@@ -1,0 +1,14 @@
+{
+  "name": "yaqiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Yaqiz - AI scam shield (ScamShield AI hackathon prototype)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/run.js && node tests/facts.js"
+  }
+}
