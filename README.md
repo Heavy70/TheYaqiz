@@ -22,15 +22,25 @@ TheYaqiz is a bilingual Progressive Web App (works on Android, iPhone and deskto
 - **The evidence behind it:** which signals fired (credential request, urgency, brand mismatch, new domain, threat-list hit…).
 - **Practical advice** on what to do next.
 
-### How a check works (layered defence)
+### Features
+
+- **Message checker:** Arabic and English scam patterns, sender check, highlighted suspicious phrases and an evidence panel.
+- **Link checker:** recognises restricted government domains, spots impersonation and lookalike domains, opens the link safely to read its final destination, and checks domain age and reputation.
+- **Image checker:** reads QR codes on the device; screenshots and ads are read by AI on request.
+- **Call companion:** a live risk meter that updates with every answer during a suspicious call.
+- **Gamified training:** short local "scam or safe?" scenarios with explanations.
+- **Reporting bridge:** a ready report summary pointing to Abu Dhabi Police's Aman service.
+- **Installable PWA:** "Add to Home Screen", works offline for the core check, and on Android appears in the share menu ("Share to Yaqiz").
+
+### How a check works (layered evidence)
 
 | Layer | Where it runs | What it does |
 |---|---|---|
-| 1. On-device rule engine (`public/engine.js`) | User's phone | Arabic-aware text normalisation, scam-wording rules (OTP/password requests, fees, threats, secrecy, family-emergency…), sender checks, brand-vs-domain mismatch against the official-domain registry. Instant and works offline. |
+| 1. On-device rule engine (`public/engine.js`) | User's phone | Arabic-aware text normalisation, scam-wording rules (OTP/password requests, fees, threats, secrecy, family emergency…), sender checks, brand-vs-domain mismatch against the official-domain registry. Under a second, works offline, the message text never leaves the device. |
 | 2. Official-domain registry (`public/registry.js`) | Phone + server | Single source of truth for official UAE, Gulf and global domains, plus restricted government suffixes (gov.ae, gov.sa…). |
-| 3. Link opening (`/api/open`) | Server | Safely follows the link (up to 7 redirects, private IPs blocked, DNS-rebinding protected), then reads the final host, page title, and whether the page asks for a password, card number or OTP. |
-| 4. Verified facts (`/api/domain`) | Server | Domain registration age via RDAP (registry first, rdap.org fallback), Google Web Risk, optional Google Safe Browsing, and public phishing lists: OpenPhish, Phishunt, PhishDestroy, Scam-Blocklist, URLhaus. |
-| 5. AI analysis (`/api/analyze`) | Server → Claude | Claude reviews the content together with the verified facts under strict scoring rules (evidence, not suspicion), in Arabic or English. |
+| 3. Link opening (`/api/open`) | Server | Safely follows the link (up to 7 redirects, private IPs blocked, DNS-rebinding protected) and reads the final host, page title, and whether the page asks for a password, card number or OTP. Only the link is sent, never the message. |
+| 4. Independent facts (`/api/domain`) | Server | Domain registration age via RDAP (TLD registry first, rdap.org fallback), Google Web Risk, optional Google Safe Browsing, and five public phishing lists: OpenPhish, URLhaus, Phishunt, PhishDestroy, Scam-Blocklist. |
+| 5. Optional AI analysis (`/api/analyze`) | Server → Claude | Deep analysis on the user's request (automatic analysis of unclear cases is off by default). Claude reviews the content together with the verified facts under strict scoring rules (evidence, not suspicion), in Arabic or English. |
 
 The final verdict combines the layers. Hard evidence (threat-list hit, credential request, brand mismatch) cannot be overruled by a "safe-sounding" message.
 
@@ -46,7 +56,9 @@ The final verdict combines the layers. Hard evidence (threat-list hit, credentia
 ## 4. Privacy design
 
 - No accounts, no sign-in, no tracking, no analytics.
-- Messages and screenshots are **not stored** by the server and are not written to a database. They are used for the single analysis request and discarded; server logs record technical errors only.
+- **Local first:** the core check runs on the device; the message text is not sent. For link checks only the link itself is sent, never the message.
+- **With user consent:** deep AI analysis runs only on request; automatic analysis of unclear cases is off by default. Messages and screenshots sent for AI analysis are **not stored** by the server; server logs record technical errors only.
+- The short check history is kept only in the user's own browser (last 30 checks) and can be cleared with one tap.
 - The only third-party content the page loads is Google Fonts.
 - The on-device engine needs no network at all.
 - Threat-list matching happens on our server; only Google Web Risk / Safe Browsing receive a hostname (not the message).
@@ -108,13 +120,18 @@ tests/                 Accuracy gate and fact tests
 ## 8. Trade-offs, what was left out, and next steps
 
 - **Trade-off:** rules plus AI instead of a custom-trained model. With no large labelled UAE scam dataset available in a hackathon timeframe, explainable rules and an LLM grounded on verified facts give higher, auditable accuracy. A trained classifier is a natural next step once data is collected with consent.
-- **Left out:** user accounts, report history and a reporting channel to the authorities, to keep the MVP private by design.
-- **With more time:**
-  - One-tap "Report to Abu Dhabi Police / eCrime" with the evidence pre-filled.
-  - A WhatsApp / share-sheet entry point so users can check a message without opening the app.
-  - An anonymised, opt-in feed of newly seen scam domains to help authorities act earlier.
-  - Coverage of more resident languages (Urdu, Hindi, Tagalog…).
-  - A larger, independently labelled test set and third-party evaluation.
+- **Left out:** user accounts and any server-side storage of messages, to keep the MVP private by design.
+- **Roadmap** (see the deck in `docs/`):
+  - +3 months: store release, a labelled local dataset, a trial with 500 users.
+  - +6 months: anonymous community signals for numbers and links, a trends dashboard for authorities, more community languages.
+  - +12 months: "Yaqiz ambassadors" in schools, and bank integration for pre-transfer alerts.
+- **What we would do differently with more time:** a larger, independently labelled test set with third-party evaluation, and measuring precision and recall on real (consented) messages.
+
+## 9. Documents
+
+- `docs/TECHNICAL.md`: technical documentation (architecture, model choices, privacy design, security, testing).
+- `docs/TheYaqiz-Deck-EN.pptx`: pitch deck (English).
+- `docs/TheYaqiz-Deck-AR.pptx`: pitch deck (Arabic).
 
 ---
 
