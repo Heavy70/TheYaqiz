@@ -773,7 +773,7 @@ $('#callReset').onclick=()=>{if(last&&last.kind==='call'&&last.score>=25)saveHis
 function numCheck(){
  const n=$('#callNum').value.trim(),c=$('#callClaim').value.trim();if(!n){toast(t('numFirst'));return}
  const r=analyzeMsg(c||n,{sender:n}),L=level(r.score),ev=(r.evidence||[]).find(e=>e.id==='sender'),fl=(r.flags||[]).filter(f=>f.w>0).slice(0,3);
- numPts=r.score>=60?30:r.score>=40?15:0;numFl=t('numFlag');
+ numPts=r.score>=60?60:r.score>=40?30:0;numFl=t('numFlag');
  const box=$('#numRes');box.classList.remove('hidden');
  box.innerHTML=(c||r.score>=25?`<b style="color:${L.col==='#c62f3a'?'#ff8b94':'#fff'}">${esc(L.t)} · ${r.score}/100</b>`:'')+(ev?`<div>${esc(ev.v)}</div>`:'')+fl.map(f=>`<div>• ${esc(f.l)}</div>`).join('')+`<div style="margin-top:6px;opacity:.9">${esc(t('numAdv'))}</div>`;
  callScore();
