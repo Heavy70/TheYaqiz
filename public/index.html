@@ -360,7 +360,16 @@ footer .dev b{color:var(--brand)}
 
   <!-- CALL -->
   <section class="view" id="v-call">
+    <div class="card" id="numCard">
+      <h2 data-i18n="numH"></h2>
+      <p class="hint" data-i18n="numD"></p>
+      <input type="text" id="callNum" dir="auto" autocomplete="off" inputmode="tel" style="font-size:15px;padding:10px 12px" data-i18n-ph="numPh">
+      <input type="text" id="callClaim" dir="auto" autocomplete="off" style="margin-top:8px;font-size:14px;padding:10px 12px" data-i18n-ph="claimPh">
+      <div class="row"><button class="btn" id="numGo" data-i18n="numGo"></button><button class="btn alt" id="numClr" data-i18n="clear"></button></div>
+      <div id="numRes" class="act hidden" style="font-size:14px;line-height:1.7"></div>
+    </div>
     <div class="card">
+      <div id="callStop" class="act hidden" style="margin:0 0 12px;background:#c62f3a;font-weight:800;font-size:16px"></div>
       <h2 data-i18n="callH"></h2>
       <p class="hint" data-i18n="callD"></p>
       <div class="meter"><div id="callMeter"></div></div>
@@ -583,6 +592,18 @@ now:['الآن','now'],
 const LANGS=['ar','en','ur','hi','tl'];
 let lang=(()=>{try{const s=localStorage.getItem('yaqiz.lang');if(s){const v=JSON.parse(s);if(LANGS.includes(v))return v}}catch(e){}return /^ar/i.test(navigator.language||'')?'ar':'en'})();
 const LI=()=>lang==='ar'?0:1;
+Object.assign(D,{
+numH:['افحص رقم المتصل أو المرسل','Check a caller or sender number'],
+numD:['ألصق الرقم الذي يتصل بك أو يراسلك، واذكر الجهة التي يدّعيها إن وُجدت.','Paste the number calling or messaging you, and the organisation they claim to be, if any.'],
+numPh:['الرقم أو الاسم (مثال: +971 55 123 4567)','Number or name (e.g. +971 55 123 4567)'],
+claimPh:['الجهة التي يدّعيها (اختياري): بنك، شرطة، بريد الإمارات…','Who they claim to be (optional): bank, police, Emirates Post…'],
+numGo:['افحص الرقم','Check number'],
+numFirst:['أدخل رقمًا أو اسمًا أولًا','Enter a number or name first'],
+numAdv:['الأرقام والأسماء قابلة للتزوير. إن طلب منك مالًا أو رمزًا فأنهِ المكالمة واتصل بالجهة على رقمها الرسمي بنفسك.','Numbers and names can be spoofed. If they ask for money or a code, hang up and call the organisation on its official number yourself.'],
+numFlag:['الرقم أو المرسل مريب','The number or sender looks suspicious'],
+callStopT:['أنهِ المكالمة الآن. الخطر مرتفع جدًا؛ لا تشارك أي رمز ولا تحوّل أي مبلغ.','Hang up now. The risk is very high: do not share any code and do not transfer any money.'],
+shareOk:['وصلت المشاركة وتم فحصها','Shared item received and checked']
+});
 const t=k=>{const a=D[k]||[k,k];return T(a[0],a[1])};
 const OUT={ur:'Urdu',hi:'Hindi',tl:'Filipino (Tagalog)'};
 const TPL={
@@ -737,15 +758,28 @@ $$('[data-u]').forEach(b=>b.onclick=()=>{$('#urlIn').value=b.dataset.u;runUrl()}
 const QS=[[['هل يطلب رمز تحقق (OTP) أو رقمًا سريًا؟','Are they asking for an OTP or PIN?'],35],[['هل يدّعي أنه من الشرطة أو النيابة أو البنك ويهددك؟','Do they claim to be police, prosecution or your bank — and threaten you?'],25],[['هل يطلب تحويل مبلغ إلى «حساب آمن» أو دفع رسوم؟','Do they want money moved to a “safe account” or a fee paid?'],30],[['هل يمنعك من إنهاء المكالمة أو إخبار أحد؟','Do they stop you from hanging up or telling anyone?'],20],[['هل يطلب تثبيت تطبيق أو مشاركة الشاشة؟','Do they ask you to install an app or share your screen?'],30],[['هل يعرف بعض بياناتك ثم يطلب الباقي؟','Do they know some of your details and ask for the rest?'],15],[['هل المكالمة عبر واتساب أو من رقم دولي أو شخصي؟','Is the call on WhatsApp or from an international/personal number?'],15],[['هل يعدك بجائزة أو استرداد أموال أو وظيفة؟','Do they promise a prize, refund or job?'],20]];
 let ans={};
 function drawQs(){$('#qs').innerHTML=QS.map((q,i)=>`<div class="q"><span>${T(q[0][0],q[0][1])}</span><span class="yn"><button class="y${ans[i]===1?' on':''}" data-i="${i}" data-v="1">${t('yes')}</button><button class="n${ans[i]===0?' on':''}" data-i="${i}" data-v="0">${t('no')}</button></span></div>`).join('')}
+let numPts=0,numFl=null,callWarned=false;
 function callScore(){
- let s=0;const fl=[];Object.entries(ans).forEach(([k,v])=>{if(v){s+=QS[k][1];fl.push(T(QS[k][0][0],QS[k][0][1]).replace(/^(هل |Are they |Do they |Is the )/,'').replace(/[؟?]$/,''))}});s=Math.min(100,s);
+ let s=0;const fl=[];if(numPts){s+=numPts;fl.push(numFl)}Object.entries(ans).forEach(([k,v])=>{if(v){s+=QS[k][1];fl.push(T(QS[k][0][0],QS[k][0][1]).replace(/^(هل |Are they |Do they |Is the )/,'').replace(/[؟?]$/,''))}});s=Math.min(100,s);
  const L=level(s),m=$('#callMeter');m.style.width=Math.max(4,s)+'%';m.style.background=L.col;
- $('#callLbl').innerHTML=Object.keys(ans).length?`<span style="color:${L.col}">${L.t} · ${s}/100</span>`:t('noAns');
+ $('#callLbl').innerHTML=(Object.keys(ans).length||numPts)?`<span style="color:${L.col}">${L.t} · ${s}/100</span>`:t('noAns');
  $('#callAct').classList.toggle('hidden',s<25);
- if(Object.keys(ans).length){last={kind:'call',input:T('مكالمة مشبوهة — إجابات قائمة الفحص','Suspicious call — checklist answers'),score:s,lvl:L.c,flags:fl,time:Date.now()}}
+ const stop=$('#callStop');stop.textContent=t('callStopT');stop.classList.toggle('hidden',s<60);
+ if(s>=60&&!callWarned){callWarned=true;try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch(e){}}if(s<60)callWarned=false;
+ if(Object.keys(ans).length||numPts){last={kind:'call',input:T('مكالمة مشبوهة — إجابات قائمة الفحص','Suspicious call — checklist answers'),score:s,lvl:L.c,flags:fl,time:Date.now()}}
 }
 $('#qs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ans[b.dataset.i]=+b.dataset.v;drawQs();callScore()});
-$('#callReset').onclick=()=>{if(last&&last.kind==='call'&&last.score>=25)saveHist(last);ans={};drawQs();callScore()};
+$('#callReset').onclick=()=>{if(last&&last.kind==='call'&&last.score>=25)saveHist(last);ans={};numPts=0;numFl=null;$('#callNum').value='';$('#callClaim').value='';$('#numRes').classList.add('hidden');drawQs();callScore()};
+function numCheck(){
+ const n=$('#callNum').value.trim(),c=$('#callClaim').value.trim();if(!n){toast(t('numFirst'));return}
+ const r=analyzeMsg(c||n,{sender:n}),L=level(r.score),ev=(r.evidence||[]).find(e=>e.id==='sender'),fl=(r.flags||[]).filter(f=>f.w>0).slice(0,3);
+ numPts=r.score>=60?30:r.score>=40?15:0;numFl=t('numFlag');
+ const box=$('#numRes');box.classList.remove('hidden');
+ box.innerHTML=(c||r.score>=25?`<b style="color:${L.col==='#c62f3a'?'#ff8b94':'#fff'}">${esc(L.t)} · ${r.score}/100</b>`:'')+(ev?`<div>${esc(ev.v)}</div>`:'')+fl.map(f=>`<div>• ${esc(f.l)}</div>`).join('')+`<div style="margin-top:6px;opacity:.9">${esc(t('numAdv'))}</div>`;
+ callScore();
+}
+$('#numGo').onclick=numCheck;$('#callNum').addEventListener('keydown',e=>{if(e.key==='Enter')numCheck()});
+$('#numClr').onclick=()=>{numPts=0;numFl=null;$('#callNum').value='';$('#callClaim').value='';$('#numRes').classList.add('hidden');callScore()};
 
 /* ===== training ===== */
 const SC=[
@@ -917,7 +951,11 @@ function langMenu(){
 $('#langBtn').onclick=e=>{e.stopPropagation();langMenu()};$('#moreLang').onclick=e=>{e.stopPropagation();langMenu()};
 
 /* ===== share target (Android) ===== */
-function shareIn(){try{const q=new URLSearchParams(location.search);const x=[q.get('title'),q.get('text'),q.get('url')].filter(Boolean).join('\n');if(x){go('scan','msg');$('#msgIn').value=x;runMsg();history.replaceState(null,'',location.pathname)}}catch(e){}}
+function shareIn(){try{const q=new URLSearchParams(location.search);const x=[q.get('title'),q.get('text'),q.get('url')].filter(Boolean).join('\n');if(x){const y=x.trim();history.replaceState(null,'',location.pathname);
+  if(/^https?:\/\/\S+$/i.test(y)){go('scan','url');$('#urlIn').value=y;runUrl()}
+  else if(/^\+?[\d\s()\-.]{7,18}$/.test(y)){go('call');$('#callNum').value=y;numCheck()}
+  else{go('scan','msg');$('#msgIn').value=x;runMsg()}
+  toast(t('shareOk'))}}catch(e){}}
 
 /* ===== PWA install ===== */
 let deferred=null;

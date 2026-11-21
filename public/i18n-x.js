@@ -1,6 +1,16 @@
 /* Community-language strings (Urdu, Hindi, Tagalog). Keyed by the English source string. */
 const YAQIZ_X={
 "ur": {
+"Check a caller or sender number": "کالر یا بھیجنے والے کا نمبر چیک کریں",
+"Paste the number calling or messaging you, and the organisation they claim to be, if any.": "وہ نمبر پیسٹ کریں جو آپ کو کال یا میسج کر رہا ہے، اور وہ ادارہ بھی لکھیں جس کا وہ دعویٰ کرتا ہے۔",
+"Number or name (e.g. +971 55 123 4567)": "نمبر یا نام (مثال: +971 55 123 4567)",
+"Who they claim to be (optional): bank, police, Emirates Post…": "وہ کس کا دعویٰ کرتا ہے (اختیاری): بینک، پولیس، ایمریٹس پوسٹ…",
+"Check number": "نمبر چیک کریں",
+"Enter a number or name first": "پہلے نمبر یا نام درج کریں",
+"Numbers and names can be spoofed. If they ask for money or a code, hang up and call the organisation on its official number yourself.": "نمبر اور نام جعلی ہو سکتے ہیں۔ اگر وہ پیسے یا کوڈ مانگیں تو کال کاٹ دیں اور ادارے کو اس کے سرکاری نمبر پر خود کال کریں۔",
+"The number or sender looks suspicious": "نمبر یا بھیجنے والا مشکوک لگتا ہے",
+"Hang up now. The risk is very high: do not share any code and do not transfer any money.": "ابھی کال کاٹ دیں۔ خطرہ بہت زیادہ ہے: کوئی کوڈ شیئر نہ کریں اور کوئی رقم منتقل نہ کریں۔",
+"Shared item received and checked": "شیئر کی گئی چیز موصول ہو کر چیک ہو گئی",
 "Flag of the United Arab Emirates": "متحدہ عرب امارات کا پرچم",
 "Your AI shield against online scams": "آن لائن فراڈ کے خلاف آپ کی اے آئی ڈھال",
 "On-device check active": "ڈیوائس پر جانچ فعال ہے",
@@ -298,6 +308,16 @@ const YAQIZ_X={
 "English": "انگریزی"
 },
 "hi": {
+"Check a caller or sender number": "कॉलर या भेजने वाले का नंबर जाँचें",
+"Paste the number calling or messaging you, and the organisation they claim to be, if any.": "जो नंबर आपको कॉल या मैसेज कर रहा है उसे पेस्ट करें, और वह किस संस्था का होने का दावा करता है, यदि बताया हो।",
+"Number or name (e.g. +971 55 123 4567)": "नंबर या नाम (उदाहरण: +971 55 123 4567)",
+"Who they claim to be (optional): bank, police, Emirates Post…": "वह किसका होने का दावा करता है (वैकल्पिक): बैंक, पुलिस, एमिरेट्स पोस्ट…",
+"Check number": "नंबर जाँचें",
+"Enter a number or name first": "पहले नंबर या नाम दर्ज करें",
+"Numbers and names can be spoofed. If they ask for money or a code, hang up and call the organisation on its official number yourself.": "नंबर और नाम नकली हो सकते हैं। अगर वे पैसे या कोड माँगें तो कॉल काट दें और संस्था को उसके आधिकारिक नंबर पर खुद कॉल करें।",
+"The number or sender looks suspicious": "नंबर या भेजने वाला संदिग्ध लगता है",
+"Hang up now. The risk is very high: do not share any code and do not transfer any money.": "अभी कॉल काट दें। जोखिम बहुत अधिक है: कोई कोड साझा न करें और कोई रकम ट्रांसफर न करें।",
+"Shared item received and checked": "साझा की गई चीज़ मिल गई और जाँच ली गई",
 "Flag of the United Arab Emirates": "संयुक्त अरब अमीरात का ध्वज",
 "Your AI shield against online scams": "ऑनलाइन ठगी के खिलाफ आपकी एआई ढाल",
 "On-device check active": "डिवाइस पर जाँच चालू है",
@@ -595,6 +615,16 @@ const YAQIZ_X={
 "English": "अंग्रेज़ी"
 },
 "tl": {
+"Check a caller or sender number": "Suriin ang numero ng tumatawag o nagpadala",
+"Paste the number calling or messaging you, and the organisation they claim to be, if any.": "I-paste ang numerong tumatawag o nagme-message sa iyo, at ang organisasyong inaangkin nila, kung mayroon.",
+"Number or name (e.g. +971 55 123 4567)": "Numero o pangalan (hal. +971 55 123 4567)",
+"Who they claim to be (optional): bank, police, Emirates Post…": "Sino ang inaangkin nila (opsyonal): bangko, pulis, Emirates Post…",
+"Check number": "Suriin ang numero",
+"Enter a number or name first": "Maglagay muna ng numero o pangalan",
+"Numbers and names can be spoofed. If they ask for money or a code, hang up and call the organisation on its official number yourself.": "Maaaring peke ang mga numero at pangalan. Kung humingi sila ng pera o code, ibaba ang tawag at tawagan mismo ang organisasyon sa opisyal nilang numero.",
+"The number or sender looks suspicious": "Mukhang kahina-hinala ang numero o nagpadala",
+"Hang up now. The risk is very high: do not share any code and do not transfer any money.": "Ibaba na ang tawag ngayon. Napakataas ng panganib: huwag magbahagi ng code at huwag maglipat ng pera.",
+"Shared item received and checked": "Natanggap at nasuri ang ibinahaging item",
 "Flag of the United Arab Emirates": "Bandila ng United Arab Emirates",
 "Your AI shield against online scams": "Ang AI na panangga mo laban sa online scam",
 "On-device check active": "Gumagana ang pagsusuri sa device",
