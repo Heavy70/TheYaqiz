@@ -1,7 +1,8 @@
 /* Yaqiz detection engine (on-device). Pure functions: no DOM. Used by the app and by tests/run.js.
    createEngine(T, LI, R): T(ar,en) picks the language, LI() returns 0 (ar) or 1 (en), R is the registry. */
 (function (root) {
-  function createEngine(T, LI, R) {
+  function createEngine(T, LI, R, TX) {
+    TX = TX || function (s) { return s; };
 
     /* ===== Arabic normalisation with index map ===== */
     function normMap(s0) {
@@ -34,7 +35,7 @@
         re: /(عاجل|فورا|حالا|بسرعه|خلال \d+ ?(ساعه|ساعات|ساعتين|دقيقه|دقائق|يوم)|خلال ساعتين|اخر فرصه|قبل فوات|ينتهي اليوم|urgent|immediately|within \d+ ?(hours?|minutes?|days?)|last chance|expires? today|act now|final (notice|warning)|last warning|اشعار نهائي|تحذير اخير)/ },
       { id: 'threat', ax: 'press', w: 18, l: ['تهديد بإيقاف أو تجميد أو غرامة أو قبض', 'Threat of suspension, freezing, fines or arrest'], tip: ['التهديد يدفعك للتصرف بخوف؛ الجهات الرسمية تبلغك عبر قنواتها الموثقة.', 'Threats push you to act out of fear; official bodies contact you through verified channels.'],
         re: /(تجميد|ايقاف (حسابك|خدمتك|بطاقتك|هويتك)|سيتم (ايقاف|تعليق|حظر|اغلاق|القبض)|تعليق (حساب|الخدمه|هويتك)|حظر (حسابك|بطاقتك)|غرامه (غير|متاخره|مروريه)|مخالفه (غير|مروريه)|قضيه|القبض|بلاغ ضدك|اجراء قانوني|مصادره|will be (suspended|blocked|closed|cancelled|terminated)|has been (suspended|blocked|frozen|locked)|is (suspended|blocked|frozen|locked)|frozen|freeze|deactivat|legal action|arrest|penalty|unpaid (traffic )?fine|warrant|تتضاعف|مضاعفه الغرامه)/ },
-      { id: 'secret', ax: 'press', w: 12, l: ['يطلب السرية أو عدم إخبار أحد', 'Asks for secrecy or not to tell anyone'], tip: ['المحتال يعزلك عن أسرتك وبنكك كي لا ينبهك أحد.', 'Scammers isolate you from family and your bank so no one warns you.'],
+      { id: 'secret', ax: 'press', w: 12, l: ['يطلب السرية أو عدم إخبار أحد', 'Asks for secrecy or tells you not to tell anyone'], tip: ['المحتال يعزلك عن أسرتك وبنكك كي لا ينبهك أحد.', 'Scammers isolate you from family and your bank so no one warns you.'],
         re: /(لا تخبر (احد|احدا|اي)|سري للغايه|لا تشارك هذه الرساله|بيننا|don'?t tell (anyone|anybody|your)|keep (this|it) (secret|confidential))/ },
       { id: 'prize', ax: 'lure', w: 20, l: ['وعد بجائزة أو ربح أو مبلغ غير متوقع', 'Promises a prize, winnings or unexpected money'], tip: ['لا يمكنك الفوز بسحب لم تشترك فيه.', 'You can’t win a draw you never entered.'],
         re: /(مبروك|تهانينا|فزت|ربحت|جائزه|سحب على|مكافاه|استرداد مبلغ|congratulations|you (have )?won|winner|you('ve| have) been selected|lottery|claim your (prize|reward|gift)|cashback offer|gift card|free (recharge|data|gift|iphone|voucher|credit)|شحن (ال)?مجاني|رصيد (ال)?مجاني|قسيمه شراء)/ },
@@ -59,6 +60,34 @@
       { id: 'pay', ax: 'money', w: 15, l: ['يطلب دفع رسوم أو تحويل أموال', 'Asks you to pay fees or transfer money'], tip: ['دفع «رسوم» صغيرة لاستلام شحنة أو جائزة أو وظيفة علامة احتيال كلاسيكية.', 'Paying a small “fee” to release a parcel, prize or job is a classic scam sign.'],
         re: /(ادفع|(?<![؀-ۿ])سدد(?![؀-ۿ])|سداد|رسوم|حول (المبلغ|لي)|حولي|حساب امن|pay (now|the|your|within|a|an|some)\b|pay (the |your |a |an |some )?(\w+ )?(fees?|charges?|fine|tax|duty|duties)|(ارسل|حول|ادفع)( لي)? (ال)?(عربون|دفعه مقدمه|مبلغ)|payment (link|required|is required|due)|unpaid|customs (fee|duty|charge)|delivery (charge|fee)|[\d,. ]+(aed|dirhams?|usd|\$)( \w+)? (fee|fees|charge|deposit|tax)|pay [\d,. ]+(aed|dirhams?|usd|\$)|بالدفع|الدفع (الان|فورا)|\bwire\b|safe account|transfer [\d,. ]*(aed|dirhams?|usd|\$)|transfer (the|your|a) (money|amount|fee))/ }
     ];
+
+    /* ===== community-language keywords (Urdu, Hindi, Tagalog + romanised Urdu/Hindi) merged into the base rules by id ===== */
+    const SECX = '(otp|pin|cvv|password|پاس ?ورڈ|کوڈ|پن|ओटीपी|कोड|पासवर्ड|पिन|code|verification|beripikasyon|bank details|card (number|details))';
+    const EXTRA = {
+      cred: [
+        '(?:' + SECX + '[^.\\n]{0,40}?(?:بھیج|بتا|شیئر|دیں|دو|भेज|बता|शेयर|दें|दो|bhej|batao|bata|share|ipadala|ibigay|sabihin|ipasa))',
+        '(?:(?:بھیج|بتا|شیئر|भेज|बता|शेयर|bhej|batao|ipadala|ibigay|sabihin)[^.\\n]{0,40}?' + SECX + ')',
+        '(?:send|share|ibigay|ipadala)[^.\\n]{0,20}(?:otp|pin|password|code)'
+      ],
+      update: ['(?:اکاؤنٹ (اپ ?ڈیٹ|فعال|ویریفائی)|معلومات اپ ?ڈیٹ|खाता (अपडेट|चालू|सत्यापित)|केवाईसी|kyc (update|verify)|account (update|verify) karein|i-?update (ang|mo)|i-?verify (ang|mo)|ma-?block ang account)'],
+      urg: ['(?:فوراً?|جلدی|ابھی|अभी|तुरंत|जल्दी|फौरन|jaldi|foran|abhi|turant|agad|kaagad|ngayon din|sa loob ng \\d+ ?(oras|araw|minuto))'],
+      threat: ['(?:بند ہو|بلاک ہو|معطل|منجمد|گرفتار|جرمانہ|ब्लॉक हो|बंद हो|निलंबित|फ्रीज|गिरफ्तार|जुर्माना|block ho (jayega|jaye)|band ho (jayega|jaye)|giraftar|na-?block|ma-?block|masususpinde|ma-?freeze|aarestuhin|ipapa-?aresto|multa)'],
+      secret: ['(?:کسی کو (مت|نہ) بتا|راز|किसी को (मत|न) बता|गोपनीय|kisi ko (mat|na) bata|huwag (mong )?sabihin (kanino|sa kahit)|walang makakaalam)'],
+      prize: ['(?:انعام|جیت|لاٹری|इनाम|जीत|लॉटरी|inaam|jeet(a|e|ey)|lottery|nanalo ka|premyo|napanalunan|raffle)'],
+      job: ['(?:نوکری|ملازمت|گھر بیٹھے|नौकरी|घर बैठे|naukri|ghar baithe|trabaho|work from home|sahod|part-?time job)'],
+      hold: ['(?:پارسل (رک|روک)|کسٹم (فیس|ڈیوٹی)|पार्सल (रुक|अटक)|कस्टम (फीस|शुल्क)|parcel (ruk|atak)|na-?hold ang (parcel|package)|naharang ang (parcel|package)|kulang ang address)'],
+      family: ['(?:نیا نمبر|میں .{0,12}(بیٹا|بھائی|دوست)|नया नंबर|मैं .{0,12}(बेटा|भाई|दोस्त)|naya number|bagong number|ako (to|ito) ang (anak|kapatid|kaibigan))'],
+      chan: ['(?:واٹس ?ایپ|ٹیلیگرام|व्हाट्सऐप|टेलीग्राम|whatsapp|telegram|viber|messenger)(?=[^.\\n]{0,30}(?:پر|رابطہ|पर|संपर्क|contact|message|mag-?message))'],
+      acct: ['(?:اس اکاؤنٹ میں|اس نمبر پر) (رقم )?(بھیج|ٹرانسفر)|इस (खाते|नंबर) (में|पर) (पैसे )?(भेज|ट्रांसफर)|(?:i-?transfer|ipadala) (sa|mo sa) (account|gcash|maya)'],
+      advfee: ['(?:رجسٹریشن فیس|پروسیسنگ فیس|پیشگی (فیس|رقم)|रजिस्ट्रेशन फीस|प्रोसेसिंग फीस|अग्रिम (फीस|राशि)|registration fee|processing fee|paunang bayad|downpayment|fee para (sa|makuha))'],
+      tech: ['(?:وائرس|ریموٹ|اینی ?ڈیسک|ٹیم ?ویور|वायरस|रिमोट|एनीडेस्क|टीमव्यूअर|anydesk|teamviewer|may virus|na-?hack)'],
+      pay: ['(?:ادائیگی|فیس (جمع|ادا)|رقم (بھیج|جمع)|भुगतान|फीस (जमा|भरें)|पैसे (भेज|जमा)|fees? (jama|bharein)|bayaran|magbayad|bayad (na|ngayon)|ipadala ang bayad)'],
+      imp: ['(?:ابوظہبی پولیس|مرکزی بینک|अबू धाबी पुलिस|सेंट्रल बैंक|pulis ng abu dhabi)']
+    };
+    RULES.forEach(r => {
+      const x = EXTRA[r.id]; if (!x) return;
+      r.re = new RegExp(r.re.source + '|' + x.join('|'), r.re.flags.indexOf('g') >= 0 ? r.re.flags : r.re.flags + 'g');
+    });
     const AXES = { sens: [['طلب بيانات حساسة', 'Sensitive data request'], 42], press: [['ضغط وتهديد', 'Pressure & threats'], 45], lure: [['إغراء مالي', 'Financial lure'], 48], imp: [['انتحال صفة', 'Impersonation'], 47], money: [['طلب أموال', 'Money request'], 15], link: [['رابط خطِر', 'Risky link'], 60] };
 
     /* ===== registry-derived sets ===== */
@@ -157,7 +186,7 @@
       const strong = hits.filter(r => !r.withOthers);
       hits.forEach(r => {
         if (r.withOthers && (allVerified || !strong.length)) return;
-        score += r.w; axes[r.ax] = (axes[r.ax] || 0) + r.w; flags.push({ l: r.l[LI()], w: r.w, tip: r.tip[LI()], rule: r.id });
+        score += r.w; axes[r.ax] = (axes[r.ax] || 0) + r.w; flags.push({ l: TX(r.l[LI()]), w: r.w, tip: TX(r.tip[LI()]), rule: r.id });
       });
       /* 3) link evidence */
       const worst = bad.slice().sort((a, b) => b.score - a.score)[0];
@@ -174,10 +203,10 @@
       if (mism) {
         const w = mism.e.soft ? 20 : 35; score += w; axes.link = Math.max(axes.link || 0, mism.e.soft ? 50 : 80); axes.imp = (axes.imp || 0) + w;
         flags.unshift({ l: T('الرسالة تنسب نفسها إلى ' + mism.e.n[0] + ' لكن الرابط (' + mism.l.host + ') ليس نطاقها الرسمي', 'The message claims to be from ' + mism.e.n[1] + ' but its link (' + mism.l.host + ') is not its official domain'), w, tip: T('النطاقات الرسمية لهذه الجهة: ', 'Official domains of this organisation: ') + mism.e.d.join(', '), rule: 'mism' });
-        evidence.push({ id: 'match', st: 'bad', t: T('تطابق الجهة والرابط', 'Organisation ↔ link'), v: mism.e.n[LI()] + ' ≠ ' + mism.l.host });
+        evidence.push({ id: 'match', st: 'bad', t: T('تطابق الجهة والرابط', 'Organisation ↔ link'), v: TX(mism.e.n[LI()]) + ' ≠ ' + mism.l.host });
       } else if (allVerified) {
         const e = ENT.find(x => x.rx.test(s));
-        if (e) evidence.push({ id: 'match', st: 'ok', t: T('تطابق الجهة والرابط', 'Organisation ↔ link'), v: e.n[LI()] + ' ✓' });
+        if (e) evidence.push({ id: 'match', st: 'ok', t: T('تطابق الجهة والرابط', 'Organisation ↔ link'), v: TX(e.n[LI()]) + ' ✓' });
       }
       const sens = flags.some(f => f.rule === 'cred' || f.rule === 'update'), money = flags.some(f => f.rule === 'pay');
       evidence.push({ id: 'ask', st: sens || money ? 'bad' : 'ok', t: T('طلب بيانات أو أموال', 'Asks for data or money'), v: sens || money ? (sens ? T('يطلب بيانات حساسة', 'asks for sensitive data') : T('يطلب دفعًا', 'asks for payment')) : T('لا يوجد', 'none') });
@@ -245,7 +274,7 @@
           if (!gThreat) { add += 35; floor = Math.max(floor, 62); r.axes.link = Math.max(r.axes.link || 0, 85); r.flags.unshift({ l: T('النطاق مدرج في قوائم مجتمعية للاحتيال: ', 'Domain listed on community scam lists: ') + f.d + ' (' + weak.join(', ') + ')', w: 35, rule: 'lists' }); }
           r.evidence.push({ id: 'lists', st: 'bad', t: T('قوائم التهديدات العامة', 'Public threat lists'), v: f.d + ' · ' + weak.join(', ') });
         } else if (weak.length) {
-          r.evidence.push({ id: 'lists', st: 'warn', t: T('قوائم التهديدات العامة', 'Public threat lists'), v: T('مدرج في قائمة مجتمعية (' + weak.join(', ') + ') لكنه قديم وسمعته عند Google نظيفة — لا يُعتدّ به وحده', 'on a community list (' + weak.join(', ') + ') but old and Google-clean — not held against it alone') });
+          r.evidence.push({ id: 'lists', st: 'warn', t: T('قوائم التهديدات العامة', 'Public threat lists'), v: T('مدرج في قائمة مجتمعية (' + weak.join(', ') + ') لكنه قديم وسمعته عند Google نظيفة — لا يُعتدّ به وحده', 'on a community list (' + weak.join(', ') + ') but old and Google-clean — not counted against it on its own') });
         } else if (lists) {
           r.evidence.push({ id: 'lists', st: 'ok', t: T('قوائم التهديدات العامة', 'Public threat lists'), v: T('غير مدرج', 'not listed') });
         }
@@ -284,7 +313,7 @@
       if (o.pw || o.sens) { add += 35; floor = Math.max(floor, 62); r.flags.unshift({ l: T('الصفحة المفتوحة تطلب كلمة مرور أو بيانات بطاقة أو رمز تحقق وهي على نطاق غير رسمي: ', 'The opened page asks for a password, card details or an OTP on a non-official domain: ') + fh, w: 35, rule: 'link' }); }
       const tt = normMap(o.title || '').s;
       const imp = tt && ENT.find(e => e.rx.test(tt) && !e.d.some(d => fh === d || fh.endsWith('.' + d)));
-      if (imp) { add += 40; floor = Math.max(floor, 70); r.flags.unshift({ l: T('عنوان الصفحة يدّعي أنها «', 'The page title claims to be “') + imp.n[LI()] + T('» لكن النطاق الحقيقي غير رسمي: ', '” but the real domain is not official: ') + fh, w: 40, rule: 'mism' }); }
+      if (imp) { add += 40; floor = Math.max(floor, 70); r.flags.unshift({ l: T('عنوان الصفحة يدّعي أنها «', 'The page title claims to be “') + TX(imp.n[LI()]) + T('» لكن النطاق الحقيقي غير رسمي: ', '” but the real domain is not official: ') + fh, w: 40, rule: 'mism' }); }
       row(add ? 'bad' : 'unk', (o.title ? '«' + o.title + '» · ' : '') + fh + ' · ' + (o.pw || o.sens ? T('تطلب بيانات حساسة', 'asks for sensitive data') : T('لا نموذج دخول ظاهر — الفتح وحده لا يثبت الأمان', 'no login form seen — opening alone does not prove safety')));
       r.score = Math.min(100, Math.max(floor, res.score + add));
       return r;
@@ -307,7 +336,7 @@
       else if (a >= 60) {
         /* the model alone is not enough to call a message a scam: without evidence we can verify, it stays "suspicious – verify" */
         r.score = Math.min(Math.max(res.score, 40), 55); r.verified = false;
-        r.flags.unshift({ l: T('الذكاء الاصطناعي يشتبه، لكن لا دليل يمكن التحقق منه: تحقّق عبر القناة الرسمية', 'The AI is suspicious, but there is no evidence we can verify: check through the official channel'), w: 0, rule: 'ai', tip: j.explanation || '' });
+        r.flags.unshift({ l: T('يشتبه الذكاء الاصطناعي في الرسالة، لكن لا يوجد دليل يمكن التحقق منه؛ تحقّق عبر القناة الرسمية', 'The AI is suspicious, but there is no verifiable evidence: check through the official channel'), w: 0, rule: 'ai', tip: j.explanation || '' });
       }
       else if (a <= 15 && res.score <= 44 && !hard) { r.score = Math.min(res.score, 24); r.flags.unshift({ l: T('التحليل المعمّق بالذكاء الاصطناعي لم يجد ما يدعو للقلق', 'The deep AI analysis found nothing worrying'), w: 0, good: true, rule: 'ai' }); }
       return r;

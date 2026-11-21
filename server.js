@@ -192,7 +192,8 @@ async function analyze(req, res){
   }
   const facts = await factsFor(text, b.lang);
   content.push({ type:'text', text:(b.lang === 'en' ? 'Content to analyse:\n<<<\n' : 'المحتوى المطلوب تحليله:\n<<<\n') + (text || '(لا نص)') + '\n>>>' + facts });
-  const sys = (b.lang === 'en' ? PROMPT_EN : PROMPT_AR);
+  const OUTL = { ur:'Urdu', hi:'Hindi', tl:'Filipino (Tagalog)' }[b.out];
+  const sys = (b.lang === 'en' ? PROMPT_EN : PROMPT_AR) + (OUTL ? `\nWrite every text value of the JSON (red_flags, explanation, advice, type) in plain ${OUTL}. Keep the JSON keys and the verdict labels exactly as specified in English.` : '');
   async function ask(extra){
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
