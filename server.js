@@ -6,7 +6,7 @@ const path = require('path');
 const PORT = process.env.PORT || 8080;
 const KEY = process.env.ANTHROPIC_API_KEY || '';
 const MODEL = process.env.YAQIZ_MODEL || 'claude-haiku-5-5';
-const PER_IP_DAY = +(process.env.YAQIZ_PER_IP_DAY || 25);
+const PER_IP_DAY = Math.min(10, +(process.env.YAQIZ_PER_IP_DAY || 10)); /* AI checks per IP per day: never more than 10 */
 const GLOBAL_DAY = +(process.env.YAQIZ_GLOBAL_DAY || 500);
 const PUB = path.join(__dirname, 'public');
 const REG = require('./public/registry.js');           // single source of truth for official domains
@@ -23,7 +23,10 @@ const SEC = {
   'Referrer-Policy':'strict-origin-when-cross-origin',
   'X-Frame-Options':'DENY',
   'Permissions-Policy':'camera=(), microphone=(), geolocation=()',
-  'Strict-Transport-Security':'max-age=31536000',
+  'Strict-Transport-Security':'max-age=31536000; includeSubDomains',
+  'Cross-Origin-Opener-Policy':'same-origin',
+  'Cross-Origin-Resource-Policy':'same-origin',
+  'X-Permitted-Cross-Domain-Policies':'none',
   'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 };
 
@@ -153,6 +156,39 @@ function tidy(j){
   return { score:n, verdict:String(j.verdict || ''), type:String(j.type || ''), red_flags:a(j.red_flags), explanation:String(j.explanation || ''), advice:a(j.advice), extracted:String(j.extracted || '').slice(0, 3000) };
 }
 
+/* The LAST X-Forwarded-For entry is the one Cloud Run's front end appended (the real peer);
+   earlier entries are written by the client and can be forged to dodge the per-IP limits. */
+const ORIGIN_SECRET = process.env.YAQIZ_ORIGIN_SECRET || '';
+function sameSecret(x){
+  const a = Buffer.from(String(x || '')), b = Buffer.from(ORIGIN_SECRET);
+  return a.length === b.length && require('crypto').timingSafeEqual(a, b);
+}
+/* Cloudflare edge ranges (https://www.cloudflare.com/ips-v4 and ips-v6). Behind Cloudflare the real visitor is in CF-Connecting-IP,
+   but that header is trusted ONLY when the connecting peer (last X-Forwarded-For entry) is a Cloudflare address. */
+const CF4 = ['173.245.48.0/20','103.21.244.0/22','103.22.200.0/22','103.31.4.0/22','141.101.64.0/18','108.162.192.0/18','190.93.240.0/20','188.114.96.0/20','197.234.240.0/22','198.41.128.0/17','162.158.0.0/15','104.16.0.0/13','104.24.0.0/14','172.64.0.0/13','131.0.72.0/22'];
+const ip4n = ip => ip.split('.').reduce((a, x) => a * 256 + (+x), 0);
+const CF4R = CF4.map(c => { const [b, m] = c.split('/'); const sz = 2 ** (32 - +m); const st = Math.floor(ip4n(b) / sz) * sz; return [st, st + sz - 1]; });
+function isCf(ip){
+  if (/^::ffff:/i.test(ip)) ip = ip.slice(7);
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(ip)){ const n = ip4n(ip); return CF4R.some(r => n >= r[0] && n <= r[1]); }
+  return /^(2400:cb00|2606:4700|2803:f800|2405:b500|2405:8100|2a06:98c|2c0f:f248):/i.test(ip);
+}
+function clientIp(req){
+  const xs = String(req.headers['x-forwarded-for'] || '').split(',').map(x => x.trim()).filter(Boolean);
+  const peer = xs.length ? xs[xs.length - 1] : (req.socket.remoteAddress || '');
+  const cf = String(req.headers['cf-connecting-ip'] || '').trim();
+  if (cf && isCf(peer) && /^[0-9a-fA-F:.]{3,45}$/.test(cf)) return cf;
+  return peer.slice(0, 64);
+}
+/* burst limit: at most 40 API calls per IP per minute (all /api routes) */
+let burstMin = 0, burst = new Map();
+function burstOk(ip){
+  const m = Math.floor(Date.now() / 60000);
+  if (m !== burstMin){ burstMin = m; burst = new Map(); }
+  const n = (burst.get(ip) || 0) + 1; burst.set(ip, n);
+  return n <= 40;
+}
+
 // simple in-memory daily limits (service runs with max-instances=1)
 let day = new Date().toISOString().slice(0,10), perIp = new Map(), total = 0;
 function allow(ip){
@@ -180,10 +216,11 @@ function readBody(req, max){
 
 async function analyze(req, res){
   if (!KEY) return json(res, 503, { error:'ai_off' });
-  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  const ip = clientIp(req);
   if (!allow(ip)) return json(res, 429, { error:'limit' });
   let b;
   try { b = JSON.parse(await readBody(req, 6*1024*1024)); } catch(e){ return json(res, 400, { error:'bad_request' }); }
+  if (!b || typeof b !== 'object' || Array.isArray(b)) return json(res, 400, { error:'bad_request' });
   const text = String(b.text || '').slice(0, 6000);
   const content = [];
   if (b.image){
@@ -319,7 +356,7 @@ async function hostFacts(host){
   return v;
 }
 async function domainApi(req, res){
-  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  const ip = clientIp(req);
   if (!allowDom(ip)) return json(res, 429, { error:'limit' });
   const q = new URL(req.url, 'http://x').searchParams.get('d') || '';
   const hosts = [...new Set(q.toLowerCase().split(',').map(x => x.trim()).filter(h => /^(?=.{4,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,24}$/.test(h)))].slice(0, 3);
@@ -397,7 +434,7 @@ async function openLink(raw){
   return v;
 }
 async function openApi(req, res){
-  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  const ip = clientIp(req);
   if (!allowDom(ip)) return json(res, 429, { error: 'limit' });
   const u = (new URL(req.url, 'http://x').searchParams.get('u') || '').trim();
   if (!/^https?:\/\/[^\s]{4,600}$/i.test(u)) return json(res, 400, { error: 'bad_request' });
@@ -405,10 +442,13 @@ async function openApi(req, res){
 }
 
 function serveStatic(req, res){
-  let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  let p;
+  try { p = decodeURIComponent(new URL(req.url, 'http://x').pathname); } catch(e){ return send(res, 400, 'Bad request'); }
+  if (p.includes('\0')) return send(res, 400, 'Bad request');
   if (p === '/') p = '/index.html';
   const f = path.normalize(path.join(PUB, p));
-  if (!f.startsWith(PUB)) return send(res, 403, 'Forbidden');
+  if (f !== PUB && !f.startsWith(PUB + path.sep)) return send(res, 403, 'Forbidden');
+  if (path.basename(f).startsWith('.')) return send(res, 404, 'Not found');
   fs.readFile(f, (err, data) => {
     if (err){
       // SPA fallback
@@ -421,15 +461,23 @@ function serveStatic(req, res){
   });
 }
 
+process.on('uncaughtException', e => console.error('uncaught', e && e.message));
+process.on('unhandledRejection', e => console.error('unhandled', e && e.message));
 http.createServer((req, res) => {
+  /* Optional lock (env YAQIZ_ORIGIN_SECRET): requests must carry the X-Origin-Secret header that a Cloudflare Transform Rule adds, so the service can't be reached by bypassing Cloudflare. Unset = off. */
+  if (ORIGIN_SECRET && !sameSecret(req.headers['x-origin-secret'])) return send(res, 403, 'Forbidden');
+  try { route(req, res); } catch(e){ console.error('route', e && e.message); try { json(res, 500, { error:'server' }); } catch(_){} }
+}).listen(PORT, () => console.log('Yaqiz on', PORT));
+function route(req, res){
   const url = req.url.split('?')[0];
-  if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY, sb: !!GSB_KEY, wr: !!WR_KEY, feeds: Object.fromEntries(Object.keys(feedSets).map(n => [n, feedSets[n].size])), feedErr: Object.fromEntries(Object.keys(feedState).filter(n => feedState[n].err).map(n => [n, feedState[n].err])), feedAt: (m => m ? new Date(m).toISOString() : null)(Math.max(0, ...Object.values(feedState).map(x => x.at))) });
-  if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res);
-  if (url === '/api/open' && req.method === 'GET') return openApi(req, res);
+  if (url.startsWith('/api/') && !burstOk(clientIp(req))) return json(res, 429, { error:'limit' });
+  if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY });
+  if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res).catch(() => json(res, 500, { error:'server' }));
+  if (url === '/api/open' && req.method === 'GET') return openApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/analyze'){
     if (req.method !== 'POST') return json(res, 405, { error:'method' });
-    return analyze(req, res);
+    return analyze(req, res).catch(e => { console.error('analyze', e && e.message); json(res, 500, { error:'server' }); });
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
   serveStatic(req, res);
-}).listen(PORT, () => console.log('Yaqiz on', PORT));
+}

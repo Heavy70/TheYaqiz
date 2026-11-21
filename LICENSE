@@ -1,0 +1,13 @@
+TheYaqiz (يقِظ) - Copyright (c) 2026 Khaldun Abdalhadi. All rights reserved.
+
+This source code is published for evaluation by the ScamShield AI hackathon
+judges (Abu Dhabi Police / 42 Abu Dhabi). Viewing and running it locally to
+evaluate the submission is permitted.
+
+Copying, redistributing, republishing, or reusing the code, the detection
+rules, the domain registry, the texts/translations, the logo or any other
+asset - in whole or in part, including for training machine-learning models -
+is not permitted without prior written permission from the author.
+
+Third-party component: public/jsQR.js is distributed under its own license
+(see public/jsQR.LICENSE.txt).
