@@ -59,7 +59,7 @@ svg.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-
 .bnav button{min-width:0;line-height:1.2;text-align:center}
 .bnav button>span:not(.c){display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
 @media(min-width:561px){.top h1,.top small{max-width:none;overflow:visible;text-overflow:clip}.top .in>div:not(.sp){flex:0 0 auto}.top small{font-size:11px}}
-@media(min-width:900px){.top .in{max-width:1240px}.top small{display:none}}
+@media(min-width:900px){.top .in{max-width:1240px;gap:14px}.top small{display:none}}
 @media(min-width:900px) and (max-width:1100px){.pill #statusTxt{display:none}}
 @media(max-width:480px){.top .in{gap:8px}.top small{display:none}.pill{padding:4px 8px;font-size:11px}.top h1{max-width:30vw}}
 @media(min-width:900px) and (max-width:1100px){.dnav button{padding:8px 7px;font-size:12.5px}}
@@ -258,8 +258,9 @@ footer .dev b{color:var(--brand)}
     <img class="mark" src="logo-mark.png" alt="" width="72" height="72">
     <div><h1 class="display" data-i18n="appName"></h1><small data-i18n="tagline"></small></div>
     <div class="sp"></div>
-    <img class="flag" src="uae-flag.png" alt="" data-i18n-alt="flagAlt" width="251" height="160">
     <nav class="dnav" id="dnav"></nav>
+    <div class="sp"></div>
+    <img class="flag" src="uae-flag.png" alt="" data-i18n-alt="flagAlt" width="251" height="160">
     <button class="lang" id="langBtn" aria-label="Switch language">EN</button>
     <span class="pill" id="statusPill"><span class="dot"></span><span id="statusTxt"></span></span>
   </div>
