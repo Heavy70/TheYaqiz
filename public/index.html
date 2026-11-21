@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>يقِظ TheYaqiz – AI Scam Shield | درعك الذكي ضد الاحتيال</title>
 <meta name="description" content="TheYaqiz checks suspicious messages, links and calls before you fall for a scam. يقِظ يساعدك على كشف رسائل الاحتيال وروابطه ومكالماته قبل أن تقع ضحيته.">
-<meta name="theme-color" content="#0b3b75">
+<meta name="theme-color" content="#0a2147">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
 <style>
 :root{
   --bg:#f2f5fa;--card:#fff;--ink:#0e1c33;--muted:#5d6b82;--line:#e3e8f0;--soft:#f7f9fc;
-  --brand:#0b3b75;--brand2:#1667c7;--accent:#5b2bd6;
+  --brand:#0a2147;--brand2:#1f4e8c;--accent:#b02a37;
   --ok:#0f8a5f;--warn:#b97500;--bad:#c62f3a;--okbg:#e8f6ef;--warnbg:#fff5df;--badbg:#fdecee;
   --r:18px;--shadow:0 1px 2px rgba(14,28,51,.05),0 8px 24px rgba(14,28,51,.06);
   --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
@@ -30,7 +30,7 @@ button{font:inherit;color:inherit}
 svg.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
 /* top bar */
-.top{position:sticky;top:0;z-index:20;background:rgba(11,59,117,.97);backdrop-filter:blur(10px);color:#fff;padding:calc(10px + var(--safe-t)) 16px 10px}
+.top{position:sticky;top:0;z-index:20;background:rgba(10,33,71,.97);backdrop-filter:blur(10px);color:#fff;padding:calc(10px + var(--safe-t)) 16px 10px}
 .top .in{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:12px}
 .mark{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 6px #0006)}
 .top h1{margin:0;font-size:20px;line-height:1.1}
@@ -48,7 +48,7 @@ svg.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-
 .bnav button.on{color:var(--brand)}
 .bnav button.on svg{stroke:var(--brand2)}
 .bnav .fab{margin-top:-24px}
-.bnav .fab span.c{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;box-shadow:0 8px 20px #1667c755;color:#fff}
+.bnav .fab span.c{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;box-shadow:0 8px 20px #1f4e8c55;color:#fff}
 .bnav .fab span.c svg{stroke:#fff;width:24px;height:24px}
 /* balanced header + nav labels in every language */
 .top .in>*{flex:0 0 auto}.top .in>div:not(.sp){min-width:0;flex:0 1 auto}.top .sp{flex:1 1 0}
@@ -59,13 +59,13 @@ svg.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-
 .bnav button{min-width:0;line-height:1.2;text-align:center}
 .bnav button>span:not(.c){display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
 @media(min-width:561px){.top h1,.top small{max-width:none;overflow:visible;text-overflow:clip}.top .in>div:not(.sp){flex:0 0 auto}.top small{font-size:11px}}
-@media(min-width:900px){.top .in{max-width:1240px;gap:14px}.top small{display:none}}
+@media(min-width:900px){.top .in{max-width:1040px;gap:14px}.top small{display:none}}
 @media(min-width:900px) and (max-width:1100px){.pill #statusTxt{display:none}}
 @media(max-width:480px){.top .in{gap:8px}.top small{display:none}.pill{padding:4px 8px;font-size:11px}.top h1{max-width:30vw}}
 @media(min-width:900px) and (max-width:1100px){.dnav button{padding:8px 7px;font-size:12.5px}}
 @media(min-width:900px){.bnav{display:none}.dnav{display:flex}body{padding-bottom:30px}}
 
-main{max-width:1000px;margin:0 auto;padding:16px}
+main{max-width:840px;margin:0 auto;padding:16px}
 .view{display:none;animation:fade .25s ease}
 .view.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -76,7 +76,7 @@ h3{font-size:16px;margin:18px 0 6px}
 .hint{color:var(--muted);margin:0 0 14px;font-size:14px}
 
 /* hero */
-.hero{border-radius:16px;padding:12px 16px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,#2a7be0 0%,#0b3b75 55%,#071f42 100%);position:relative;overflow:hidden;margin-bottom:14px}
+.hero{border-radius:16px;padding:12px 16px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,#2f5fa8 0%,#0a2147 55%,#050f24 100%);position:relative;overflow:hidden;margin-bottom:14px}
 .hero::after{content:"";position:absolute;inset:auto -60px -80px auto;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,#ffffff1c,transparent 70%)}
 .hero h2{font-size:17px;line-height:1.4;margin:6px 0 4px}
 .hero .pill{font-size:11px;padding:2px 8px}
@@ -290,8 +290,8 @@ footer .dev b{color:var(--brand)}
     </div>
     <div class="quick">
       <div class="qa" data-go="scan" data-mode="msg"><div class="ic" style="background:#e7f0fc;color:var(--brand2)"><svg class="i"><use href="#i-msg"/></svg></div><b data-i18n="kMsg"></b></div>
-      <div class="qa" data-go="scan" data-mode="url"><div class="ic" style="background:#efe9fd;color:var(--accent)"><svg class="i"><use href="#i-link"/></svg></div><b data-i18n="kUrl"></b></div>
-      <div class="qa" data-go="scan" data-mode="img"><div class="ic" style="background:#e8f6ef;color:var(--ok)"><svg class="i"><use href="#i-img"/></svg></div><b data-i18n="kShot"></b></div>
+      <div class="qa" data-go="scan" data-mode="url"><div class="ic" style="background:#d8f8ea;color:#0bb678"><svg class="i"><use href="#i-link"/></svg></div><b data-i18n="kUrl"></b></div>
+      <div class="qa" data-go="scan" data-mode="img"><div class="ic" style="background:#ece8fb;color:#6d4ad6"><svg class="i"><use href="#i-img"/></svg></div><b data-i18n="kShot"></b></div>
       <div class="qa" data-go="train"><div class="ic" style="background:#fff3dc;color:var(--warn)"><svg class="i"><use href="#i-cap"/></svg></div><b data-i18n="train"></b></div>
     </div>
     <div class="card">
@@ -388,8 +388,8 @@ footer .dev b{color:var(--brand)}
     <div class="list" style="margin-bottom:14px">
       <div class="li" data-go="report"><div class="ic" style="background:var(--badbg);color:var(--bad)"><svg class="i"><use href="#i-flag"/></svg></div><div class="tx"><b data-i18n="mRep"></b><small data-i18n="mRepD"></small></div></div>
       <div class="li" data-go="pitch"><div class="ic" style="background:#e7f0fc;color:var(--brand2)"><svg class="i"><use href="#i-doc"/></svg></div><div class="tx"><b data-i18n="mPitch"></b><small data-i18n="mPitchD"></small></div></div>
-      <div class="li hidden" id="moreAuto"><div class="ic" style="background:#efe9fd;color:var(--accent)"><svg class="i"><use href="#i-spark"/></svg></div><div class="tx"><b data-i18n="mAuto"></b><small id="autoSt"></small></div></div>
-      <div class="li" id="moreLang"><div class="ic" style="background:#efe9fd;color:var(--accent)"><svg class="i"><use href="#i-msg"/></svg></div><div class="tx"><b data-i18n="mLang"></b><small data-i18n="mLangD"></small></div></div>
+      <div class="li hidden" id="moreAuto"><div class="ic" style="background:#fbe9ec;color:var(--accent)"><svg class="i"><use href="#i-spark"/></svg></div><div class="tx"><b data-i18n="mAuto"></b><small id="autoSt"></small></div></div>
+      <div class="li" id="moreLang"><div class="ic" style="background:#fbe9ec;color:var(--accent)"><svg class="i"><use href="#i-msg"/></svg></div><div class="tx"><b data-i18n="mLang"></b><small data-i18n="mLangD"></small></div></div>
       <div class="li" id="moreInstall"><div class="ic" style="background:var(--okbg);color:var(--ok)"><svg class="i"><use href="#i-dl"/></svg></div><div class="tx"><b data-i18n="mInst"></b><small data-i18n="mInstD"></small></div></div>
       <div class="li" id="clearHist"><div class="ic" style="background:var(--soft);color:var(--muted)"><svg class="i"><use href="#i-clock"/></svg></div><div class="tx"><b data-i18n="mClr"></b><small data-i18n="mClrD"></small></div></div>
     </div>
@@ -667,7 +667,7 @@ const KMAP={'رسالة':'msg','رابط':'url','صورة':'img','مكالمة':
 function kindKey(k){return KMAP[k]||k}
 function saveHist(r){const h=store.get('hist',[]);h.unshift({k:r.kind,i:r.input.slice(0,140),s:r.score,l:r.lvl,f:r.flags,t:r.time});store.set('hist',h.slice(0,30))}
 function ago(x){const m=Math.round((Date.now()-x)/60000);return m<1?t('now'):m<60?T(`قبل ${m} دقيقة`,`${m} min ago`):m<1440?T(`قبل ${Math.round(m/60)} ساعة`,`${Math.round(m/60)} h ago`):new Date(x).toLocaleDateString(T('ar-AE','en-GB'))}
-const KIC={msg:['i-msg','#e7f0fc','var(--brand2)','kMsg'],url:['i-link','#efe9fd','var(--accent)','kUrl'],img:['i-img','#e8f6ef','var(--ok)','kImg'],call:['i-phone','#fff3dc','var(--warn)','kCall']};
+const KIC={msg:['i-msg','#e7f0fc','var(--brand2)','kMsg'],url:['i-link','#d8f8ea','#0bb678','kUrl'],img:['i-img','#ece8fb','#6d4ad6','kImg'],call:['i-phone','#fff3dc','var(--warn)','kCall']};
 function renderHome(){
  const h=store.get('hist',[]);$('#sTot').textContent=h.length;$('#sBad').textContent=h.filter(x=>x.l==='bad').length;$('#sWarn').textContent=h.filter(x=>x.l==='warn').length;
  const tr=store.get('train',null);$('#sTrain').textContent=tr?`${tr.ok}/${tr.n}`:'—';
@@ -909,7 +909,7 @@ function langMenu(){
  let m=$('#langMenu');if(m){m.remove();return}
  m=document.createElement('div');m.id='langMenu';m.setAttribute('role','menu');
  m.style.cssText='position:fixed;inset-inline-end:12px;top:56px;z-index:60;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:6px;min-width:150px';
- m.innerHTML=LANGS.map(l=>`<button type="button" role="menuitem" data-l="${l}" dir="auto" style="display:block;width:100%;text-align:start;padding:10px 12px;border:0;background:${l===lang?'#efe9fd':'transparent'};border-radius:8px;font:inherit;font-size:15px;cursor:pointer">${LNAME[l]}</button>`).join('');
+ m.innerHTML=LANGS.map(l=>`<button type="button" role="menuitem" data-l="${l}" dir="auto" style="display:block;width:100%;text-align:start;padding:10px 12px;border:0;background:${l===lang?'#fbe9ec':'transparent'};border-radius:8px;font:inherit;font-size:15px;cursor:pointer">${LNAME[l]}</button>`).join('');
  m.onclick=e=>{const b=e.target.closest('button');if(b)setLang(b.dataset.l)};
  document.body.appendChild(m);
  setTimeout(()=>document.addEventListener('click',function f(e){if(!m.contains(e.target)){m.remove()}document.removeEventListener('click',f)},{once:false}),0);
