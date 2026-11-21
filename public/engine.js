@@ -216,7 +216,13 @@
       if (snd) {
         const personal = snd.k === 'mobile' || snd.k === 'foreign';
         const kindTxt = { mobile: T('رقم جوال شخصي', 'a personal mobile number'), foreign: T('رقم أجنبي', 'a foreign number'), landline: T('رقم أرضي', 'a landline'), service: T('رقم خدمة (800/600)', 'a service number (800/600)'), short: T('رمز قصير', 'a short code'), alpha: T('اسم مرسل نصّي', 'a text sender ID') }[snd.k];
-        if (entHit && personal) {
+        const GEN_ORG = /(شرطه|الداخليه|وزاره|النيابه|المحكمه|القضاء|الجمارك|الضرايب|الضرائب|البنك|مصرف|حسابك|بطاقتك|الاتصالات|بريد|police|prosecut|ministry|court|customs|\bbank\b|your account|your card|telecom|courier|government)/;
+        if (!entHit && personal && GEN_ORG.test(s)) {
+          const w = 35; score += w; axes.imp = (axes.imp || 0) + w;
+          flags.unshift({ l: T('يدّعي صفة جهة رسمية أو بنك لكنه يتصل أو يراسل من ' + kindTxt, 'Claims to be an official body or bank but is using ' + kindTxt), w, tip: T('الشرطة والبنوك لا تطلب منك مالًا أو رمزًا عبر مكالمة من رقم جوال شخصي. أنهِ المكالمة واتصل بالجهة على رقمها الرسمي.', 'Police and banks do not ask for money or codes in a call from a personal mobile number. Hang up and call the organisation on its official number.'), rule: 'sndr' });
+          evidence.push({ id: 'sender', st: 'bad', t: T('المرسل', 'Sender'), v: snd.v + ' · ' + kindTxt });
+          sndFloor = 70;
+        } else if (entHit && personal) {
           const strict = !entHit.soft && !COURIER.includes(entHit.id), w = strict ? 35 : 10;
           score += w; axes.imp = (axes.imp || 0) + w;
           flags.unshift({ l: T('الرسالة تنسب نفسها إلى ' + entHit.n[0] + ' لكنها وصلت من ' + kindTxt, 'The message claims to be from ' + entHit.n[1] + ' but came from ' + kindTxt), w, tip: T('البنوك والجهات الرسمية ترسل باسم معرِّف مسجَّل لا من أرقام جوالات.', 'Banks and official bodies send under a registered sender name, not from mobile numbers.'), rule: 'sndr' });
