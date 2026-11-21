@@ -27,6 +27,7 @@ const SEC = {
   'Cross-Origin-Opener-Policy':'same-origin',
   'Cross-Origin-Resource-Policy':'same-origin',
   'X-Permitted-Cross-Domain-Policies':'none',
+  'X-Robots-Tag':'noai, noimageai',
   'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 };
 
@@ -468,8 +469,33 @@ http.createServer((req, res) => {
   if (ORIGIN_SECRET && !sameSecret(req.headers['x-origin-secret'])) return send(res, 403, 'Forbidden');
   try { route(req, res); } catch(e){ console.error('route', e && e.message); try { json(res, 500, { error:'server' }); } catch(_){} }
 }).listen(PORT, () => console.log('Yaqiz on', PORT));
+/* Anti-scraping (v37): /api only for our own pages, never for bare scripts; plus a per-IP page limit. */
+const BAD_UA = /^(curl|wget|python|python-requests|python-urllib|aiohttp|httpx|go-http-client|java|libwww|okhttp\/[0-9.]+$|scrapy|node-fetch|axios|undici|postman|insomnia|httpie|php|ruby|perl|apache-httpclient|headless|phantomjs|selenium)|(scrapy|crawler|spider|scraper|bot\b)/i;
+function hostOf(v){ try { return new URL(String(v)).host.toLowerCase(); } catch(e){ return ''; } }
+function sameSite(req){
+  const h = String(req.headers.host || '').toLowerCase();
+  const sf = String(req.headers['sec-fetch-site'] || '').toLowerCase();
+  if (sf === 'same-origin') return true;
+  if (sf === 'cross-site' || sf === 'same-site') return false;
+  const o = hostOf(req.headers.origin), r = hostOf(req.headers.referer);
+  return !!h && (o === h || (!o && r === h));
+}
+function apiAllowed(req){
+  const ua = String(req.headers['user-agent'] || '');
+  if (ua.length < 12 || BAD_UA.test(ua)) return false;
+  return sameSite(req);
+}
+let pgMin = 0, pg = new Map();
+function pageOk(ip){
+  const m = Math.floor(Date.now() / 60000);
+  if (m !== pgMin){ pgMin = m; pg = new Map(); }
+  const n = (pg.get(ip) || 0) + 1; pg.set(ip, n);
+  return n <= 150;
+}
 function route(req, res){
   const url = req.url.split('?')[0];
+  if (!pageOk(clientIp(req))) return send(res, 429, 'Too many requests', {'Retry-After':'60'});
+  if (url.startsWith('/api/') && url !== '/api/health' && !apiAllowed(req)) return json(res, 403, { error:'forbidden' });
   if (url.startsWith('/api/') && !burstOk(clientIp(req))) return json(res, 429, { error:'limit' });
   if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY });
   if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res).catch(() => json(res, 500, { error:'server' }));
