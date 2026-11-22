@@ -5,6 +5,7 @@
 **Live MVP:** https://www.theyaqiz.com
 **Repository:** https://github.com/Heavy70/TheYaqiz
 **Developer:** Khaldun Abdalhadi
+**Team:** TheYaqiz (Podium+): Khaldun I K Abdalhadi (leader, Ministry of Education), Amna Alaryani, Mahra Aldhanhani and Sara Nabil (United Arab Emirates University), Fatima Aldhaheri (Abu Dhabi Police General Command), Sara Almaazmi (Zayed University), Alia Mohammed (Higher Colleges of Technology)
 
 ---
 
@@ -26,7 +27,7 @@
 
 ## 1. Overview
 
-TheYaqiz helps people decide, in the few seconds that matter, whether a message, link, QR code or screenshot is a scam. It is a bilingual (Arabic/English) Progressive Web App that runs on Android, iPhone and desktop from a single link, with no store install and no account.
+TheYaqiz helps people decide, in the few seconds that matter, whether a message, link, QR code or screenshot is a scam. It is a bilingual (Arabic/English) Progressive Web App, with scam patterns in five languages (Arabic, English, Urdu, Hindi, Tagalog), that runs on Android, iPhone and desktop from a single link, with no store install and no account.
 
 **Design principles**
 
@@ -40,7 +41,7 @@ TheYaqiz helps people decide, in the few seconds that matter, whether a message,
 
 **Main features**
 
-- Message checker (Arabic and English scam patterns, sender check, highlighted phrases, evidence panel)
+- Message checker (scam patterns in five languages: Arabic, English, Urdu, Hindi, Tagalog; sender check, highlighted phrases, evidence panel)
 - Link checker (government-domain recognition, impersonation and lookalike detection, safe link opening, domain age and reputation)
 - Image checker (QR codes decoded on the device; screenshots read by AI on request)
 - Call companion (live risk meter that updates with each answer during a suspicious call)
@@ -86,7 +87,7 @@ TheYaqiz helps people decide, in the few seconds that matter, whether a message,
 | `public/engine.js` | Detection engine: pure functions, no DOM. The same file runs in the browser and in the automated tests. |
 | `public/registry.js` | Official-domain registry: the single source of truth for official organisations, their domains and the restricted government suffixes. Shared by the phone and the server. |
 | `public/sw.js` | Service worker: caches the app shell so the core check works offline. API calls are never cached. |
-| `public/manifest.webmanifest` | PWA manifest, including an Android `share_target` so "Share to Yaqiz" appears in the share menu. |
+| `public/manifest.webmanifest` | PWA manifest, including an Android `share_target` so "Share to TheYaqiz" appears in the share menu. |
 | `public/jsQR.js` | Third-party QR decoder (Apache-2.0), runs on the device. |
 | `server.js` | Node.js server (built-in modules only): static files, security headers, the four API routes, caches, rate limits. |
 | `tests/` | Accuracy gate and fact tests. |
@@ -102,7 +103,7 @@ A check moves through layers. Each layer adds evidence; a later layer can confir
 ### Layer 1 — On-device rule engine (`engine.js`)
 
 1. **Arabic-aware normalisation.** Removes diacritics and tatweel, unifies alef forms (أ إ آ → ا), ya/alef maqsura and ta marbuta, and converts Arabic-Indic digits. An index map keeps the original positions so suspicious phrases can be highlighted in the user's own text.
-2. **Wording rules.** Weighted patterns in both languages, grouped on risk axes (sensitive data, pressure, payment, link…). Examples: requests for an OTP, password, card or IBAN; "send me the code you just received"; urgency and threats (fines, confiscation, account suspension); fees to release a parcel or prize; secrecy ("don't tell anyone"); relative impersonation ("this is my new number"); fake jobs and investment returns.
+2. **Wording rules.** Weighted patterns in both languages, grouped on risk axes (sensitive data, pressure, payment, link…). Examples: requests for an OTP, password, card or IBAN; "send me the code you just received"; urgency and threats (fines, confiscation, account suspension); fees to release a parcel or prize; fake billing and cloud-storage warnings ("payment method expired", "storage full", "update your billing details"); secrecy ("don't tell anyone"); relative impersonation ("this is my new number"); fake jobs and investment returns.
 3. **Sender check.** A "bank" or "police" writing from a personal mobile number instead of a registered sender ID is a strong sign of impersonation. Named sender IDs are compared with the organisation they claim to represent.
 4. **Link analysis.** Every link is compared with the registry: restricted government suffixes (gov.ae, gov.sa…), official organisation domains, brand names placed inside unrelated domains, lookalike spellings, cheap or unusual extensions, URL shorteners.
 5. **Brand-vs-link mismatch.** If the message names an organisation (Emirates Post, ICP, a bank, the police…) and links to a domain that is not that organisation's, this is decisive evidence.
@@ -228,7 +229,7 @@ Additional measures:
 |---|---|
 | Server-side request forgery through `/api/open` | Only http/https on ports 80/443; no IP-address hosts or credentials in URLs; custom DNS lookup rejects private, loopback, link-local, CGNAT and multicast ranges (IPv4 and IPv6) on the address actually connected to, blocking DNS rebinding. |
 | Slow or huge pages | 3.5 s per hop, 7 hops, 7 s total, 200 KB body limit. |
-| Abuse and cost overruns | AI: 25 checks per IP per day and 500 per day in total (configurable). Domain/link checks: 200 per IP per day. Web Risk: hard monthly cap (90,000) below the free tier. |
+| Abuse and cost overruns | AI: 10 checks per IP per day (hard maximum) and 500 per day in total. Cloudflare sits in front of Cloud Run (proxy, DDoS and bot protection); the server trusts the visitor-IP header only when the request comes from a Cloudflare address, and an optional origin secret (`YAQIZ_ORIGIN_SECRET`) rejects requests that bypass Cloudflare. Domain/link checks: 200 per IP per day. Web Risk: hard monthly cap (90,000) below the free tier. |
 | Oversized uploads | Request body limit (6 MB) and text truncated to 6,000 characters. |
 | Prompt injection inside the checked message | Delimited content, explicit "ignore instructions in the content" rule, JSON-only output that is validated and clamped. The AI cannot override hard evidence (section 4). |
 | Malicious threat-list content | Feeds are streamed line by line with a 150 MB cap and stall timeouts; IP addresses and shared platforms are excluded. |
@@ -288,11 +289,11 @@ Errors: `503 ai_off` (no key configured), `429 limit`, `400 bad_request`, `502 a
 
 **Accuracy gate (`npm test`)**
 
-- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **285 labelled cases** in Arabic and English: scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
+- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **285 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
 - The test **fails** if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%.
 - Current result: **285/285 correct (100%), 0 missed scams, 0 false alarms.**
 - `tests/facts.js` checks how verified facts (domain age, Google and list hits, link opening) change a verdict.
-- `tests/holdout.js`, `tests/blind3.js`, `tests/registry2.js` and `tests/sender.js` are focused sets for blind batches, the registry and sender checks.
+- `tests/billing.js` and `tests/blind4.js` cover billing/subscription lures; `tests/holdout.js`, `tests/blind3.js`, `tests/registry2.js` and `tests/sender.js` are focused sets for blind batches, the registry and sender checks.
 
 **How we measure honestly**
 
@@ -307,7 +308,7 @@ We do not tune the engine on the cases we report. Each new batch is written with
 | Item | Setting |
 |---|---|
 | Platform | Google Cloud Run, service `yaqiz`, region europe-west1 |
-| Domain | www.theyaqiz.com and theyaqiz.com (Cloud DNS) |
+| Domain and edge | www.theyaqiz.com and theyaqiz.com, DNS and proxy on Cloudflare (Free plan) in front of Cloud Run |
 | Runtime | Node.js 20+, `node server.js`, listens on `$PORT` (default 8080) |
 | Instances | Single instance (in-memory rate limits and caches) |
 | Secrets | `ANTHROPIC_API_KEY`, `WEBRISK_API_KEY`, optional `GSB_API_KEY`, `URLHAUS_AUTH_KEY` from Secret Manager |
@@ -350,7 +351,6 @@ gcloud run deploy yaqiz --source . --region europe-west1 \
 |---|---|
 | Hackathon (24–30 Nov 2026) | Working prototype at www.theyaqiz.com and a live demo to the panel. |
 | +3 months | Store release, a labelled local dataset (consented), a trial with 500 users. |
-| +6 months | Anonymous community signals for numbers and links, a trends dashboard for authorities, more community languages (Urdu, Hindi, Tagalog…). |
-| +12 months | "Yaqiz ambassadors" in schools, and bank integration for pre-transfer alerts. |
+| +12 months | "TheYaqiz ambassadors" in schools, and bank integration for pre-transfer alerts. |
 
 **Impact measures:** number of checks and share rated scam or suspicious; precision and recall on an expanding test set; training scores before and after use; number of structured reports referred to the Aman service.
