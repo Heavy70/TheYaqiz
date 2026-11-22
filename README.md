@@ -73,7 +73,7 @@ An automated accuracy gate runs the on-device engine against a labelled set of r
 npm test
 ```
 
-Current result: **242 cases, 100% correct, 0 missed scams, 0 false alarms.** The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
+Current result: **285 cases, 100% correct, 0 missed scams, 0 false alarms.** The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
 
 ## 6. How to run
 

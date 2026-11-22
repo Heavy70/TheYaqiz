@@ -30,7 +30,11 @@
       { id: 'credx', ax: 'sens', w: 25, neg: NEG, skipIf: /(courier|driver|delivery (agent|partner|man|person|boy)|rider|مندوب|سائق|التوصيل)/, l: ['يطلب منك إرسال أو قول رمز سرّي أو كلمة مرور', 'Asks you to send or tell a secret code or password'], tip: ['لا يطلب أحد منك قول الرمز أو كلمة المرور؛ من يفعل فهو محتال.', 'Nobody legitimate asks you to say or send a code or password — whoever does is a scammer.'],
         re: new RegExp('(?:' + SV + '[^.؟!\\n]{0,45}?' + SECRET + ')|(?:' + SECRET + '[^]{0,90}?(?:send|share|forward|read|tell|give)\\w* (?:it|them|that|the code) (?:back )?to me)|(?:(?:send|tell|give|share) me (?:the |that |this |your )?(?:code|otp|pin|password))') },
       { id: 'update', ax: 'sens', w: 12, l: ['يطلب تحديث بيانات أو تفعيل حساب عبر رابط', 'Asks you to update details or activate an account via a link'], tip: ['تحديث البيانات يتم من التطبيق الرسمي مباشرة لا من رابط في رسالة.', 'Update details in the official app — never via a link in a message.'],
-        re: /(حدث بياناتك|تحديث (البيانات|بياناتك|الحساب)|تفعيل (حسابك|البطاقه)|تاكيد (هويتك|بياناتك)|verify your (account|identity|details|information)|update your (details|account|information|records)|confirm your (identity|account|details)|re-?activate (your|the) (account|card))/ },
+        re: /(حدث بياناتك|تحديث (البيانات|بياناتك|الحساب)|تفعيل (حسابك|البطاقه)|تاكيد (هويتك|بياناتك)|verify your (account|identity|details|information)|update your (details|account|information|records)|confirm your (identity|account|details)|re-?activate (your|the) (account|card)|تحقق من (حسابك|بياناتك|هويتك))/ },
+      { id: 'payupd', ax: 'sens', w: 25, neg: NEG, l: ['يطلب تحديث أو تأكيد بيانات الدفع أو البطاقة', 'Asks you to update or confirm payment or card details'], tip: ['حدّث بيانات الدفع من التطبيق أو الموقع الرسمي الذي تكتبه بنفسك، لا من زر أو رابط في رسالة.', 'Update payment details only in the official app or a website you type yourself — never from a button or link in a message.'],
+        re: /((update|confirm|verify|re-?enter|re-?add|add|provide|fix|correct|enter|renew)\s+(your\s+|a\s+|the\s+|new\s+)*(payment|billing|card|credit card|debit card|bank card)\b|(حدث|تحديث|اكد|تاكيد|ادخل|ادخال|اضف|اضافه|جدد|تجديد)\s+(طريقه|وسيله|بيانات|معلومات|تفاصيل)\s+(ال)?(دفع|بطاقتك|بطاقه|البطاقه|الفوتره|السداد)|(اكد|ادخل|حدث)\s+بيانات\s+بطاقتك)/ },
+      { id: 'bill', ax: 'press', w: 20, l: ['ذريعة فشل الدفع أو انتهاء الاشتراك أو امتلاء التخزين أو حذف الملفات', 'Failed-payment, expired-subscription, full-storage or file-deletion pretext'], tip: ['رسائل «فشل الدفع» و«امتلاء التخزين» من أشهر طُعوم سرقة البطاقات؛ افتح التطبيق الرسمي بنفسك لتتأكد.', '“Payment failed” and “storage full” messages are top card-theft lures — open the official app yourself to check.'],
+        re: /(payment( method| details| card| information)? (has |have |was |is )?(expired|declined|failed|unsuccessful|invalid|outdated|not (been )?processed)|payment (failed|declined|unsuccessful)|(couldn'?t|could not|unable to|were unable to|failed to) (process|complete|charge|verify|renew) (your |the )?(last |recent |latest )?(payment|card|billing|subscription)|card (has )?(expired|was declined)|billing (problem|issue|failure|error)|subscription (has |is |was )?(expired|ended|cancell?ed|suspended|on hold|paused|will be (cancell?ed|suspended|terminated|deactivated))|membership (payment )?(has |is |was )?(expired|failed|on hold|suspended|cancell?ed)|(storage|cloud|icloud|drive|mailbox|inbox)( space)? (is )?(almost |nearly |now |completely )?full|out of (storage|space)|(photos|videos|files|data|documents|emails?|messages|backups?)( and (photos|videos|files|data|documents|emails?|messages))? (will|may|could) be (permanently )?(deleted|removed|lost|erased)|(account|profile|files|data) will be (permanently )?(deleted|removed|closed|terminated)|avoid (any )?(service |account )?(interruption|suspension|disruption|deactivation|termination|cancell?ation)|avoid losing|service (interruption|disruption)|backup (has )?stopped|(has been|was) renewed for|(storage|space|mailbox|quota)( usage)? limit (has been |is )?(reached|exceeded)|(trouble|problem|issue) with (your )?(current )?(billing|payment)|(subscription|membership|plan) (expires|will expire|is expiring|ends) (today|tomorrow|soon|in)|to keep (your )?(chats|photos|videos|files|data|account|access|emails|messages|service|line)|(your )?card (was |has been )?(declined|rejected)|(تم )?رفض (بطاقتك|البطاقه|بطاقه)|(بريدك|حسابك|صندوق (ال)?بريد|البريد (ال)?الكتروني)[^.\n]{0,30}ممتلئ|حتي لا (تفقد|يتم حذف)|(اشتراكك|عضويتك)[^.\n]{0,20}ينتهي|انتهت صلاحيه (طريقه|وسيله|بطاقه|بيانات) (ال)?(دفع|سداد)|(طريقه|وسيله) (ال)?دفع (منتهيه|مرفوضه|غير صالحه)|(فشل|فشلت|تعذر|لم تتم|لم يتم) (اتمام |تنفيذ )?(عمليه )?(ال)?(دفع|سداد|خصم|تحصيل)|تعذر (تحصيل|خصم)|(اشتراكك|عضويتك|الاشتراك|اشتراك)[^.\n]{0,25}?(انتهي|منتهي|متوقف|معلق|موقوف|سينتهي|سيتم (ايقاف|الغاء|تعليق))|مساحه (ال)?تخزين( (ال)?سحابيه)? (ممتلئه|نفدت|امتلات|على وشك)|سيتم حذف (صورك|ملفاتك|بياناتك|حسابك|رسائلك|رسايلك)|(قبل|لتجنب) (حذف|فقدان)|لتجنب (انقطاع|توقف|ايقاف|تعليق) (ال)?(خدمه|حسابك|اشتراكك))/ },
       { id: 'urg', ax: 'press', w: 15, l: ['لغة استعجال وضغط زمني', 'Urgency and time pressure'], tip: ['الضغط الزمني يمنعك من التفكير والتحقق.', 'Time pressure stops you from thinking and checking.'],
         re: /(عاجل|فورا|حالا|بسرعه|خلال \d+ ?(ساعه|ساعات|ساعتين|دقيقه|دقائق|يوم)|خلال ساعتين|اخر فرصه|قبل فوات|ينتهي اليوم|urgent|immediately|within \d+ ?(hours?|minutes?|days?)|last chance|expires? today|act now|final (notice|warning)|last warning|اشعار نهائي|تحذير اخير)/ },
       { id: 'threat', ax: 'press', w: 18, l: ['تهديد بإيقاف أو تجميد أو غرامة أو قبض', 'Threat of suspension, freezing, fines or arrest'], tip: ['التهديد يدفعك للتصرف بخوف؛ الجهات الرسمية تبلغك عبر قنواتها الموثقة.', 'Threats push you to act out of fear; official bodies contact you through verified channels.'],
@@ -82,6 +86,8 @@
       advfee: ['(?:رجسٹریشن فیس|پروسیسنگ فیس|پیشگی (فیس|رقم)|रजिस्ट्रेशन फीस|प्रोसेसिंग फीस|अग्रिम (फीस|राशि)|registration fee|processing fee|paunang bayad|downpayment|fee para (sa|makuha))'],
       tech: ['(?:وائرس|ریموٹ|اینی ?ڈیسک|ٹیم ?ویور|वायरस|रिमोट|एनीडेस्क|टीमव्यूअर|anydesk|teamviewer|may virus|na-?hack)'],
       pay: ['(?:ادائیگی|فیس (جمع|ادا)|رقم (بھیج|جمع)|भुगतान|फीस (जमा|भरें)|पैसे (भेज|जमा)|fees? (jama|bharein)|bayaran|magbayad|bayad (na|ngayon)|ipadala ang bayad)'],
+      bill: ['(?:ادائیگی (ناکام|مسترد)|سبسکرپشن (ختم|معطل)|स्टोरेज (भर|फुल)|भुगतान (विफल|असफल)|सब्सक्रिप्शन (समाप्त|बंद)|payment (fail|failed) (ho|hua)|nabigo ang (bayad|payment)|puno na ang storage|mabubura ang (iyong )?(mga )?(larawan|file))'],
+      payupd: ['(?:کارڈ (کی )?(تفصیلات|معلومات) (اپ ?ڈیٹ|درج)|कार्ड (की )?(जानकारी|डिटेल) (अपडेट|दर्ज)|i-?update ang (iyong )?(payment|card|bayad))'],
       imp: ['(?:ابوظہبی پولیس|مرکزی بینک|अबू धाबी पुलिस|सेंट्रल बैंक|pulis ng abu dhabi)']
     };
     RULES.forEach(r => {
@@ -208,7 +214,7 @@
         const e = ENT.find(x => x.rx.test(s));
         if (e) evidence.push({ id: 'match', st: 'ok', t: T('تطابق الجهة والرابط', 'Organisation ↔ link'), v: TX(e.n[LI()]) + ' ✓' });
       }
-      const sens = flags.some(f => f.rule === 'cred' || f.rule === 'update'), money = flags.some(f => f.rule === 'pay');
+      const sens = flags.some(f => f.rule === 'cred' || f.rule === 'update' || f.rule === 'payupd'), money = flags.some(f => f.rule === 'pay');
       evidence.push({ id: 'ask', st: sens || money ? 'bad' : 'ok', t: T('طلب بيانات أو أموال', 'Asks for data or money'), v: sens || money ? (sens ? T('يطلب بيانات حساسة', 'asks for sensitive data') : T('يطلب دفعًا', 'asks for payment')) : T('لا يوجد', 'none') });
       /* sender evidence (optional field) */
       const snd = senderInfo(opts.sender), entHit = ENT.find(x => x.rx.test(s));
@@ -248,6 +254,23 @@
       if (has('acct') && has('pay')) score = Math.max(score, 62);
       if (has('advfee') && has('pay') && /(job|offer|visa|vacanc|prize|winner|وظيف|تاشير|جائز|عرض)/.test(s)) score = Math.max(score, 62);
       if (has('prize', 'job', 'rent', 'hold') && has('pay')) score = Math.max(score, 62);
+      /* billing / subscription / storage / account-lock lures (often a screenshot with a button and no visible link):
+         a pretext + a request to act, with no pointer to the official app/settings, rarely comes from a genuine company */
+      const officialRef = /(in (the )?settings|settings ?>|(in|via|from|using|through|open) (the )?(official )?([a-z0-9+&]+ ){0,2}app\b|app store app|من (خلال )?(ال)?تطبيق|عبر (ال)?تطبيق|في (ال)?تطبيق|(افتح|من|في) (ال)?اعدادات)/.test(s);
+      const cta = /(click|tap|press|upgrade|renew|update|verify|confirm|claim|get|restore|resume|unlock|reactivate)\b[^.\n]{0,25}\b(now|here|below|button|today|account|storage|access|watching|method|free)|\b(update|fix|verify|confirm|pay) (it|them|now)\b|اضغط|انقر|اضغط هنا|للترقيه|رقي|استعاده|استعد/.test(s);
+      if (!allVerified && !officialRef) {
+        if (has('payupd') && has('bill', 'threat', 'urg')) score = Math.max(score, 72);
+        else if (has('payupd') && cta) score = Math.max(score, 62);
+        if (has('bill') && has('update', 'cred', 'credx', 'threat', 'urg', 'pay')) score = Math.max(score, 62);
+        if (has('bill') && cta) score = Math.max(score, 62);
+        if (has('update') && has('threat')) score = Math.max(score, 62);
+        /* fake renewal / refund callback: "renewed for 1,499 AED — if you did not authorise this, call our refund team" */
+        if (has('bill') && /((did not|didn'?t|not) (authori[sz]e|make|recogni[sz]e|order|request|place)[^.\n]{0,60}(call|contact|reach|refund)|refund (team|department|desk|center|centre)|(لم تقم|لم تطلب)[^.\n]{0,40}(اتصل|تواصل))/.test(s)) score = Math.max(score, 62);
+      } else if (officialRef && !allVerified) {
+        /* the message itself sends you to the official app/settings: a billing pretext alone is not proof of a scam */
+        const soft = ['bill', 'payupd', 'update', 'urg', 'link', 'hold'];
+        if (flags.filter(f => f.w > 0).every(f => soft.includes(f.rule)) && linkScore < 30) score = Math.min(score, 45);
+      }
       const out = { score: Math.min(100, score), flags, ranges, axes, text: txt, evidence };
       if (allVerified && out.score < 25) out.verified = true;
       const pend = Array.from(new Set(bad.map(l => l.host))).slice(0, 3);
@@ -304,7 +327,7 @@
       if (!o || !o.ok) { row('unk', T('تعذّر فتحه من الخادم (محجوب أو بطيء أو لا يعمل) — لا يغيّر الحكم', 'could not be opened (blocked, slow or down) — verdict unchanged')); return r; }
       const fh = o.host, chain = (o.hops || []).map(h => h.host).filter((h, i, a) => i === 0 || h !== a[i - 1]);
       const fin = analyzeUrl(o.url), off = !!(fin && fin.official);
-      const hard = (r.flags || []).some(f => f.w > 0 && ['cred', 'credx', 'pay', 'advfee', 'secret', 'family', 'acct', 'threat', 'sndr', 'sb', 'lists'].includes(f.rule));
+      const hard = (r.flags || []).some(f => f.w > 0 && ['cred', 'credx', 'pay', 'payupd', 'bill', 'advfee', 'secret', 'family', 'acct', 'threat', 'sndr', 'sb', 'lists'].includes(f.rule));
       if (chain.length > 1) row(off ? 'ok' : 'warn', chain.join(' → '));
       if (off) {
         if (!hard) {
@@ -327,14 +350,14 @@
 
     /* ===== merge an AI verdict into a local result (conservative) ===== */
     /* verifiable evidence = something we can check ourselves, not just a model's impression */
-    const HARD = ['mism', 'sb', 'age', 'link', 'sndr', 'lists', 'cred', 'credx', 'pay', 'advfee', 'secret', 'family', 'acct', 'threat'];
+    const HARD = ['mism', 'sb', 'age', 'link', 'sndr', 'lists', 'cred', 'credx', 'pay', 'payupd', 'bill', 'advfee', 'secret', 'family', 'acct', 'threat'];
     function hardEvidence(res) { return (res.flags || []).some(f => f.w > 0 && HARD.includes(f.rule)); }
     function applyAi(res, j) {
       const r = Object.assign({}, res, { flags: res.flags.slice(), evidence: (res.evidence || []).filter(e => e.st !== 'load') });
       const a = Math.max(0, Math.min(100, Math.round(+j.score || 0)));
       r.evidence.push({ id: 'ai', st: a >= 60 ? 'bad' : a >= 25 ? 'warn' : 'ok', t: T('تحليل الذكاء الاصطناعي', 'AI analysis'), v: String(j.verdict || '') + ' · ' + a + '/100' });
       const hard = hardEvidence(res);
-      if (a >= 60 && hard) { r.score = Math.max(res.score, 62); r.flags.unshift({ l: T('التحليل المعمّق بالذكاء الاصطناعي يؤكد الاشتباه', 'The deep AI analysis confirms the suspicion'), w: 0, rule: 'ai', tip: j.explanation || '' }); }
+      if (a >= 60 && hard) { r.score = Math.max(res.score, 62, Math.min(a, 95)); r.flags.unshift({ l: T('التحليل المعمّق بالذكاء الاصطناعي يؤكد الاشتباه', 'The deep AI analysis confirms the suspicion'), w: 0, rule: 'ai', tip: j.explanation || '' }); }
       else if (a >= 60 && res.verified) {
         /* every link is a verified official domain and nothing checkable is wrong: the model's impression does not turn a genuine message into a scam */
         r.flags.unshift({ l: T('الذكاء الاصطناعي متحفّظ، لكن الروابط كلها رسمية موثّقة ولا طلب لبيانات حساسة', 'The AI is cautious, but every link is a verified official domain and nothing sensitive is requested'), w: 0, good: true, rule: 'ai', tip: j.explanation || '' });
@@ -343,6 +366,11 @@
         /* the model alone is not enough to call a message a scam: without evidence we can verify, it stays "suspicious – verify" */
         r.score = Math.min(Math.max(res.score, 40), 55); r.verified = false;
         r.flags.unshift({ l: T('يشتبه الذكاء الاصطناعي في الرسالة، لكن لا يوجد دليل يمكن التحقق منه؛ تحقّق عبر القناة الرسمية', 'The AI is suspicious, but there is no verifiable evidence: check through the official channel'), w: 0, rule: 'ai', tip: j.explanation || '' });
+      }
+      else if (a >= 25 && !res.verified && res.score < 25) {
+        /* the AI sees something the on-device rules missed: never show "no risk signals" while the AI says "suspicious" */
+        r.score = Math.max(res.score, Math.min(a, 55), 30);
+        r.flags.unshift({ l: T('التحليل المعمّق بالذكاء الاصطناعي يرى علامات مريبة؛ تحقّق عبر القناة الرسمية قبل أي خطوة', 'The deep AI analysis sees suspicious signs: check through the official channel before doing anything'), w: 0, rule: 'ai', tip: j.explanation || '' });
       }
       else if (a <= 15 && res.score <= 44 && !hard) { r.score = Math.min(res.score, 24); r.flags.unshift({ l: T('التحليل المعمّق بالذكاء الاصطناعي لم يجد ما يدعو للقلق', 'The deep AI analysis found nothing worrying'), w: 0, good: true, rule: 'ai' }); }
       return r;

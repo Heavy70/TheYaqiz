@@ -9,6 +9,6 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/run.js && node tests/facts.js && node tests/multi.js"
+    "test": "node tests/run.js && node tests/facts.js && node tests/multi.js && node tests/ai.js"
   }
 }

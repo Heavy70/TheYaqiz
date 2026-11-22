@@ -1,1 +1,1 @@
-module.exports = [].concat(require('./cases.js'), require('./holdout.js'), require('./blind3.js'), require('./sender.js'), require('./registry2.js'));
+module.exports = [].concat(require('./cases.js'), require('./holdout.js'), require('./blind3.js'), require('./sender.js'), require('./registry2.js'), require('./billing.js'), require('./blind4.js'));
