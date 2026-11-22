@@ -10,7 +10,7 @@
 
 ## 1. The problem
 
-People in the UAE receive a steady flow of fraudulent SMS, WhatsApp messages and links: fake parcel fees "from Emirates Post", fake police fines, bank "account suspended" alerts, prize and job scams. They look official, they create urgency, and the victim has seconds to decide.
+People in the UAE receive a steady flow of fraudulent SMS, WhatsApp messages and links: fake parcel fees "from Emirates Post", fake police fines, bank "account suspended" alerts, fake billing and cloud-storage warnings ("payment method expired", "storage full"), prize and job scams. They look official, they create urgency, and the victim has seconds to decide.
 
 Most people cannot tell whether a link is real. Existing checkers are English-only and judge a single link in isolation. They also tend to treat every non-UAE site as suspicious, so they flag genuine Gulf and global shops and lose the user's trust.
 
@@ -24,13 +24,13 @@ TheYaqiz is a bilingual Progressive Web App (works on Android, iPhone and deskto
 
 ### Features
 
-- **Message checker:** Arabic and English scam patterns, sender check, highlighted suspicious phrases and an evidence panel.
+- **Message checker:** scam patterns in five languages (Arabic, English, Urdu, Hindi, Tagalog), sender check, highlighted suspicious phrases and an evidence panel.
 - **Link checker:** recognises restricted government domains, spots impersonation and lookalike domains, opens the link safely to read its final destination, and checks domain age and reputation.
 - **Image checker:** reads QR codes on the device; screenshots and ads are read by AI on request.
 - **Call companion:** a live risk meter that updates with every answer during a suspicious call.
 - **Gamified training:** short local "scam or safe?" scenarios with explanations.
 - **Reporting bridge:** a ready report summary pointing to Abu Dhabi Police's Aman service.
-- **Installable PWA:** "Add to Home Screen", works offline for the core check, and on Android appears in the share menu ("Share to Yaqiz").
+- **Installable PWA:** "Add to Home Screen", works offline for the core check, and on Android appears in the share menu ("Share to TheYaqiz").
 
 ### How a check works (layered evidence)
 
@@ -51,7 +51,8 @@ The final verdict combines the layers. Hard evidence (threat-list hit, credentia
 - **Model choice: Claude (Haiku class by default, configurable via `YAQIZ_MODEL`).** It is fast and low-cost per check, and it reads Arabic and English messages and screenshots well. The model is given *verified facts* from the server (domain age, list hits), so it reasons over evidence instead of guessing.
 - **Evidence over suspicion.** The scoring rules stop the "everything foreign is suspicious" failure: an old domain that matches the named brand with no sensitive request is scored safe. A message claiming to be the police, ICP, Emirates Post or a bank, but linking to a domain that is not theirs, is scored as a scam.
 - **Threat lists matched locally.** Public feeds are downloaded by the server and checked in memory, streamed line by line so memory stays flat. The user's link is never sent to those list providers.
-- **Cost guards.** Per-IP and global daily limits for AI checks; Web Risk has a hard monthly cap below the free tier so it can never bill.
+- **Cloudflare in front of Cloud Run.** www.theyaqiz.com is served through Cloudflare (proxy, DDoS and bot protection). The server trusts the visitor-IP header only when the request really comes from a Cloudflare address, so per-visitor limits cannot be spoofed.
+- **Cost guards.** Per-IP (max 10 AI checks a day) and global daily limits for AI checks; Web Risk has a hard monthly cap below the free tier so it can never bill.
 
 ## 4. Privacy design
 
@@ -67,7 +68,7 @@ The final verdict combines the layers. Hard evidence (threat-list hit, credentia
 
 ## 5. Accuracy testing
 
-An automated accuracy gate runs the on-device engine against a labelled set of real-world style scam and genuine messages and links (Arabic and English):
+An automated accuracy gate runs the on-device engine against a labelled set of real-world style scam and genuine messages and links (Arabic and English, including billing and cloud-storage lures):
 
 ```
 npm test
@@ -95,7 +96,8 @@ Without any keys the app runs with the on-device engine, RDAP domain age, link o
 | `WEBRISK_API_KEY` | Google Web Risk lookups |
 | `GSB_API_KEY` | Google Safe Browsing lookups |
 | `URLHAUS_AUTH_KEY` | abuse.ch URLhaus feed |
-| `YAQIZ_PER_IP_DAY` / `YAQIZ_GLOBAL_DAY` | Daily AI-check limits (default 25 / 500) |
+| `YAQIZ_PER_IP_DAY` / `YAQIZ_GLOBAL_DAY` | Daily AI-check limits (per IP default and maximum 10; global default 500) |
+| `YAQIZ_ORIGIN_SECRET` | Optional: only accept requests that carry the `X-Origin-Secret` header added by a Cloudflare rule |
 | `YAQIZ_WR_MONTH_CAP` | Monthly Web Risk cap (default 90000) |
 
 ### Deploy (Google Cloud Run)
@@ -123,15 +125,27 @@ tests/                 Accuracy gate and fact tests
 - **Left out:** user accounts and any server-side storage of messages, to keep the MVP private by design.
 - **Roadmap** (see the deck in `docs/`):
   - +3 months: store release, a labelled local dataset, a trial with 500 users.
-  - +6 months: anonymous community signals for numbers and links, a trends dashboard for authorities, more community languages.
-  - +12 months: "Yaqiz ambassadors" in schools, and bank integration for pre-transfer alerts.
+  - +12 months: "TheYaqiz ambassadors" in schools, and bank integration for pre-transfer alerts.
 - **What we would do differently with more time:** a larger, independently labelled test set with third-party evaluation, and measuring precision and recall on real (consented) messages.
 
-## 9. Documents
+## 9. Team
+
+Team **TheYaqiz** (ScamShield AI, Podium+):
+
+| Member | Affiliation |
+|---|---|
+| Khaldun I K Abdalhadi (team leader) | Ministry of Education |
+| Amna Alaryani | United Arab Emirates University |
+| Fatima Aldhaheri | Abu Dhabi Police General Command |
+| Mahra Aldhanhani | United Arab Emirates University |
+| Sara Almaazmi | Zayed University |
+| Alia Mohammed | Higher Colleges of Technology |
+| Sara Nabil | United Arab Emirates University |
+
+## 10. Documents
 
 - `docs/TECHNICAL.md`: technical documentation (architecture, model choices, privacy design, security, testing).
-- `docs/TheYaqiz-Deck-EN.pptx`: pitch deck (English).
-- `docs/TheYaqiz-Deck-AR.pptx`: pitch deck (Arabic).
+- `docs/TheYaqiz-Presentation-EN-AR.pptx`: pitch deck, English then Arabic (30 slides). Online version: https://docs.google.com/presentation/d/1uoNrt5K9ic9MmcA6QnY0sw2SL-RFjoRMNm9Qjde30-U/edit
 
 ---
 
