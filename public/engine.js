@@ -8,7 +8,7 @@
     function normMap(s0) {
       let s = '', map = [];
       for (let i = 0; i < s0.length; i++) {
-        let c = s0[i]; if (/[ً-ْـ]/.test(c)) continue;
+        let c = s0[i]; if (/[ً-ْـ\u200b\u200e\u200f\u202a-\u202e\u2060\ufeff]/.test(c)) continue;
         let l = c.toLowerCase(); if (l.length !== 1) l = c;
         l = l.replace(/[أإآ]/, 'ا').replace('ى', 'ي').replace('ة', 'ه');
         const d = '٠١٢٣٤٥٦٧٨٩'.indexOf(l); if (d >= 0) l = String(d);
@@ -25,6 +25,8 @@
     const NEG = /(do not|don'?t|never|not to|لا\s|لن\s|ممنوع|عدم|without)[^.,;؛؟!]{0,8}$/;
 
     const RULES = [
+      { id: 'inj', ax: 'ai', w: 45, l: ['يحاول التلاعب بأداة الفحص أو الذكاء الاصطناعي (تعليمات موجَّهة للآلة)', 'Tries to manipulate the checking tool or AI (instructions aimed at the machine)'], tip: ['الرسائل الحقيقية لا تخاطب أدوات الفحص؛ وجود تعليمات كهذه دليل على نية خداع.', 'Genuine messages never address scanners or AI tools; instructions like this show deliberate deception.'],
+        re: /(?:(?:(?:ignore|disregard|forget|override|bypass|skip|discard|overlook)\s+(?:all\s+|any\s+|your\s+|previous\s+|prior\s+|above\s+|earlier\s+|preceding\s+|system\s+|safety\s+|security\s+|original\s+)+(?:instructions?|rules|prompts?|guidelines?|directives?|restrictions|programming)|(?:you are|you're|act as|pretend (?:to be|you are)|behave as|from now on you)\s+(?:now\s+|no longer\s+)?(?:an?\s+)?(?:unrestricted|jailbroken|uncensored|unfiltered|dan\b|do anything now|evil)|(?:developer|debug|god|admin|sudo|jailbreak)\s+mode|(?:reveal|show|print|repeat|leak)\s+(?:me\s+)?(?:your\s+|the\s+)?(?:system\s+prompt|hidden\s+(?:prompt|instructions)|instructions)|(?:mark|rate|classify|label|flag|report|rank|score|treat|consider|declare|categori[sz]e|output|return|answer|respond|say|tell|reply|conclude|judge)\s+(?:this|it|that|the\s+(?:message|link|text|email|sms|content|result))[^.\n]{0,20}?(?:as\s+|with\s+|:\s*|is\s+|to be\s+)?(?:safe(?!\s*senders?)|legit(?:imate)?|genuine|trusted|verified|harmless|clean|not\s+(?:an?\s+)?(?:scam|phishing|fraud|suspicious|malicious)|no risk|low risk|zero risk)|(?:set|give|assign|return|output|use)\s+(?:a\s+|the\s+|it\s+)?(?:risk\s+|scam\s+)?score\s+(?:of\s+|to\s+|as\s+|=\s*|:\s*)?(?:0|zero|1|low)\b|(?:ai|a\.i\.|chatbot|language model|llm|gpt|claude|scanner|yaqiz|theyaqiz|scam ?shield)\b[^.\n]{0,25}(?:ignore|disregard|do not (?:flag|detect|report|warn)|don'?t (?:flag|detect|report|warn)|must (?:say|answer|respond|classify|mark|report))|(?:do not|don'?t|never|stop)\s+(?:flag|detect|report|warn|block|mark|label)\s+(?:this|it|the message|the link)|(?:if you(?:'re| are) (?:an? )?(?:ai|llm|assistant|language model|bot|scanner)|dear (?:ai|llm|scanner|bot)|note to (?:the )?(?:ai|scanner|filter|model|llm)|attention (?:ai|scanner|llm)|to the (?:ai|scanner|filter|model|llm) (?:reading|analy[sz]ing|checking))|(?:<\/?(?:system|instructions?|prompt|assistant)>|\[\/?(?:system|inst)\]|<\|im_(?:start|end)\|>|#{2,3}\s*(?:system|instructions?)\b))|(?:(?:تجاهل|تناسي|انس|اهمل|الغ|تخط|تجاوز|تخل|اترك)\w*\s*(?:كل\s+|جميع\s+|اي\s+|هذه\s+|ما\s+)?(?:ال)?(?:تعليمات|اوامر|قواعد|توجيهات|ضوابط|قيود|برمجتك)|(?:اعتبر|صنف|قيم|احكم|اخبر|قل|قول|اجب|اجعل|اعط|اكتب|رد|اظهر|اعلن)\w*[^.\n]{0,25}(?:الرساله|الرابط|المحتوي|النتيجه|هذه|هذا|ها\b)[^.\n]{0,25}(?:امن|امنه|سليم\w*|موثوق\w*|غير\s+(?:مشبوه|احتيال)\w*|ليس\w*\s+(?:احتيال|مشبوه|خطر|نصب)\w*|بدون\s+خطر|خطر\s+(?:منخفض|صفر)|صفر\s*%?)|(?:ايها|يا)\s+(?:ال)?(?:ذكاء\s+(?:ال)?اصطناعي|روبوت|يقظ)|اذا\s+كنت\s+(?:ال)?(?:ذكاء\s+اصطناعي|نموذج|مساعد|روبوت)|ملاحظه\s+(?:الي|ل)\s*(?:ال)?(?:ذكاء\s+(?:ال)?اصطناعي|فاحص\s+(?:ال)?رسائل|ماسح\s+(?:ال)?رسائل)|لا\s+(?:تبلغ|تحذر|تصنف|تكتشف|تحظر|تنبه)[^.\n]{0,20}(?:هذه|الرساله|الاحتيال|كاحتيال|كمشبوه|عنها)|وضع\s+(?:ال)?مطور|موجه\s+(?:ال)?نظام|(?:اظهر|اكشف|اعرض)\s+(?:لي\s+)?(?:تعليماتك|موجهك)|(?:ال)?ذكاء\s+(?:ال)?اصطناعي[^.\n]{0,20}(?:تجاهل|لا\s+تبلغ|لا\s+تحذر))|(?:(?:تمام|سب|پچھلی|اوپر کی|سابقہ|ساری)\s*ہدایات[^.\n]{0,12}(?:نظر انداز|بھول|چھوڑ|مت مان)|ہدایات\s*(?:کو\s*)?(?:نظر انداز|بھول)|(?:اسے|اس پیغام کو|یہ پیغام|اس لنک کو|لنک کو)[^.\n]{0,20}(?:محفوظ|سیف|درست|اصلی|جائز)[^.\n]{0,12}(?:قرار|بتائیں|لکھیں|کہیں|درجہ|سمجھیں)|دھوکہ نہیں\s*(?:ہے\s*)?(?:بتائیں|لکھیں|کہیں)|(?:اے آئی|اسسٹنٹ|مصنوعی ذہانت)[^.\n]{0,20}(?:نظر انداز|رپورٹ نہ|وارننگ نہ|خبردار نہ)|(?:sab|saari|pichli|upar ki)\s+(?:hidayat|hidayaat|instructions?)[^.\n]{0,15}(?:ignore|nazar andaz|bhool)|nazar andaz kar|ignore kar(?:o|do|na)|(?:isko|ise)\s+(?:safe|sahi|asli)\s+(?:batao|likho|bolo|mark kar|samjho))|(?:(?:सभी|सारे|पिछले|ऊपर के|पहले के)\s*(?:निर्देश|निर्देशों|आदेश)[^.\n]{0,12}(?:अनदेखा|नज़रअंदाज़|नजरअंदाज|भूल|मत मान)|निर्देशों को\s*(?:अनदेखा|नज़रअंदाज़|नजरअंदाज|भूल)|(?:इसे|इस संदेश को|इस मैसेज को|लिंक को|इस लिंक को)[^.\n]{0,20}(?:सुरक्षित|सही|असली|वैध|स्कैम नहीं|धोखा नहीं)[^.\n]{0,12}(?:बताएं|बताओ|लिखें|कहें|मानें|घोषित|समझें)|(?:एआई|ए आई|असिस्टेंट|चैटबॉट)[^.\n]{0,20}(?:अनदेखा|रिपोर्ट न|चेतावनी न|नज़रअंदाज़))|(?:(?:huwag pansinin|wag pansinin|balewalain|kalimutan|ignore)\s+(?:mo\s+)?(?:ang\s+)?(?:lahat\s+ng\s+)?(?:mga\s+)?(?:nakaraang\s+|naunang\s+)?(?:utos|tagubilin|instruksyon|panuto|instructions?)|(?:markahan|itala|ideklara|sabihing|ituring|i-?mark)\s+(?:mo\s+)?(?:ito|ang mensaheng ito|ang link)?[^.\n]{0,20}(?:ligtas|lehitimo|tunay|hindi\s+scam)|(?:huwag|wag)\s+(?:mong\s+)?(?:i-?flag|i-?report|balaan|i-?block)|(?:ai|assistant|chatbot)\b[^.\n]{0,25}(?:huwag|wag|balewalain|pansinin)))/ },
       { id: 'cred', ax: 'sens', w: 30, neg: NEG, l: ['يطلب رمز تحقق (OTP) أو كلمة مرور أو بيانات بطاقة', 'Asks for a verification code (OTP), password or card details'], tip: ['لا توجد جهة رسمية أو بنك يطلب منك رمز التحقق أو الرقم السري أبدًا.', 'No bank or government entity ever asks for your OTP or PIN.'],
         re: new RegExp('(?:' + VERBS + '[^.؟!\\n]{0,45}?' + CODES + ')|(?:' + CODES + '[^]{0,90}?(?:send|share|forward|read|tell|give)\\w* (?:it|them|that|the code) (?:back )?to me)|(?:(?:send|tell|give|share) me (?:the |that |this |your )?(?:code|otp|pin|password))') },
       { id: 'credx', ax: 'sens', w: 25, neg: NEG, skipIf: /(courier|driver|delivery (agent|partner|man|person|boy)|rider|مندوب|سائق|التوصيل)/, l: ['يطلب منك إرسال أو قول رمز سرّي أو كلمة مرور', 'Asks you to send or tell a secret code or password'], tip: ['لا يطلب أحد منك قول الرمز أو كلمة المرور؛ من يفعل فهو محتال.', 'Nobody legitimate asks you to say or send a code or password — whoever does is a scammer.'],
@@ -94,7 +96,7 @@
       const x = EXTRA[r.id]; if (!x) return;
       r.re = new RegExp(r.re.source + '|' + x.join('|'), r.re.flags.indexOf('g') >= 0 ? r.re.flags : r.re.flags + 'g');
     });
-    const AXES = { sens: [['طلب بيانات حساسة', 'Sensitive data request'], 42], press: [['ضغط وتهديد', 'Pressure & threats'], 45], lure: [['إغراء مالي', 'Financial lure'], 48], imp: [['انتحال صفة', 'Impersonation'], 47], money: [['طلب أموال', 'Money request'], 15], link: [['رابط خطِر', 'Risky link'], 60] };
+    const AXES = { sens: [['طلب بيانات حساسة', 'Sensitive data request'], 42], press: [['ضغط وتهديد', 'Pressure & threats'], 45], lure: [['إغراء مالي', 'Financial lure'], 48], imp: [['انتحال صفة', 'Impersonation'], 47], money: [['طلب أموال', 'Money request'], 15], link: [['رابط خطِر', 'Risky link'], 60], ai: [['التلاعب بأداة الفحص', 'Manipulating the checker'], 60] };
 
     /* ===== registry-derived sets ===== */
     const OFFICIAL = Array.from(new Set(R.official.concat(...R.entities.map(e => e.d))));
@@ -248,6 +250,8 @@
       const linkScore = worst ? worst.score : 0;
       if (linkScore >= 60) score = Math.max(score, linkScore);
       if (linkScore >= 20 && (others >= 1 || mism)) score = Math.max(score, 62);
+      /* prompt injection / addressing the checker: genuine senders never do this */
+      if (has('inj')) score = Math.max(score, 70);
       if (has('cred', 'credx') && has('urg', 'threat', 'secret')) score = Math.max(score, 70);
       if (has('credx')) score = Math.max(score, 62);
       if (has('family') && has('pay', 'urg')) score = Math.max(score, 62);
@@ -350,7 +354,7 @@
 
     /* ===== merge an AI verdict into a local result (conservative) ===== */
     /* verifiable evidence = something we can check ourselves, not just a model's impression */
-    const HARD = ['mism', 'sb', 'age', 'link', 'sndr', 'lists', 'cred', 'credx', 'pay', 'payupd', 'bill', 'advfee', 'secret', 'family', 'acct', 'threat'];
+    const HARD = ['mism', 'sb', 'age', 'link', 'sndr', 'lists', 'cred', 'credx', 'pay', 'payupd', 'bill', 'advfee', 'secret', 'family', 'acct', 'threat', 'inj'];
     function hardEvidence(res) { return (res.flags || []).some(f => f.w > 0 && HARD.includes(f.rule)); }
     function applyAi(res, j) {
       const r = Object.assign({}, res, { flags: res.flags.slice(), evidence: (res.evidence || []).filter(e => e.st !== 'load') });
