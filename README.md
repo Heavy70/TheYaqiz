@@ -146,7 +146,7 @@ Team **TheYaqiz** (ScamShield AI, Podium+):
 ## 10. Documents
 
 - `docs/TECHNICAL.md`: technical documentation (architecture, model choices, privacy design, security, testing).
-- `docs/TheYaqiz-Presentation-EN-AR.pptx`: pitch deck, English then Arabic (30 slides). Online version: https://docs.google.com/presentation/d/1uoNrt5K9ic9MmcA6QnY0sw2SL-RFjoRMNm9Qjde30-U/edit
+- `docs/TheYaqiz-Presentation-EN-AR.pptx` and `docs/TheYaqiz-Presentation-EN-AR.pdf`: pitch deck (v17), English then Arabic (30 slides). Online version: https://drive.google.com/file/d/1a1OtGuXGMf_qDWVGNBReukAieVfrtjLe/view?usp=drivesdk
 
 ---
 
