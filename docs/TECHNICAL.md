@@ -290,9 +290,9 @@ Errors: `503 ai_off` (no key configured), `429 limit`, `400 bad_request`, `502 a
 
 **Accuracy gate (`npm test`)**
 
-- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **315 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
+- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **339 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
 - The test **fails** if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%.
-- Current result: **315/315 correct (100%), 0 missed scams, 0 false alarms.**
+- Current result: **339/339 correct (100%), 0 missed scams, 0 false alarms.**
 - `tests/facts.js` checks how verified facts (domain age, Google and list hits, link opening) change a verdict.
 - `tests/billing.js` and `tests/blind4.js` cover billing/subscription lures; `tests/holdout.js`, `tests/blind3.js`, `tests/registry2.js` and `tests/sender.js` are focused sets for blind batches, the registry and sender checks.
 

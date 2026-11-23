@@ -74,7 +74,9 @@ An automated accuracy gate runs the on-device engine against a labelled set of r
 npm test
 ```
 
-Current result: **315 cases, 100% correct, 0 missed scams, 0 false alarms.** The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
+The official-domain registry (`public/registry.js`) lists government suffixes plus 164 trusted UAE organisations plus the restricted academic and school suffixes (ac.ae, sch.ae) (universities, banks, telecoms, airlines, utilities, retail, and the Podium+ hackathon platform), so a genuine message linking to one of them is verified instead of judged on an unfamiliar domain; look-alike domains of these names are still flagged.
+
+Current result: **339 cases, 100% correct, 0 missed scams, 0 false alarms.** The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
 
 ## 6. How to run
 
