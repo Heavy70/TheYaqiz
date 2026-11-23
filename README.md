@@ -138,11 +138,10 @@ Team **TheYaqiz** (ScamShield AI, Podium+):
 |---|---|
 | Khaldun I K Abdalhadi (team leader) | Ministry of Education |
 | Amna Alaryani | United Arab Emirates University |
-| Fatima Aldhaheri | Abu Dhabi Police General Command |
 | Mahra Aldhanhani | United Arab Emirates University |
 | Sara Almaazmi | Zayed University |
-| Alia Mohammed | Higher Colleges of Technology |
-| Sara Nabil | United Arab Emirates University |
+| Rafa Khalife | |
+| Meznah Alawlaqi | |
 
 ## 10. Documents
 
