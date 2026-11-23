@@ -276,7 +276,10 @@
         if (flags.filter(f => f.w > 0).every(f => soft.includes(f.rule)) && linkScore < 30) score = Math.min(score, 45);
       }
       const out = { score: Math.min(100, score), flags, ranges, axes, text: txt, evidence };
-      if (allVerified && out.score < 25) out.verified = true;
+      if (allVerified && out.score < 25) {
+        /* every link is an exact verified official domain and nothing serious was found: a trusted site scores 0 (weak wording cues such as "congratulations" are dropped, not counted) */
+        out.verified = true; out.score = 0; out.flags = flags.filter(f => !(f.w > 0));
+      }
       const pend = Array.from(new Set(bad.map(l => l.host))).slice(0, 3);
       if (pend.length) { out.pending = pend; out.pendingUrl = (bad.find(l => l.host === pend[0]) || bad[0]).raw; }
       return out;
@@ -358,7 +361,12 @@
     function hardEvidence(res) { return (res.flags || []).some(f => f.w > 0 && HARD.includes(f.rule)); }
     function applyAi(res, j) {
       const r = Object.assign({}, res, { flags: res.flags.slice(), evidence: (res.evidence || []).filter(e => e.st !== 'load') });
-      const a = Math.max(0, Math.min(100, Math.round(+j.score || 0)));
+      let a = Math.max(0, Math.min(100, Math.round(+j.score || 0)));
+      if (res.verified && a < 60 && !hardEvidence(res)) {
+        /* trusted-domain rule, applied on every path (server AI, on-device AI, screenshot): every link is an exact verified official domain, so the model's impression is not shown as suspicion */
+        j.score = a = 0; j.verdict = T('آمن غالبًا', 'Likely safe'); j.type = T('ليست احتيالًا', 'Not a scam'); j.red_flags = [];
+        j.explanation = T('كل الروابط في هذه الرسالة تعود لنطاقات رسمية موثّقة، ولا تطلب بيانات حساسة أو دفعًا.', 'Every link in this message belongs to a verified official domain, and no sensitive data or payment is requested.');
+      }
       r.evidence.push({ id: 'ai', st: a >= 60 ? 'bad' : a >= 25 ? 'warn' : 'ok', t: T('تحليل الذكاء الاصطناعي', 'AI analysis'), v: String(j.verdict || '') + ' · ' + a + '/100' });
       const hard = hardEvidence(res);
       if (a >= 60 && hard) { r.score = Math.max(res.score, 62, Math.min(a, 95)); r.flags.unshift({ l: T('التحليل المعمّق بالذكاء الاصطناعي يؤكد الاشتباه', 'The deep AI analysis confirms the suspicion'), w: 0, rule: 'ai', tip: j.explanation || '' }); }

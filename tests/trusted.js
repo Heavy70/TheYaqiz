@@ -2,7 +2,7 @@
 module.exports = [
 /* genuine (s) */
 ['New announcement\nHello Khaldun,\nThe organisers of SCAMSHIELD AI have posted an announcement: UPDATE: TEAM FORMATION DEADLINE EXTENDED.\nSign in to read it.\nRead the announcement\nIf the button does not work, copy this into your browser:\nhttps://podium.aevsoft.cc/HackathonMngtWebApp/announcements.php?hackathon_id=12\nMessage from Podium+','s'],
-['Podium+: your team submission was saved. View it at https://podium.aevsoft.cc/HackathonMngtWebApp/','s'],
+['Podium+\nYour place is confirmed\nHello Khaldun,\nCongratulations! Your team TheYaqiz has been selected for SCAMSHIELD AI, and your place is now confirmed.\nTue 24, Thu 26 and Mon 30 Nov 2026\nVenue: 42 Abu Dhabi\nView my hackathon\nIf the button does not work, copy this into your browser: https://podium.aevsoft.cc/HackathonMngtWebApp/participant/hackathons.php','s'],
 ['42 Abu Dhabi: the next piscine registration is open. Details at https://42abudhabi.ae/piscine','s'],
 ['Zayed University: the spring registration schedule is now published at https://www.zu.ac.ae/main/en/registration','s'],
 ['UAE University: your timetable has been updated. Check it on https://www.uaeu.ac.ae','s'],
