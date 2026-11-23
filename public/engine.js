@@ -67,7 +67,7 @@
         re: /(ادفع|(?<![؀-ۿ])سدد(?![؀-ۿ])|سداد|رسوم|حول (المبلغ|لي)|حولي|حساب امن|pay (now|the|your|within|a|an|some)\b|pay (the |your |a |an |some )?(\w+ )?(fees?|charges?|fine|tax|duty|duties)|(ارسل|حول|ادفع)( لي)? (ال)?(عربون|دفعه مقدمه|مبلغ)|payment (link|required|is required|due)|unpaid|customs (fee|duty|charge)|delivery (charge|fee)|[\d,. ]+(aed|dirhams?|usd|\$)( \w+)? (fee|fees|charge|deposit|tax)|pay [\d,. ]+(aed|dirhams?|usd|\$)|بالدفع|الدفع (الان|فورا)|\bwire\b|safe account|transfer [\d,. ]*(aed|dirhams?|usd|\$)|transfer (the|your|a) (money|amount|fee))/ }
     ];
 
-    /* ===== community-language keywords (Urdu, Hindi, Tagalog + romanised Urdu/Hindi) merged into the base rules by id ===== */
+    /* ===== community-language keywords (Urdu, Hindi, Tagalog, Persian, Amharic, Luganda + romanised Urdu/Hindi) merged into the base rules by id ===== */
     const SECX = '(otp|pin|cvv|password|پاس ?ورڈ|کوڈ|پن|ओटीपी|कोड|पासवर्ड|पिन|code|verification|beripikasyon|bank details|card (number|details))';
     const EXTRA = {
       cred: [
@@ -92,6 +92,38 @@
       payupd: ['(?:کارڈ (کی )?(تفصیلات|معلومات) (اپ ?ڈیٹ|درج)|कार्ड (की )?(जानकारी|डिटेल) (अपडेट|दर्ज)|i-?update ang (iyong )?(payment|card|bayad))'],
       imp: ['(?:ابوظہبی پولیس|مرکزی بینک|अबू धाबी पुलिस|सेंट्रल बैंक|pulis ng abu dhabi)']
     };
+    /* Persian, Amharic and Luganda wording (same merge-by-id mechanism). Persian: ZWNJ-tolerant, digits ۰-۹. */
+    const Z = '[\\u200c ]?';
+    const SECX_FA = '(?:رمز (?:یک ?بار ?مصرف|عبور|دوم|پویا|امنیتی|کارت)|رمز(?= را| خود| شما)|کد (?:تایید|فعال ?سازی|امنیتی|پیامک[یی]?)|پین|شماره کارت|اطلاعات (?:کارت|بانکی)|cvv2?|otp)';
+    const VB_FA = '(?:ارسال|بفرست|بگو|اعلام|وارد|ثبت ?کن|در اختیار|به اشتراک|می' + Z + 'فرست|می' + Z + 'خواه|بدهید|بده)';
+    const SECX_AM = '(?:otp|pin|cvv|password|ሚስጥር ቁጥር|የይለፍ ?ቃል|የማረጋገጫ ኮድ|ኮድ|ፒን|የካርድ (?:ቁጥር|ዝርዝር)|የባንክ (?:ዝርዝር|መረጃ))';
+    const VB_AM = '(?:ላክ|ላኩ|ይላኩ|ንገር|ንገሩ|ይንገሩ|አጋራ|አጋሩ|ስጡ|ይስጡ|ስጠኝ|ያስገቡ|አስገባ)';
+    const SECX_LG = '(?:\\botp\\b|\\bpin\\b|cvv|password|ekigambo ekikuumi|koodi|ebikwata ku (?:kaadi|banka)|namba ya kaadi)';
+    const VB_LG = '(?:weereza|tuma|buulira|tubuulire|gabana|sindika|mpa|wandiika|saba)';
+    const EXTRA2 = {
+      cred: [
+        '(?:' + SECX_FA + '[^.\\n]{0,40}?' + VB_FA + ')', '(?:' + VB_FA + '[^.\\n]{0,40}?' + SECX_FA + ')',
+        '(?:' + SECX_AM + '[^.\\n]{0,40}?' + VB_AM + ')', '(?:' + VB_AM + '[^.\\n]{0,40}?' + SECX_AM + ')',
+        '(?:' + SECX_LG + '[^.\\n]{0,40}?' + VB_LG + ')', '(?:' + VB_LG + '[^.\\n]{0,40}?' + SECX_LG + ')'
+      ],
+      update: ['(?:به' + Z + 'روز ?رسانی (?:حساب|اطلاعات)|احراز هویت|تایید (?:حساب|هویت)|فعال ?سازی (?:مجدد )?حساب|መለያ(?:ዎን|ህን|ሽን)? (?:አዘምን|ያዘምኑ|አረጋግጥ|ያረጋግጡ|ያግብሩ)|ddamu ebikwata|zuukiza akawunti|kakasa akawunti)'],
+      urg: ['(?:فوری|فورا|بلافاصله|همین (?:حالا|الان)|ظرف [\\d۰-۹]+ (?:ساعت|دقیقه|روز)|تا [\\d۰-۹]+ ساعت|አስቸኳይ|ወዲያውኑ|አሁኑኑ|በ\\d+ (?:ሰዓት|ሰአት|ደቂቃ|ቀን) ውስጥ|amangu|mu bwangu|mangu ddala|kati ddala|mu ssaawa \\d+|mu ddakiika \\d+)'],
+      threat: ['(?:مسدود (?:می' + Z + 'شود|خواهد شد|شد)|مسدودی|تعلیق|معلق|بلوکه|توقیف|جریمه|دستگیر|بازداشت|ይታገዳል|ይዘጋል|ታግዷል|ይቀዘቅዛል|ይታሰራ|ቅጣት|ejja (?:kuggalwa|kukwatibwa|kuyimirizibwa)|ojja kusibibwa|okusibibwa|engassi)'],
+      secret: ['(?:به (?:هیچ ?کس|کسی) (?:نگو|نگویید|نگین)|محرمانه|ለማንም (?:አትንገር|አትንገሩ|እንዳትነግር|እንዳትነግሩ)|ሚስጥር|tobuulira (?:muntu|yenna)|kuuma ekyama)'],
+      prize: ['(?:جایزه|برنده (?:شده|شدید)|قرعه ?کشی|بخت ?آزمایی|لاتاری|ሽልማት|አሸንፈዋል|አሸናፊ|ዕጣ|እጣ|ሎተሪ|ekirabo|wawangudde|owangudde|obululu|lottery)'],
+      job: ['(?:فرصت شغلی|کار در منزل|درآمد (?:بالا|میلیونی|روزانه)|سود (?:تضمین|تضمینی|روزانه)|የሥራ (?:ማስታወቂያ|ዕድል)|ከቤት ሆነው|የተረጋገጠ ትርፍ|በየቀኑ ትርፍ|amagoba (?:agakakasibwa|buli lunaku)|okussa ssente|omulimu ogw[’\\x27]okukola mu maka)'],
+      hold: ['(?:بسته (?:شما )?(?:متوقف|نگه|مرجوع)|هزینه (?:گمرک|ترخیص|پست)|آدرس (?:ناقص|نامعتبر)|እሽግ (?:ታግዷል|ተይዟል|ተያዘ)|የጉምሩክ (?:ክፍያ|ቀረጥ)|አድራሻ (?:ያልተሟላ|ጎድሏል)|ekipapula (?:kikwatiddwa|kiyimiridde)|endagiriro etali nnambulukufu)'],
+      family: ['(?:شماره (?:ی )?جدید(?:م)?|گوشی ?ام (?:خراب|شکست)|አዲስ ቁጥር|አዲሱ ቁጥሬ|ስልኬ (?:ተበላሽቷል|ጠፍቷል)|namba yange empya|ssimu yange (?:emenyese|ebuze))'],
+      chan: ['(?:واتس ?اپ|تلگرام)(?=[^.\\n]{0,30}(?:پیام|تماس|ارتباط|بفرست|مراجعه))|(?:ዋትስአፕ|ቴሌግራም)(?=[^.\\n]{0,30}(?:ያነጋግሩ|ይላኩ|መልእክት|ይደውሉ))|(?:whatsapp|telegram)(?=[^.\\n]{0,30}(?:tuukirira|tuma|kuba|ssimu))'],
+      acct: ['(?:به (?:این )?(?:حساب|شماره حساب|شماره کارت)[^.\\n]{0,20}(?:واریز|انتقال|بفرست)|ወደ (?:ዚህ|ይህ) (?:መለያ|ቁጥር|አካውንት) (?:ገንዘብ )?(?:ላክ|ላኩ|አስተላልፍ|አስተላልፉ)|sindika ssente (?:ku|mu) (?:akawunti|namba)|teeka ssente mu akawunti)'],
+      advfee: ['(?:هزینه (?:ثبت ?نام|پردازش|ویزا|ترخیص)|حق ?ثبت ?نام|پیش ?پرداخت|የምዝገባ ክፍያ|የማስኬጃ ክፍያ|ቅድመ ክፍያ|የቪዛ ክፍያ|ffiizi y[’\\x27]okuwandiisa|ssente ezisooka)'],
+      tech: ['(?:ویروس|هک (?:شده|شد)|اینی ?دسک|تیم ?ویور|ቫይረስ|የርቀት መዳረሻ|ተጠልፏል|akawuka)'],
+      pay: ['(?:پرداخت (?:کنید|نمایید|فوری)|واریز (?:کنید|نمایید)|کارمزد|ክፍያ (?:ይክፈሉ|ይፈጽሙ|ያድርጉ)|ይክፈሉ|ገንዘብ (?:ላኩ|ላክ|አስተላልፉ)|sasula (?:kati|mangu|ssente|ffiizi)|sindika ssente|ffiizi)'],
+      bill: ['(?:پرداخت (?:ناموفق|رد شد)|اشتراک (?:شما )?(?:منقضی|به پایان|تمام)|فضای (?:ذخیره|ذخیره' + Z + 'سازی) (?:پر|تمام)|ክፍያ (?:አልተሳካም|ወድቋል)|ማከማቻ (?:ሞልቷል|ሞላ)|okusasula (?:kulemeddwa|kuremye)|ekifo ky[’\\x27]okutereka kijjudde)'],
+      payupd: ['(?:اطلاعات (?:کارت|پرداخت) (?:را )?(?:به' + Z + 'روز|وارد)|የካርድ (?:መረጃ|ዝርዝር) (?:ያዘምኑ|ያስገቡ)|ddamu ebikwata ku kaadi|kyusa ebikwata ku kaadi)'],
+      imp: ['(?:پلیس ابوظبی|بانک مرکزی|የአቡ ዳቢ ፖሊስ|ማዕከላዊ ባንክ|poliisi ya abu dhabi|banka enkulu)']
+    };
+    Object.keys(EXTRA2).forEach(k => { EXTRA[k] = (EXTRA[k] || []).concat(EXTRA2[k]); });
     RULES.forEach(r => {
       const x = EXTRA[r.id]; if (!x) return;
       r.re = new RegExp(r.re.source + '|' + x.join('|'), r.re.flags.indexOf('g') >= 0 ? r.re.flags : r.re.flags + 'g');

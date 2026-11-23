@@ -83,6 +83,7 @@ h3{font-size:16px;margin:18px 0 6px}
 .hero .btn{font-size:13px;padding:7px 14px;border-radius:10px}
 .hero .btn svg{width:17px;height:17px}
 .hero h2 br{display:none}.hero h2{white-space:nowrap;font-size:clamp(12.5px,4vw,17px)}
+html:not([lang=ar]):not([lang=en]) .hero h2{white-space:normal;overflow-wrap:anywhere}
 .hero p{opacity:.85;margin:0 0 10px;max-width:none;font-size:12.5px;line-height:1.5}
 .hero .cta{display:flex;gap:8px;flex-wrap:wrap}
 .btn{border:0;font-weight:700;font-size:14px;padding:10px 16px;border-radius:12px;cursor:pointer;background:var(--brand);color:#fff;display:inline-flex;align-items:center;gap:8px;justify-content:center;transition:transform .1s}
@@ -228,6 +229,8 @@ html[dir=ltr] body{font-family:Inter,"IBM Plex Sans Arabic",system-ui,sans-serif
 html[dir=ltr] .display,html[dir=ltr] h2,html[dir=ltr] .vt,html[dir=ltr] .stat .n,html[dir=ltr] .ch .n{font-family:"Space Grotesk",Inter,sans-serif}
 html[lang=hi] body,html[lang=hi] .display,html[lang=hi] h2,html[lang=hi] .vt{font-family:'Noto Sans Devanagari','Nirmala UI',Mangal,system-ui,sans-serif}
 html[lang=ur] body,html[lang=ur] .display,html[lang=ur] h2,html[lang=ur] .vt{font-family:'Noto Nastaliq Urdu','Noto Naskh Arabic','Jameel Noori Nastaleeq','IBM Plex Sans Arabic',Tajawal,system-ui,sans-serif;line-height:1.9}
+html[lang=fa] body,html[lang=fa] .display,html[lang=fa] h2,html[lang=fa] .vt{font-family:'Vazirmatn','Noto Naskh Arabic','Noto Sans Arabic',Tahoma,'IBM Plex Sans Arabic',system-ui,sans-serif;line-height:1.8}
+html[lang=am] body,html[lang=am] .display,html[lang=am] h2,html[lang=am] .vt{font-family:'Noto Sans Ethiopic','Nyala','Abyssinica SIL','Kefa',system-ui,sans-serif;line-height:1.75}
 html[dir=ltr] .bubble{border-radius:14px 14px 4px 14px}
 .flag{height:30px;width:auto;flex:0 0 auto;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
 @media(max-width:560px){.flag{height:24px}.top .in{gap:9px}.top small{font-size:10.5px;line-height:1.35}}
@@ -589,7 +592,7 @@ eGrant:['لم يُسمح بالتحليل بالذكاء الاصطناعي.','A
 histCleared:['تم مسح السجل','History cleared'],trainDone:['أنهيت التدريب','Training complete'],perfect:['ممتاز! أنت يقِظ تمامًا','Excellent — you’re fully alert!'],
 now:['الآن','now'],
 };
-const LANGS=['ar','en','ur','hi','tl'];
+const LANGS=['ar','en','ur','hi','tl','fa','am','lg'];
 let lang=(()=>{try{const s=localStorage.getItem('yaqiz.lang');if(s){const v=JSON.parse(s);if(LANGS.includes(v))return v}}catch(e){}return /^ar/i.test(navigator.language||'')?'ar':'en'})();
 const LI=()=>lang==='ar'?0:1;
 Object.assign(D,{
@@ -605,17 +608,21 @@ callStopT:['أنهِ المكالمة الآن. الخطر مرتفع جدًا؛
 shareOk:['وصلت المشاركة وتم فحصها','Shared item received and checked']
 });
 const t=k=>{const a=D[k]||[k,k];return T(a[0],a[1])};
-const OUT={ur:'Urdu',hi:'Hindi',tl:'Filipino (Tagalog)'};
+const OUT={ur:'Urdu',hi:'Hindi',tl:'Filipino (Tagalog)',fa:'Persian (Farsi)',am:'Amharic',lg:'Luganda (Ganda, the main local language of Uganda)'};
 const TPL={
 ur:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`ایسی ڈومین ایکسٹینشن جو فراڈ مہمات سے گہرا تعلق رکھتی ہے (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`ایسی ڈومین ایکسٹینشن جو فراڈ مہمات میں عام ہے (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`غیر سرکاری لنک میں ایک معلوم برانڈ کا نام (${m[1]}) استعمال ہوا ہے`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`ڈومین کا نام ${m[1]} سے بہت ملتا ہے (جان بوجھ کر مشابہت)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`آپ کو دھوکا دینے کے لیے ایک معروف سرکاری ڈومین (${m[1]}) کسی اور ڈومین کے اندر رکھا گیا ہے`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`پیغام ${m[1]} کی طرف سے ہونے کا دعویٰ کرتا ہے لیکن اس کا لنک (${m[2]}) اس کا سرکاری ڈومین نہیں`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`پیغام ${m[1]} کی طرف سے ہونے کا دعویٰ کرتا ہے لیکن ${m[2]} سے آیا ہے`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`کمیونٹی فہرست (${m[1]}) میں شامل ہے لیکن پرانا ہے اور گوگل پر صاف ہے — اکیلے اس بنیاد پر شمار نہیں کیا جاتا`]],
 hi:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`ऐसा डोमेन एक्सटेंशन जो ठगी अभियानों से गहरा जुड़ा है (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`डोमेन एक्सटेंशन जो ठगी अभियानों में आम है (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`गैर-आधिकारिक लिंक में एक जाने-पहचाने ब्रांड का नाम (${m[1]}) इस्तेमाल हुआ है`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`डोमेन का नाम ${m[1]} से बहुत मिलता है (जानबूझकर नकल)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`आपको धोखा देने के लिए एक जाने-माने आधिकारिक डोमेन (${m[1]}) को किसी दूसरे डोमेन के अंदर रखा गया है`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`संदेश ${m[1]} की ओर से होने का दावा करता है, लेकिन उसका लिंक (${m[2]}) उसका आधिकारिक डोमेन नहीं है`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`संदेश ${m[1]} की ओर से होने का दावा करता है, लेकिन ${m[2]} से आया है`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`सामुदायिक सूची (${m[1]}) में है, लेकिन पुराना है और गूगल पर साफ़ है — अकेले इसके आधार पर नहीं गिना जाता`]],
-tl:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`Domain extension na malapit na nauugnay sa mga scam campaign (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`Domain extension na karaniwan sa mga scam campaign (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`Gumagamit ng kilalang pangalan ng brand (${m[1]}) sa hindi opisyal na link`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`Halos kapareho ng ${m[1]} ang pangalan ng domain (sadyang panggagaya)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`Inilalagay ang kilalang opisyal na domain (${m[1]}) sa loob ng ibang domain para linlangin ka`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`Sinasabi ng mensahe na galing ito sa ${m[1]} pero hindi opisyal na domain nito ang link (${m[2]})`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`Sinasabi ng mensahe na galing ito sa ${m[1]} pero galing ito sa ${m[2]}`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`nasa community list (${m[1]}) pero luma at malinis sa Google — hindi ito binibilang laban dito nang mag-isa`]]};
+tl:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`Domain extension na malapit na nauugnay sa mga scam campaign (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`Domain extension na karaniwan sa mga scam campaign (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`Gumagamit ng kilalang pangalan ng brand (${m[1]}) sa hindi opisyal na link`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`Halos kapareho ng ${m[1]} ang pangalan ng domain (sadyang panggagaya)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`Inilalagay ang kilalang opisyal na domain (${m[1]}) sa loob ng ibang domain para linlangin ka`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`Sinasabi ng mensahe na galing ito sa ${m[1]} pero hindi opisyal na domain nito ang link (${m[2]})`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`Sinasabi ng mensahe na galing ito sa ${m[1]} pero galing ito sa ${m[2]}`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`nasa community list (${m[1]}) pero luma at malinis sa Google — hindi ito binibilang laban dito nang mag-isa`]],
+fa:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`دامنه‌ای با پسوندی که ارتباط شدید با کارزارهای کلاهبرداری دارد (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`دامنه‌ای با پسوندی رایج در کارزارهای کلاهبرداری (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`از نام یک برند شناخته‌شده (${m[1]}) در لینکی غیررسمی استفاده می‌کند`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`نام دامنه بسیار شبیه ${m[1]} است (تقلید عمدی)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`یک دامنهٔ رسمی شناخته‌شده (${m[1]}) را برای فریب شما درون دامنه‌ای دیگر قرار می‌دهد`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`پیام ادعا می‌کند از ${m[1]} است، اما لینک آن (${m[2]}) دامنهٔ رسمی آن نیست`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`پیام ادعا می‌کند از ${m[1]} است، اما از ${m[2]} آمده است`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`در یک فهرست جامعه (${m[1]}) است اما قدیمی و بدون گزارش در Google است — به‌تنهایی علیه آن محسوب نمی‌شود`]],
+am:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`ከማጭበርበር ዘመቻዎች ጋር በጥብቅ የተያያዘ የጎራ ቅጥያ (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`በማጭበርበር ዘመቻዎች የተለመደ የጎራ ቅጥያ (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`ይፋዊ ባልሆነ አገናኝ ውስጥ የታወቀ የንግድ ምልክት ስም (${m[1]}) ይጠቀማል`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`የጎራው ስም ከ${m[1]} ጋር በጣም ይመሳሰላል (ሆን ተብሎ የተደረገ አስመስሎ)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`ለማታለል የታወቀ ይፋዊ ጎራ (${m[1]}) በሌላ ጎራ ውስጥ ያስቀምጣል`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`መልእክቱ ከ${m[1]} ነኝ ይላል፣ ነገር ግን አገናኙ (${m[2]}) ይፋዊ ጎራው አይደለም`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`መልእክቱ ከ${m[1]} ነኝ ይላል፣ ነገር ግን የመጣው ከ${m[2]} ነው`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`በማኅበረሰብ ዝርዝር (${m[1]}) ውስጥ አለ፣ ነገር ግን አሮጌ እና በGoogle ንጹህ ነው — ብቻውን አይቆጠርበትም`]],
+lg:[[/^Domain extension heavily tied to scam campaigns \((.*)\)$/,m=>`Ekigambo kya domain ekikwatagana ennyo n’obufere (${m[1]})`],[/^Domain extension common in scam campaigns \((.*)\)$/,m=>`Ekigambo kya domain ekitera okukozesebwa mu bufere (${m[1]})`],[/^Uses a known brand name \((.*)\) in an unofficial link$/,m=>`Ekozesa erinnya lya brand emanyiddwa (${m[1]}) mu link etali ntuufu`],[/^Domain name is very close to (.*) \(deliberate look-alike\)$/,m=>`Erinnya lya domain lifaanana nnyo ${m[1]} (okwefaananya okw’ekigendererwa)`],[/^Puts a well-known official domain \((.*)\) inside a different domain to fool you$/,m=>`Eteeka domain entuufu emanyiddwa (${m[1]}) munda mu domain endala okukusiga`],[/^The message claims to be from (.*) but its link \((.*)\) is not its official domain$/,m=>`Obubaka bugamba nti buva mu ${m[1]} naye link yaabwo (${m[2]}) si domain yaayo entuufu`],[/^The message claims to be from (.*) but came from (.*)$/,m=>`Obubaka bugamba nti buva mu ${m[1]} naye bwava mu ${m[2]}`],[/^on a community list \((.*)\) but old and Google-clean — not counted against it on its own$/,m=>`Eri ku lukalala lw’abantu (${m[1]}) naye ya dda era nnongoofu ku Google — tebala ku yo yokka`]]
+};
 function trX(s){
  if(typeof s!=='string')return s;const d=YAQIZ_X[lang];if(!d)return s;
  if(d[s]!==undefined)return d[s];
  let m;
- if(m=/^(\d+) min ago$/.exec(s))return ({ur:`${m[1]} منٹ پہلے`,hi:`${m[1]} मिनट पहले`,tl:`${m[1]} min ang nakalipas`})[lang];
- if(m=/^(\d+) h ago$/.exec(s))return ({ur:`${m[1]} گھنٹے پہلے`,hi:`${m[1]} घंटे पहले`,tl:`${m[1]} oras ang nakalipas`})[lang];
+ if(m=/^(\d+) min ago$/.exec(s))return ({ur:`${m[1]} منٹ پہلے`,hi:`${m[1]} मिनट पहले`,tl:`${m[1]} min ang nakalipas`,fa:`${m[1]} دقیقه پیش`,am:`ከ${m[1]} ደቂቃ በፊት`,lg:`edakiika ${m[1]} emabega`})[lang];
+ if(m=/^(\d+) h ago$/.exec(s))return ({ur:`${m[1]} گھنٹے پہلے`,hi:`${m[1]} घंटे पहले`,tl:`${m[1]} oras ang nakalipas`,fa:`${m[1]} ساعت پیش`,am:`ከ${m[1]} ሰዓት በፊት`,lg:`essaawa ${m[1]} emabega`})[lang];
  for(const [re,f] of TPL[lang]){if(m=re.exec(s))return f(m)}
  return s;
 }
@@ -806,7 +813,10 @@ $('#trReset').onclick=()=>{tr={n:0,ok:0,done:{}};drawTrain()};
 const REP={
 ur:['آن لائن فراڈ کی کوشش کی رپورٹ','تاریخ اور وقت','مواد کی قسم','مشتبہ مواد','«یقِظ» کے جانچ کا نتیجہ','علامات','کوئی نہیں','بھیجنے والے/کال کرنے والے کا نمبر','کیا ادائیگی کی یا معلومات شیئر کیں؟','رقم اور بینک (اگر ہو)','ur-PK'],
 hi:['ऑनलाइन ठगी के प्रयास की रिपोर्ट','तारीख़ और समय','सामग्री का प्रकार','संदिग्ध सामग्री','«यक़िज़» की जाँच का नतीजा','संकेत','कोई नहीं','भेजने वाले/कॉल करने वाले का नंबर','क्या भुगतान किया या जानकारी साझा की?','रकम और बैंक (यदि हो)','hi-IN'],
-tl:['Ulat ng online scam attempt','Petsa at oras','Uri ng nilalaman','Kahina-hinalang nilalaman','Resulta ng pagsusuri ng TheYaqiz','Mga senyales','wala','Numero ng nagpadala/tumawag','Nagbayad ka ba o nagbahagi ng detalye?','Halaga at bangko (kung mayroon)','en-PH']};
+tl:['Ulat ng online scam attempt','Petsa at oras','Uri ng nilalaman','Kahina-hinalang nilalaman','Resulta ng pagsusuri ng TheYaqiz','Mga senyales','wala','Numero ng nagpadala/tumawag','Nagbayad ka ba o nagbahagi ng detalye?','Halaga at bangko (kung mayroon)','en-PH'],
+fa:['گزارش تلاش کلاهبرداری آنلاین','تاریخ و زمان','نوع محتوا','محتوای مشکوک','نتیجهٔ بررسی «یقِظ»','نشانه‌ها','هیچ','شمارهٔ فرستنده/تماس‌گیرنده','آیا پرداخت کردید یا اطلاعاتی به اشتراک گذاشتید؟','مبلغ و بانک (در صورت وجود)','fa-IR'],
+am:['የመስመር ላይ ማጭበርበር ሙከራ ሪፖርት','ቀንና ሰዓት','የይዘት ዓይነት','አጠራጣሪ ይዘት','የTheYaqiz የፍተሻ ውጤት','ምልክቶች','ምንም','የላኪ/ደዋይ ቁጥር','ከፍለዋል ወይም መረጃ አጋርተዋል?','መጠንና ባንክ (ካለ)','am-ET'],
+lg:['Alipoota y’okugezaako obufere obw’oku intaneeti','Olunaku n’essaawa','Ekika ky’ebiwandiiko','Ebiwandiiko ebiteeberezebwa','Ekivuddemu ky’okukebera kwa TheYaqiz','Obubonero','tewali','Namba y’atuma/y’ayimba','Wasasula oba wagabana ebikwata ku ggwe?','Omuwendo ne banka (bwe wabaawo)','en-UG']};
 function fillReport(){
  if(!last){$('#repTxt').value=t('noScan');return}
  const L=level(last.score);const kl=t((KIC[kindKey(last.kind)]||KIC.msg)[3]);
@@ -923,13 +933,13 @@ function enableAi(){
 /* ===== language switch ===== */
 function applyLang(){
  setTimeout(()=>{try{paintAuto()}catch(e){}},0);
- const h=document.documentElement;h.lang=lang;h.dir=(lang==='ar'||lang==='ur')?'rtl':'ltr';
+ const h=document.documentElement;h.lang=lang;h.dir=(lang==='ar'||lang==='ur'||lang==='fa')?'rtl':'ltr';
  $$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
  $$('[data-i18n-html]').forEach(e=>e.innerHTML=t(e.dataset.i18nHtml));
  $$('[data-i18n-ph]').forEach(e=>e.placeholder=t(e.dataset.i18nPh));
  $$('[data-i18n-alt]').forEach(e=>e.alt=t(e.dataset.i18nAlt));
  $$('[data-lang]').forEach(e=>e.classList.toggle('hidden',e.dataset.lang!==(lang==='ar'?'ar':'en')));
- $('#langBtn').textContent={ar:'ع',en:'EN',ur:'اردو',hi:'हिं',tl:'TL'}[lang];
+ $('#langBtn').textContent={ar:'ع',en:'EN',ur:'اردو',hi:'हिं',tl:'TL',fa:'فا',am:'አማ',lg:'LG'}[lang];
  $('#statusTxt').textContent=aiOn?t('stAi'):t('stLocal');
  if(imgBlob)$('#dropTxt').textContent=imgBlob.name;
  document.title=T('يقِظ | درعك الذكي ضد الاحتيال الإلكتروني','TheYaqiz | Your AI shield against online scams');
@@ -937,7 +947,7 @@ function applyLang(){
  if(curView==='report')fillReport();
  if(lastRun&&$('#res').classList.contains('show'))lastRun();
 }
-const LNAME={ar:'العربية',en:'English',ur:'اردو',hi:'हिन्दी',tl:'Tagalog'};
+const LNAME={ar:'العربية',en:'English',ur:'اردو',hi:'हिन्दी',tl:'Tagalog',fa:'فارسی',am:'አማርኛ',lg:'Luganda'};
 function setLang(l){lang=l;store.set('lang',lang);const m=$('#langMenu');if(m)m.remove();applyLang()}
 function langMenu(){
  let m=$('#langMenu');if(m){m.remove();return}

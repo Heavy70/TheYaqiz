@@ -27,7 +27,7 @@
 
 ## 1. Overview
 
-TheYaqiz helps people decide, in the few seconds that matter, whether a message, link, QR code or screenshot is a scam. It is a bilingual (Arabic/English) Progressive Web App, with scam patterns in five languages (Arabic, English, Urdu, Hindi, Tagalog), that runs on Android, iPhone and desktop from a single link, with no store install and no account.
+TheYaqiz helps people decide, in the few seconds that matter, whether a message, link, QR code or screenshot is a scam. It is a Progressive Web App with an Arabic/English core and an interface, results and scam-wording rules in eight languages (Arabic, English, Urdu, Hindi, Tagalog, Persian, Amharic for Ethiopia and Luganda for Uganda), that runs on Android, iPhone and desktop from a single link, with no store install and no account.
 
 **Design principles**
 
@@ -41,7 +41,7 @@ TheYaqiz helps people decide, in the few seconds that matter, whether a message,
 
 **Main features**
 
-- Message checker (scam patterns in five languages: Arabic, English, Urdu, Hindi, Tagalog; sender check, highlighted phrases, evidence panel)
+- Message checker (scam patterns in eight languages: Arabic, English, Urdu, Hindi, Tagalog, Persian, Amharic, Luganda; sender check, highlighted phrases, evidence panel)
 - Link checker (government-domain recognition, impersonation and lookalike detection, safe link opening, domain age and reputation)
 - Image checker (QR codes decoded on the device; screenshots read by AI on request)
 - Call companion (live risk meter that updates with each answer during a suspicious call)
@@ -86,6 +86,7 @@ TheYaqiz helps people decide, in the few seconds that matter, whether a message,
 | `public/index.html` | Single-page bilingual UI: home, scan, call companion, training, report, settings. |
 | `public/engine.js` | Detection engine: pure functions, no DOM. The same file runs in the browser and in the automated tests. |
 | `public/registry.js` | Official-domain registry: the single source of truth for official organisations, their domains and the restricted government suffixes. Shared by the phone and the server. |
+| `public/i18n-x.js` | Translations of the whole interface and of every verdict, evidence and tip string into Urdu, Hindi, Tagalog, Persian, Amharic and Luganda (308 strings each), keyed by the English source text. Persian is right-to-left; Amharic uses the Ethiopic script. |
 | `public/sw.js` | Service worker: caches the app shell so the core check works offline. API calls are never cached. |
 | `public/manifest.webmanifest` | PWA manifest, including an Android `share_target` so "Share to TheYaqiz" appears in the share menu. |
 | `public/jsQR.js` | Third-party QR decoder (Apache-2.0), runs on the device. |
