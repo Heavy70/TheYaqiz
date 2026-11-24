@@ -562,6 +562,19 @@ async function chatApi(req, res){
 const TTS_KEY = (process.env.AZURE_SPEECH_KEY || '').trim(), TTS_REGION = (process.env.AZURE_SPEECH_REGION || 'uaenorth').trim();
 const TTS_PER_IP_DAY = +(process.env.YAQIZ_TTS_PER_IP_DAY || 60), TTS_CHARS_DAY = +(process.env.YAQIZ_TTS_CHARS_DAY || 15000);   /* about 450k characters a month: inside the free tier (500k) */
 const TTS_VOICES = { ar:['ar-AE','ar-AE-HamdanNeural'], en:['en-GB','en-GB-RyanNeural'], ur:['ur-PK','ur-PK-AsadNeural'], hi:['hi-IN','hi-IN-MadhurNeural'], tl:['fil-PH','fil-PH-AngeloNeural'], fa:['fa-IR','fa-IR-FaridNeural'], am:['am-ET','am-ET-AmehaNeural'] };
+/* Arabic in a real Emirati voice through ElevenLabs when its key and voice id are set; Azure stays the automatic fallback */
+const EL_KEY = (process.env.ELEVENLABS_API_KEY || '').trim(), EL_VOICE_AR = (process.env.ELEVEN_VOICE_AR || '').trim(), EL_MODEL = (process.env.ELEVEN_MODEL || 'eleven_v4').trim();
+const EL_CHARS_DAY = +(process.env.YAQIZ_EL_CHARS_DAY || 3000);
+let elDay = '', elChars = 0;
+function allowEl(n){ const d = new Date().toISOString().slice(0,10); if (d !== elDay){ elDay = d; elChars = 0; } if (elChars + n > EL_CHARS_DAY) return false; elChars += n; return true; }
+async function elevenTts(text){
+  if (!EL_KEY || !EL_VOICE_AR || !allowEl(text.length)) return null;
+  try {
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(EL_VOICE_AR)}?output_format=mp3_44100_64`, { method:'POST', headers:{ 'xi-api-key':EL_KEY, 'Content-Type':'application/json', 'Accept':'audio/mpeg' }, body: JSON.stringify({ text, model_id: EL_MODEL }) });
+    if (!r.ok){ console.error('tts eleven upstream', r.status); return null; }
+    return Buffer.from(await r.arrayBuffer());
+  } catch(e){ console.error('tts eleven', e.message); return null; }
+}
 function ttsLang(text, ui){
   if (/[ሀ-፿]/.test(text)) return 'am';
   if (/[ऀ-ॿ]/.test(text)) return 'hi';
@@ -578,13 +591,15 @@ function allowTts(ip, n){
   ttIp.set(ip, k + 1); ttChars += n; return true;
 }
 async function ttsApi(req, res){
-  if (!TTS_KEY) return json(res, 503, { error:'tts_off' });
+  if (!TTS_KEY && !(EL_KEY && EL_VOICE_AR)) return json(res, 503, { error:'tts_off' });
   let b; try { b = JSON.parse(await readBody(req, 16 * 1024)); } catch(e){ return json(res, 400, { error:'bad_request' }); }
   const text = typeof b.text === 'string' ? maskNums(b.text.trim()).slice(0, 2500) : '';
   if (!text) return json(res, 400, { error:'bad_request' });
   const l = ttsLang(text, CHAT_LANGS[b.lang] ? b.lang : 'en');
   if (!l) return json(res, 404, { error:'no_voice' });
   if (!allowTts(clientIp(req), text.length)) return json(res, 429, { error:'limit' });
+  if (l === 'ar'){ const el = await elevenTts(text); if (el) return send(res, 200, el, { 'Content-Type':'audio/mpeg', 'Cache-Control':'no-store' }); }
+  if (!TTS_KEY) return json(res, 503, { error:'tts_off' });
   const [xl, voice] = TTS_VOICES[l];
   const ssml = `<speak version="1.0" xml:lang="${xl}"><voice name="${voice}"><prosody rate="+0%">${xmlEsc(text)}</prosody></voice></speak>`;
   try {
@@ -650,7 +665,7 @@ function route(req, res){
   if (!pageOk(clientIp(req))) return send(res, 429, 'Too many requests', {'Retry-After':'60'});
   if (url.startsWith('/api/') && url !== '/api/health' && !apiAllowed(req)) return json(res, 403, { error:'forbidden' });
   if (url.startsWith('/api/') && !burstOk(clientIp(req))) return json(res, 429, { error:'limit' });
-  if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY, chat: !!CHAT_KEY, tts: !!TTS_KEY });
+  if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY, chat: !!CHAT_KEY, tts: !!(TTS_KEY || (EL_KEY && EL_VOICE_AR)) });
   if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/open' && req.method === 'GET') return openApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/chat'){

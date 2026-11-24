@@ -44,6 +44,7 @@ ok(/MUST be in Emirati dialect/.test(S.CHAT_SYS) && /avoid MSA/.test(S.CHAT_SYS)
 ok(S.ttsLang('مرحبا', 'ar') === 'ar' && S.ttsLang('سلام', 'fa') === 'fa' && S.ttsLang('hello', 'lg') === null && S.ttsLang('ሰላም', 'en') === 'am' && S.ttsLang('hi', 'tl') === 'tl', 'server voice picks the language; Luganda falls back to the browser');
 ok(S.TTS_VOICES.ar[1] === 'ar-AE-HamdanNeural' && S.TTS_VOICES.en[1] === 'en-GB-RyanNeural' && /'en-GB'\}/.test(html), 'Arabic = Emirati Hamdan voice, English = British Ryan voice (server and browser fallback)');
 ok(S.xmlEsc('<a&"b">') === '&lt;a&amp;&quot;b&quot;&gt;', 'text is escaped before it goes into SSML');
-ok(/\/api\/tts/.test(srv) && /TTS_CHARS_DAY/.test(srv) && /TTS_PER_IP_DAY/.test(srv) && /tts: !!TTS_KEY/.test(srv) && /media-src 'self' data: blob:/.test(srv), 'server voice route with daily limits, health flag and CSP for audio');
+ok(/\/api\/tts/.test(srv) && /TTS_CHARS_DAY/.test(srv) && /TTS_PER_IP_DAY/.test(srv) && /tts: !!(TTS_KEY || (EL_KEY && EL_VOICE_AR))/.test(srv) && /media-src 'self' data: blob:/.test(srv), 'server voice route with daily limits, health flag and CSP for audio');
 ok(/fetch\('\/api\/tts'/.test(html) && /speakBrowser\(x\)/.test(html) && /TTS_SIL/.test(html), 'app uses the server voice and falls back to the browser voice');
+ok(/api\.elevenlabs\.io\/v1\/text-to-speech/.test(srv) && /ELEVEN_VOICE_AR/.test(srv) && /EL_CHARS_DAY/.test(srv) && /if \(l === 'ar'\)\{ const el = await elevenTts/.test(srv), 'Arabic uses the ElevenLabs Emirati voice when set, with a daily cap and Azure fallback');
 console.log(fails.length ? 'CHAT FAIL\n' + fails.join('\n') : 'CHAT PASS'); process.exit(fails.length ? 1 : 0);

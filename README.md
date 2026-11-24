@@ -100,6 +100,7 @@ Without any keys the app runs with the on-device engine, RDAP domain age, link o
 |---|---|
 | `ANTHROPIC_API_KEY` | Enables the Claude AI analysis |
 | `AZURE_SPEECH_KEY` / `AZURE_SPEECH_REGION` | Optional Azure Speech key and region (default `uaenorth`) for the assistant's spoken replies: one natural voice on every device, Arabic in the Emirati `ar-AE-HamdanNeural` voice, English in the British `en-GB-RyanNeural` voice, and native neural voices for Urdu, Hindi, Tagalog, Persian and Amharic, at a natural pace. Without it the browser's own voice is used |
+| `ELEVENLABS_API_KEY` / `ELEVEN_VOICE_AR` / `ELEVEN_MODEL` | Optional: Arabic spoken replies in a real Emirati-dialect voice from ElevenLabs (voice id from the Voice Library, model default `eleven_v4`, 3,000 characters/day cap); Azure Hamdan is the automatic fallback |
 | `YAQIZ_CHAT_KEY` | Optional separate key for the "Ask Yaqiz" assistant (falls back to `ANTHROPIC_API_KEY`) |
 | `YAQIZ_CHAT_PER_IP_DAY` / `YAQIZ_CHAT_GLOBAL_DAY` | Daily assistant message limits (defaults 30 per IP, 1500 global) |
 | `YAQIZ_MODEL` | Claude model id (default `claude-haiku-5-5`) |
