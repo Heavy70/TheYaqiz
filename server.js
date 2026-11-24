@@ -431,8 +431,10 @@ async function domainApi(req, res){
    the moment they are issued, usually before the first scam SMS goes out. Each new name is scored by the same on-device engine,
    official domains are dropped, and the domain's registration age is read over RDAP. Nothing about users is involved. */
 const ENG = require('./public/engine.js')((a, e) => e, () => 1, REG);
-/* crt.sh answers prefix searches (brand%) fast; a leading wildcard (%brand%) times out (502), so each brand is searched as a name prefix and as a subdomain (%.brand%) */
-const WATCH = ['emiratesnbd', 'uaepass', 'emiratespost', 'adpolice', 'dubaipolice', 'etisalat', 'mashreq', 'bankfab', 'adcb', 'adib', 'salik', 'tamm'].flatMap(b => [[b, b + '%'], [b, '%.' + b + '%']]);
+/* crt.sh answers prefix searches (brand%) fast; a leading wildcard (%brand%) times out (502). It also rate-limits (429),
+   so the 12 brands are asked one at a time, with a pause between questions and a longer wait after a 429. */
+const WATCH = ['emiratesnbd', 'uaepass', 'emiratespost', 'adpolice', 'dubaipolice', 'etisalat', 'mashreq', 'bankfab', 'adcb', 'adib', 'salik', 'tamm'].map(b => [b, b + '%']);
+const WATCH_GAP = +(process.env.YAQIZ_WATCH_GAP_MS || 3000), WATCH_429_WAIT = +(process.env.YAQIZ_WATCH_429_MS || 30000);
 const WATCH_DAYS = 90;
 let watch = { t: 0, items: [], ok: 0, failed: 0 }, watchBusy = null, watchTry = 0;
 async function crtNames(q){
@@ -455,10 +457,12 @@ const PROXY_SUFFIX = /\.(admin-)?mcas(-df)?(-gov)?\.ms$|\.translate\.goog$/;
 function brandCountrySite(reg){ const p = reg.split('.'); return OFF_CORES.has(p[0]) && p.length <= 3 && p[p.length - 1].length === 2 && (p.length === 2 || SLD.includes(p[1])); }
 async function refreshWatch(){
   const found = new Map(); let ok = 0, failed = 0;
-  /* crt.sh is often slow or answers 502: 6 queries at a time, then one retry of the failed ones.
+  /* one query at a time; a failed one is retried once at the end (after a 429, only after a longer wait).
      Findings are published as they arrive (watch.partial), because Cloud Run gives the instance CPU mainly while a request is open. */
+  const pause = ms => new Promise(z => setTimeout(z, ms));
   const publish = () => { watch.partial = [...found.values()].sort((a, b) => b.score - a.score || b.seen.localeCompare(a.seen)).slice(0, 25); };
-  const run = async (list, onFail) => { for (let i = 0; i < list.length; i += 6) { await Promise.all(list.slice(i, i + 6).map(async ([brand, q]) => {
+  let limited = false;
+  const run = async (list, onFail) => { for (let i = 0; i < list.length; i++) { if (i) await pause(limited ? WATCH_429_WAIT : WATCH_GAP); limited = false; await Promise.all(list.slice(i, i + 1).map(async ([brand, q]) => {
       try {
         const names = await crtNames(q); ok++;
         names.forEach((m, n) => {
@@ -467,10 +471,10 @@ async function refreshWatch(){
           const reg = regDomain(n), prev = found.get(reg); if (brandCountrySite(reg)) return;
           if (!prev || r.score > prev.score) found.set(reg, { domain: n, reg, brand, score: r.score, seen: m.seen, issuer: m.issuer, why: r.flags.filter(f => f.w > 0).slice(0, 2).map(f => f.l) });
         });
-      } catch(e){ onFail([brand, q]); console.error('watch', q, e.name === 'AbortError' ? 'timeout' : String(e.message || e).slice(0, 60)); }
+      } catch(e){ if (/429/.test(String(e.message))) limited = true; onFail([brand, q]); console.error('watch', q, e.name === 'AbortError' ? 'timeout' : String(e.message || e).slice(0, 60)); }
     })); publish(); } };
   const again = []; await run(WATCH, x => again.push(x));
-  if (again.length) await run(again, () => failed++);
+  if (again.length){ await pause(WATCH_429_WAIT); await run(again, () => failed++); }
   const items = [...found.values()].sort((a, b) => b.score - a.score || b.seen.localeCompare(a.seen)).slice(0, 40);
   await Promise.all(items.slice(0, 25).map(async it => { const c = await domainAge(it.reg).catch(() => null); it.created = c || ''; it.age = c ? Math.max(0, Math.floor((Date.now() - Date.parse(c)) / 864e5)) : null; }));
   /* keep what is plausibly new: registered in the last 180 days, or age not published */

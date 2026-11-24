@@ -1,5 +1,5 @@
 /* Early warning (Certificate Transparency) and evidence facts, with the network stubbed: look-alikes are kept, official and old domains are dropped. */
-process.env.PORT = '0'; delete process.env.ANTHROPIC_API_KEY;
+process.env.PORT = '0'; delete process.env.ANTHROPIC_API_KEY; process.env.YAQIZ_WATCH_GAP_MS = '1'; process.env.YAQIZ_WATCH_429_MS = '1';
 const day = 864e5, iso = t => new Date(t).toISOString().slice(0, 19);
 const CRT = [
   { issuer_name: 'C=US, O=Let\'s Encrypt, CN=R11', name_value: 'adcb-secure-login.top\nwww.adcb-secure-login.top', not_before: iso(Date.now() - 2 * day) },
