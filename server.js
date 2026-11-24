@@ -570,8 +570,10 @@ function allowEl(n){ const d = new Date().toISOString().slice(0,10); if (d !== e
 async function elevenTts(text){
   if (!EL_KEY || !EL_VOICE_AR || !allowEl(text.length)) return null;
   try {
-    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(EL_VOICE_AR)}?output_format=mp3_44100_64`, { method:'POST', headers:{ 'xi-api-key':EL_KEY, 'Content-Type':'application/json', 'Accept':'audio/mpeg' }, body: JSON.stringify({ text, model_id: EL_MODEL }) });
-    if (!r.ok){ console.error('tts eleven upstream', r.status); return null; }
+    const call = () => fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(EL_VOICE_AR)}?output_format=mp3_44100_64`, { method:'POST', headers:{ 'xi-api-key':EL_KEY, 'Content-Type':'application/json', 'Accept':'audio/mpeg' }, body: JSON.stringify({ text, model_id: EL_MODEL }) });
+    let r = await call();
+    if (r.status === 429){ await new Promise(z => setTimeout(z, 1500)); r = await call(); }   /* busy or too many requests at once: one retry */
+    if (!r.ok){ let d = ''; try { const j = await r.json(); d = JSON.stringify(j.detail || j).slice(0, 300); } catch(e){} console.error('tts eleven upstream', r.status, d); return null; }
     return Buffer.from(await r.arrayBuffer());
   } catch(e){ console.error('tts eleven', e.message); return null; }
 }
