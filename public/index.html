@@ -240,6 +240,7 @@ html[dir=ltr] .bubble{border-radius:14px 14px 4px 14px}
 @media(max-width:360px){.top .pill{display:none}}
 footer .dev{font-size:13.5px;color:var(--ink);margin-bottom:4px}
 footer .dev b{color:var(--brand)}
+.chat .nt{font-size:12.5px;color:var(--muted);margin:6px 0 10px}.chat .msgs{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:4px 2px;margin-bottom:10px}.chat .m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.chat .m.u{align-self:flex-end;background:var(--brand);color:#fff;border-end-end-radius:4px}.chat .m.b{align-self:flex-start;background:var(--soft);border:1px solid var(--line);border-end-start-radius:4px}.chat .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.chat .chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}.chat .row{display:flex;gap:8px;align-items:flex-end}.chat .row textarea{resize:none;min-height:46px;flex:1;min-width:0;width:auto}.chat .row .btn{flex:none}
 </style>
 </head>
 <body>
@@ -403,10 +404,22 @@ footer .dev b{color:var(--brand)}
     <div class="list" style="margin-bottom:14px">
       <div class="li" data-go="report"><div class="ic" style="background:var(--badbg);color:var(--bad)"><svg class="i"><use href="#i-flag"/></svg></div><div class="tx"><b data-i18n="mRep"></b><small data-i18n="mRepD"></small></div></div>
       <div class="li" data-go="pitch"><div class="ic" style="background:#e7f0fc;color:var(--brand2)"><svg class="i"><use href="#i-doc"/></svg></div><div class="tx"><b data-i18n="mPitch"></b><small data-i18n="mPitchD"></small></div></div>
+      <div class="li hidden" id="moreChat" data-go="chat"><div class="ic" style="background:#fbe9ec;color:var(--accent)"><svg class="i"><use href="#i-spark"/></svg></div><div class="tx"><b data-i18n="chatH"></b><small data-i18n="chatD"></small></div></div>
       <div class="li hidden" id="moreAuto"><div class="ic" style="background:#fbe9ec;color:var(--accent)"><svg class="i"><use href="#i-spark"/></svg></div><div class="tx"><b data-i18n="mAuto"></b><small id="autoSt"></small></div></div>
       <div class="li" id="moreLang"><div class="ic" style="background:#fbe9ec;color:var(--accent)"><svg class="i"><use href="#i-msg"/></svg></div><div class="tx"><b data-i18n="mLang"></b><small data-i18n="mLangD"></small></div></div>
       <div class="li" id="moreInstall"><div class="ic" style="background:var(--okbg);color:var(--ok)"><svg class="i"><use href="#i-dl"/></svg></div><div class="tx"><b data-i18n="mInst"></b><small data-i18n="mInstD"></small></div></div>
       <div class="li" id="clearHist"><div class="ic" style="background:var(--soft);color:var(--muted)"><svg class="i"><use href="#i-clock"/></svg></div><div class="tx"><b data-i18n="mClr"></b><small data-i18n="mClrD"></small></div></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-chat">
+    <div class="card chat">
+      <h2 data-i18n="chatH"></h2>
+      <p class="hint" data-i18n="chatD"></p>
+      <p class="nt" data-i18n="chatNote"></p>
+      <div class="msgs" id="chatMsgs" aria-live="polite"></div>
+      <div class="chips" id="chatChips"></div>
+      <div class="row"><textarea id="chatIn" rows="2" maxlength="1000" dir="auto" data-i18n-ph="chatPh"></textarea><button class="btn" id="chatSend" data-i18n="chatSend"></button></div>
     </div>
   </section>
 
@@ -610,6 +623,20 @@ numFlag:['الرقم أو المرسل مريب','The number or sender looks sus
 callStopT:['أنهِ المكالمة الآن. الخطر مرتفع جدًا؛ لا تشارك أي رمز ولا تحوّل أي مبلغ.','Hang up now. The risk is very high: do not share any code and do not transfer any money.'],
 shareOk:['وصلت المشاركة وتم فحصها','Shared item received and checked']
 });
+Object.assign(D,{
+chatH:['اسأل يقِظ','Ask Yaqiz'],
+chatD:['مساعد ذكي يجيب عن أسئلتك حول الاحتيال ويشرح لك ماذا تفعل.','A smart assistant that answers your questions about scams and tells you what to do.'],
+chatNote:['تُرسل رسائلك إلى خدمة ذكاء اصطناعي لتوليد الرد، ولا تُحفظ. لا تكتب كلمات مرور أو رموز تحقق أو أرقام بطاقات.','Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.'],
+chatPh:['اكتب سؤالك…','Type your question…'],
+chatSend:['إرسال','Send'],
+chatErr:['تعذّر الرد الآن. حاول مرة أخرى بعد قليل.','Could not reply right now. Please try again shortly.'],
+chatLimit:['وصلت إلى الحد اليومي للمحادثة. جرّب غدًا.','You reached today’s chat limit. Try again tomorrow.'],
+chatWait:['يكتب…','Typing…'],
+chatQ1:['وصلتني رسالة مشبوهة، ماذا أفعل؟','I got a suspicious message. What should I do?'],
+chatQ2:['كيف أبلّغ شرطة أبوظبي عن احتيال؟','How do I report a scam to Abu Dhabi Police?'],
+chatQ3:['اشرح لي نتيجة آخر فحص','Explain my last check result'],
+chatHello:['مرحبًا، أنا يقِظ. اسألني عن أي رسالة أو مكالمة أو موقف يبدو لك احتيالًا.','Hi, I’m Yaqiz. Ask me about any message, call or situation that looks like a scam.']
+});
 const t=k=>{const a=D[k]||[k,k];return T(a[0],a[1])};
 const OUT={ur:'Urdu',hi:'Hindi',tl:'Filipino (Tagalog)',fa:'Persian (Farsi)',am:'Amharic',lg:'Luganda (Ganda, the main local language of Uganda)'};
 const TPL={
@@ -639,18 +666,19 @@ const store={get(k,d){try{const v=localStorage.getItem('yaqiz.'+k);return v?JSON
 let last=null,lastRun=null,aiOn=false,curView='home';
 
 /* ===== navigation ===== */
-const VIEWS=['home','scan','call','train','report','pitch'];
-const VLBL={home:'nHome',scan:'scan',call:'nCall',train:'train',report:'mRep',pitch:'mPitch'};
-function drawNav(){$('#dnav').innerHTML=VIEWS.map(v=>`<button data-go="${v}" class="${v===curView?'on':''}">${t(VLBL[v])}</button>`).join('')}
+const VIEWS=['home','scan','call','train','chat','report','pitch'];let chatOn=false;
+const VLBL={home:'nHome',scan:'scan',call:'nCall',train:'train',chat:'chatH',report:'mRep',pitch:'mPitch'};
+function drawNav(){$('#dnav').innerHTML=VIEWS.filter(v=>v!=='chat'||chatOn).map(v=>`<button data-go="${v}" class="${v===curView?'on':''}">${t(VLBL[v])}</button>`).join('')}
 function go(v,mode){
   curView=v;
   $$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
-  const nv=['report','pitch'].includes(v)?'more':v;
+  const nv=['report','pitch','chat'].includes(v)?'more':v;
   $$('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.go===nv));
   $$('#dnav button').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
   if(mode)setMode(mode);
   if(v==='report')fillReport();
   if(v==='home')renderHome();
+  if(v==='chat')chatDraw();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go,b.dataset.mode)});
@@ -938,10 +966,37 @@ function enableAi(){
 }
 (async()=>{
  const inArtifact=/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)||location.protocol==='blob:'||location.origin==='null';
- if(!inArtifact){try{const r=await fetch('/api/health',{cache:'no-store'});const j=await r.json();srv=true;if(j.ai){ai={kind:'server',images:true};enableAi()}}catch(e){}}
+ if(!inArtifact){try{const r=await fetch('/api/health',{cache:'no-store'});const j=await r.json();srv=true;if(j.ai){ai={kind:'server',images:true};enableAi()}if(j.chat){chatOn=true;$('#moreChat').classList.remove('hidden');drawNav()}}catch(e){}}
  if(!ai){try{if(window.claude&&claude.use){sample=await claude.use('sample');if(sample){let im=false;try{im=!!(await sample.limits()).images}catch(e){}ai={kind:'sample',images:im};enableAi()}}}catch(e){}}
  imgNote();
 })();
+
+/* ===== Ask Yaqiz: assistant chat (in memory only; the server masks card-like numbers; only the last result's score/signals are sent as context, never the message text) ===== */
+let chatMsgs=[],chatBusy=false;
+function chatDraw(){
+ const box=$('#chatMsgs');if(!box)return;
+ box.innerHTML=`<div class="m b" dir="auto">${esc(t('chatHello'))}</div>`+chatMsgs.map(m=>`<div class="m ${m.r==='user'?'u':'b'}" dir="auto">${esc(m.c)}</div>`).join('')+(chatBusy?`<div class="m b">${esc(t('chatWait'))}</div>`:'');
+ box.scrollTop=box.scrollHeight;
+ const qs=['chatQ1','chatQ2'].concat(last?['chatQ3']:[]);
+ $('#chatChips').innerHTML=chatMsgs.length?'':qs.map(k=>`<button type="button" data-q="${k}">${esc(t(k))}</button>`).join('');
+ $('#chatSend').disabled=chatBusy;
+}
+async function chatAsk(x){
+ x=String(x||'').trim().slice(0,1000);if(!x||chatBusy)return;
+ chatMsgs.push({r:'user',c:x});chatBusy=true;$('#chatIn').value='';chatDraw();
+ let out;
+ try{
+  const body={messages:chatMsgs.slice(-10).map(m=>({role:m.r,content:m.c}))};
+  if(last)body.ctx={score:last.score,verdict:last.lvl,type:last.kind,flags:(last.flags||[]).slice(0,5)};
+  const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  out=r.ok&&j.reply?j.reply:t(r.status===429?'chatLimit':'chatErr');
+ }catch(e){out=t('chatErr')}
+ chatMsgs.push({r:'assistant',c:out});chatBusy=false;chatDraw();
+}
+$('#chatSend').onclick=()=>chatAsk($('#chatIn').value);
+$('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatAsk($('#chatIn').value)}});
+$('#chatChips').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(b)chatAsk(t(b.dataset.q))});
 
 /* ===== language switch ===== */
 function applyLang(){
@@ -956,7 +1011,7 @@ function applyLang(){
  $('#statusTxt').textContent=aiOn?t('stAi'):t('stLocal');
  if(imgBlob)$('#dropTxt').textContent=imgBlob.name;
  document.title=T('يقِظ | درعك الذكي ضد الاحتيال الإلكتروني','TheYaqiz | Your AI shield against online scams');
- drawNav();drawSamples();drawQs();callScore();drawTrain();renderHome();imgNote();
+ drawNav();drawSamples();drawQs();callScore();drawTrain();renderHome();imgNote();if(curView==='chat')chatDraw();
  if(curView==='report')fillReport();
  if(lastRun&&$('#res').classList.contains('show'))lastRun();
 }

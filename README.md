@@ -94,6 +94,8 @@ Without any keys the app runs with the on-device engine, RDAP domain age, link o
 | Variable | Purpose |
 |---|---|
 | `ANTHROPIC_API_KEY` | Enables the Claude AI analysis |
+| `YAQIZ_CHAT_KEY` | Optional separate key for the "Ask Yaqiz" assistant (falls back to `ANTHROPIC_API_KEY`) |
+| `YAQIZ_CHAT_PER_IP_DAY` / `YAQIZ_CHAT_GLOBAL_DAY` | Daily assistant message limits (defaults 30 per IP, 1500 global) |
 | `YAQIZ_MODEL` | Claude model id (default `claude-haiku-5-5`) |
 | `WEBRISK_API_KEY` | Google Web Risk lookups |
 | `GSB_API_KEY` | Google Safe Browsing lookups |

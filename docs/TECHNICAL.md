@@ -211,6 +211,7 @@ This rule set came from testing: language models alone over-flag genuine service
 | Message text (normal check) | Stays on the device; analysed by `engine.js` | No |
 | Links / domains in the message | Sent to our server **without the message text**, to open the link and check age and reputation | Kept only in a short in-memory cache (hours) for speed; never written to disk |
 | Hostname sent to Google | Only the hostname/URL, for Web Risk / Safe Browsing | By Google under its API terms |
+| Questions typed to the "Ask Yaqiz" assistant (optional feature) | Sent to our server and to the Claude API to generate the reply; card-like numbers masked first | Not stored; the conversation exists only in the open page |
 | Message or screenshot for deep AI analysis | Sent to our server and to the Claude API, **only when the user asks** | Not stored by our server; not logged |
 | Check history | The user's own browser (last 30 checks, first 140 characters) | On the device only; one-tap clear |
 | Settings (language, auto-analysis) | The user's own browser | On the device only |
@@ -250,7 +251,7 @@ All responses are JSON with `Cache-Control: no-store`.
 Status of optional services (example values):
 
 ```json
-{ "ok": true, "ai": true, "sb": false, "wr": true,
+{ "ok": true, "ai": true, "chat": true, "sb": false, "wr": true,
   "feeds": { "OpenPhish": 300, "Phishunt": 1200 }, "feedErr": {}, "feedAt": "2026-11-20T08:00:00.000Z" }
 ```
 
@@ -285,6 +286,10 @@ Deep AI analysis. Body: `{ "text": "...", "lang": "ar" | "en", "image": "<base64
 ```
 
 Errors: `503 ai_off` (no key configured), `429 limit`, `400 bad_request`, `502 ai_error`.
+
+### `POST /api/chat`
+
+The "Ask Yaqiz" assistant. Body: `{ "messages": [{"role":"user","content":"..."}], "ctx": { "score": 82, "verdict": "bad", "type": "msg", "flags": ["..."] } }` (`ctx` optional: the last check's score and signals, never its message text). At most the last 10 messages are used, each capped at 1200 characters; card-like numbers (13–19 digits) are masked on the server before anything is sent on. Replies `{ "reply": "..." }`. The assistant is scoped to scams and online safety, gives only the official Abu Dhabi Police channels, and refuses to take passwords, codes or card numbers. Conversations live in the page's memory only and are never stored. Limits: 30 messages/IP/day, 1500/day total. Errors as for `/api/analyze`.
 
 ---
 
