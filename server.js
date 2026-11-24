@@ -450,6 +450,8 @@ async function crtNames(q){
 }
 /* the brand's own country sites (emiratesnbd.com.eg, mashreq.com.cn) are the brand itself or a defensive registration, not a look-alike */
 const OFF_CORES = new Set(OFFICIAL.map(o => o.split('.')[0]).filter(c => c.length >= 4));
+/* corporate security proxies rewrite real sites into these names (Microsoft Defender for Cloud Apps: adpolice.gov.ae.mcas.ms): not look-alikes */
+const PROXY_SUFFIX = /\.(admin-)?mcas(-df)?(-gov)?\.ms$|\.translate\.goog$/;
 function brandCountrySite(reg){ const p = reg.split('.'); return OFF_CORES.has(p[0]) && p.length <= 3 && p[p.length - 1].length === 2 && (p.length === 2 || SLD.includes(p[1])); }
 async function refreshWatch(){
   const found = new Map(); let ok = 0, failed = 0;
@@ -460,7 +462,7 @@ async function refreshWatch(){
       try {
         const names = await crtNames(q); ok++;
         names.forEach((m, n) => {
-          if (ENG.isGov(n) || ENG.isOfficial(n)) return;
+          if (ENG.isGov(n) || ENG.isOfficial(n) || PROXY_SUFFIX.test(n)) return;
           const r = ENG.analyzeUrl('https://' + n + '/'); if (!r || r.score < 40) return;
           const reg = regDomain(n), prev = found.get(reg); if (brandCountrySite(reg)) return;
           if (!prev || r.score > prev.score) found.set(reg, { domain: n, reg, brand, score: r.score, seen: m.seen, issuer: m.issuer, why: r.flags.filter(f => f.w > 0).slice(0, 2).map(f => f.l) });
