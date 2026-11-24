@@ -1,0 +1,10 @@
+const fs=require('fs');let bad=0;const ck=(n,c)=>{if(!c){bad++;console.log('FAIL',n)}};
+const L=fs.readFileSync(__dirname+'/../public/gov/login.html','utf8'),P=fs.readFileSync(__dirname+'/../public/gov/portal.html','utf8');
+ck('login has UAE PASS button',/Login with UAE PASS/.test(L));
+ck('login has no credential fields',!/<input|<form|type=["']?password/i.test(L));
+ck('login redirects to portal',/portal\.html/.test(L));
+ck('login marked as demo',/DEMO/.test(L)&&/never asks for/i.test(L));
+ck('portal is gated by demo session',/yaqiz_demo_session/.test(P)&&/login\.html/.test(P));
+ck('portal marked as demo',/DEMO session/.test(P));
+ck('sw does not cache /gov/',/startsWith\('\/gov\/'\)/.test(fs.readFileSync(__dirname+'/../public/sw.js','utf8')));
+console.log(bad?'GOV FAIL':'GOV PASS');process.exit(bad?1:0);
