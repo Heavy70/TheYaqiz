@@ -32,4 +32,18 @@ ok(/SpeechRecognition/.test(html) && /speechSynthesis/.test(html) && /id="chatMi
 ok(!/store\.set\('chat/.test(html), 'voice never stores chat');
 ok(/id="v-chat"/.test(html) && /id="moreChat"/.test(html), 'chat view and More entry exist');
 ok(!/localStorage[^;]*chat/i.test(html) && !/store\.set\('chat/.test(html), 'chat history must never be stored');
+ok(/Answer only from the knowledge base/.test(S.CHAT_SYS) && /aman@adpolice\.gov\.ae/.test(S.CHAT_SYS) && /Luganda/.test(S.CHAT_SYS), 'persona answers only from the TheYaqiz knowledge base, in all 8 languages');
+ok(S.cleanChat({ messages: [{ role: 'user', content: 'hi' }], lang: 'lg' }).lang === 'lg' && S.cleanChat({ messages: [{ role: 'user', content: 'hi' }], lang: 'xx' }).lang === 'en', 'app language is passed and validated');
+ok(/\[\[HANDOVER\]\]/.test(srv) && /href="tel:8002626"/.test(html) && /href="tel:999"/.test(html), 'handover to official channels exists');
+ok(/classList\.add\('talk'\)/.test(html), 'avatar animates while speaking');
+ok(/auto=\(kind==='msg'\|\|kind==='url'\)&&!!ai;/.test(html) && !/\$\('#msgAi'\)\.classList\.remove/.test(html) && !/\$\('#moreAuto'\)\.classList\.remove/.test(html), 'one unified Check button: engine + link opening + AI merged');
+['ur','hi','tl','fa','am','lg'].forEach(l => ok(X[l]['The check runs on your device first, then the text is sent to an AI service for a deeper analysis. It is not stored.'], l + ' translation missing: privacyAi'));
+['Someone called saying they are from the police or my bank. Is it a scam?','How do I check a link before I open it?','Contact the official channel now (Abu Dhabi Police – Aman):','Emergency 999','This device has no voice for this language, so the reply is shown as text only.','Listen to the reply'].forEach(k => ['ur','hi','tl','fa','am','lg'].forEach(l => ok(X[l][k], l + ' translation missing: ' + k)));
+ok(/function ttsUnlock\(/.test(html) && /voiceschanged/.test(html) && /data-say=/.test(html) && /setTimeout\(r,150\)/.test(html), 'spoken replies: unlocked inside the tap, wait for voices, no speak right after cancel, chunked, listen button');
+ok(/Emirati dialect/.test(S.CHAT_SYS) && /ar-AE/.test(html) && /hamdan/i.test(html) && /u\.rate=/.test(html), 'Arabic replies in Emirati dialect, Emirati voice preferred, natural speaking rate');
+ok(S.ttsLang('مرحبا', 'ar') === 'ar' && S.ttsLang('سلام', 'fa') === 'fa' && S.ttsLang('hello', 'lg') === null && S.ttsLang('ሰላም', 'en') === 'am' && S.ttsLang('hi', 'tl') === 'tl', 'server voice picks the language; Luganda falls back to the browser');
+ok(S.TTS_VOICES.ar[1] === 'ar-AE-HamdanNeural' && S.TTS_VOICES.en[1] === 'en-GB-RyanNeural' && /'en-GB'\}/.test(html), 'Arabic = Emirati Hamdan voice, English = British Ryan voice (server and browser fallback)');
+ok(S.xmlEsc('<a&"b">') === '&lt;a&amp;&quot;b&quot;&gt;', 'text is escaped before it goes into SSML');
+ok(/\/api\/tts/.test(srv) && /TTS_CHARS_DAY/.test(srv) && /TTS_PER_IP_DAY/.test(srv) && /tts: !!TTS_KEY/.test(srv) && /media-src 'self' data: blob:/.test(srv), 'server voice route with daily limits, health flag and CSP for audio');
+ok(/fetch\('\/api\/tts'/.test(html) && /speakBrowser\(x\)/.test(html) && /TTS_SIL/.test(html), 'app uses the server voice and falls back to the browser voice');
 console.log(fails.length ? 'CHAT FAIL\n' + fails.join('\n') : 'CHAT PASS'); process.exit(fails.length ? 1 : 0);

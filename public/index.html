@@ -982,7 +982,7 @@ function enableAi(){
 }
 (async()=>{
  const inArtifact=/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)||location.protocol==='blob:'||location.origin==='null';
- if(!inArtifact){try{const r=await fetch('/api/health',{cache:'no-store'});const j=await r.json();srv=true;if(j.ai){ai={kind:'server',images:true};enableAi()}if(j.chat){chatOn=true;$('#moreChat').classList.remove('hidden');drawNav()}}catch(e){}}
+ if(!inArtifact){try{const r=await fetch('/api/health',{cache:'no-store'});const j=await r.json();srv=true;if(j.ai){ai={kind:'server',images:true};enableAi()}if(j.tts){ttsSrv=true;$('#chatSpk').classList.remove('hidden')}if(j.chat){chatOn=true;$('#moreChat').classList.remove('hidden');drawNav()}}catch(e){}}
  if(!ai){try{if(window.claude&&claude.use){sample=await claude.use('sample');if(sample){let im=false;try{im=!!(await sample.limits()).images}catch(e){}ai={kind:'sample',images:im};enableAi()}}}catch(e){}}
  imgNote();
 })();
@@ -996,21 +996,38 @@ $('#chatAv').innerHTML=AVATAR;
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition,TTS='speechSynthesis' in window;
 const SRL={ar:'ar-AE',en:'en-US',ur:'ur-PK',hi:'hi-IN',tl:'fil-PH',fa:'fa-IR',am:'am-ET',lg:'en-UG'};
 let rec=null,listening=false,spkOn=store.get('speak',true)!==false;
-let ttsId=0,ttsKeep=[],ttsUnlocked=false;
-function stopSpeak(){ttsId++;try{if(TTS&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel()}catch(e){}ttsKeep=[];const a=document.getElementById('chatAv');if(a)a.classList.remove('talk')}
+let ttsId=0,ttsKeep=[],ttsUnlocked=false,ttsSrv=false;
+/* server voice (Azure neural; Arabic = Emirati ar-AE Hamdan): one <audio> element, unlocked inside the user's tap so iPhone plays the reply that arrives later */
+const ttsAudio=new Audio(),TTS_SIL='data:audio/wav;base64,UklGRmQBAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
+function stopSpeak(){ttsId++;try{ttsAudio.pause()}catch(e){}try{if(TTS&&(speechSynthesis.speaking||speechSynthesis.pending))speechSynthesis.cancel()}catch(e){}ttsKeep=[];const a=document.getElementById('chatAv');if(a)a.classList.remove('talk')}
 /* iPhone/Safari and Chrome only allow speech that starts from a tap: a silent utterance inside the tap unlocks the reply that arrives later */
-function ttsUnlock(){if(!TTS||!spkOn||ttsUnlocked)return;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);ttsUnlocked=true}catch(e){}}
+function ttsUnlock(){if(!spkOn||ttsUnlocked)return;ttsUnlocked=true;try{if(ttsSrv){ttsAudio.src=TTS_SIL;ttsAudio.play().catch(()=>{})}if(TTS){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch(e){}}
 function voicesReady(){return new Promise(r=>{try{if(speechSynthesis.getVoices().length)return r();const f=()=>{speechSynthesis.removeEventListener('voiceschanged',f);r()};speechSynthesis.addEventListener('voiceschanged',f);setTimeout(r,1500)}catch(e){r()}})}
-function voiceFor(l){const vs=speechSynthesis.getVoices(),L=l.toLowerCase(),p=L.slice(0,2),m=vs.filter(v=>v.lang.toLowerCase().replace('_','-').startsWith(p));return m.find(v=>v.lang.toLowerCase().replace('_','-')===L&&v.localService)||m.find(v=>v.localService)||m[0]||null}
-function speakLang(x){if(/[\u0600-\u06FF]/.test(x))return lang==='ur'?'ur-PK':lang==='fa'?'fa-IR':'ar-SA';if(/[\u0900-\u097F]/.test(x))return 'hi-IN';if(/[\u1200-\u137F]/.test(x))return 'am-ET';return lang==='tl'?'fil-PH':'en-US'}
+/* best voice for a language: natural/online voices first (they speak at a normal pace); for Arabic an Emirati (ar-AE) male voice first, e.g. Microsoft Hamdan */
+function voiceFor(l){const vs=speechSynthesis.getVoices(),L=l.toLowerCase(),p=L.slice(0,2),nl=v=>v.lang.toLowerCase().replace('_','-');
+ const m=vs.filter(v=>nl(v).startsWith(p));if(!m.length)return null;
+ const sc=v=>(p==='ar'&&nl(v)==='ar-ae'?40:0)+(p==='ar'&&/hamdan/i.test(v.name)?20:0)+(nl(v)===L?10:0)+(/natural|neural|online|google/i.test(v.name)?8:0)+(/female|fatima|hoda|zira|sonia|libby|hazel|susan/i.test(v.name)?0:2);
+ return m.slice().sort((a,b)=>sc(b)-sc(a))[0]}
+function speakLang(x){if(/[\u0600-\u06FF]/.test(x))return lang==='ur'?'ur-PK':lang==='fa'?'fa-IR':'ar-AE';if(/[\u0900-\u097F]/.test(x))return 'hi-IN';if(/[\u1200-\u137F]/.test(x))return 'am-ET';return lang==='tl'?'fil-PH':'en-GB'}
 async function speakTxt(x,force){
- if(!TTS||!(spkOn||force)||!x)return;
+ if(!(spkOn||force)||!x)return;
+ if(ttsSrv){
+  stopSpeak();const id=ttsId;
+  try{const r=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:x,lang})});
+   if(r.ok){const b=await r.blob();if(id!==ttsId)return;const a=ttsAudio,av=$('#chatAv');if(a._u)URL.revokeObjectURL(a._u);a._u=URL.createObjectURL(b);a.src=a._u;a.onplay=()=>av.classList.add('talk');a.onended=a.onerror=a.onpause=()=>av.classList.remove('talk');await a.play();return}
+  }catch(e){}
+  if(id!==ttsId)return;   /* server voice unavailable (no Luganda voice, limit, error): fall back to the browser voice */
+ }
+ speakBrowser(x);
+}
+async function speakBrowser(x){
+ if(!TTS)return;
  stopSpeak();const id=ttsId;await voicesReady();await new Promise(r=>setTimeout(r,150));if(id!==ttsId)return;   /* Chrome drops a speak() issued right after cancel() */
  const l=speakLang(x),v=voiceFor(l);if(!v&&speechSynthesis.getVoices().length){toast(t('noVoice'));return}
  /* short chunks: Chrome stops long utterances after about 15 seconds */
- const parts=[];(x.match(/[^.!?؟۔।።\n]+[.!?؟۔।።]*/g)||[x]).forEach(p=>{p=p.trim();if(!p)return;const k=parts.length-1;if(k>=0&&(parts[k]+' '+p).length<=180)parts[k]+=' '+p;else parts.push(p)});
+ const parts=[];(x.match(/[^.!?؟۔।።\n]+[.!?؟۔।።]*/g)||[x]).forEach(p=>{p=p.trim();if(!p)return;const k=parts.length-1;if(k>=0&&(parts[k]+' '+p).length<=260)parts[k]+=' '+p;else parts.push(p)});
  const av=$('#chatAv');
- parts.forEach((p,n)=>{const u=new SpeechSynthesisUtterance(p);u.lang=v?v.lang:l;if(v)u.voice=v;if(n===0)u.onstart=()=>av.classList.add('talk');if(n===parts.length-1)u.onend=u.onerror=()=>av.classList.remove('talk');ttsKeep.push(u);speechSynthesis.speak(u)});
+ parts.forEach((p,n)=>{const u=new SpeechSynthesisUtterance(p);u.lang=v?v.lang:l;if(v)u.voice=v;u.rate=v&&/natural|neural|online|google/i.test(v.name)?1.05:1.2;if(n===0)u.onstart=()=>av.classList.add('talk');if(n===parts.length-1)u.onend=u.onerror=()=>av.classList.remove('talk');ttsKeep.push(u);speechSynthesis.speak(u)});
  try{speechSynthesis.resume()}catch(e){}
 }
 function micPaint(){const b=$('#chatMic');b.classList.toggle('on',listening);b.setAttribute('aria-pressed',listening);$('#chatIn').placeholder=t(listening?'micListen':'chatPh')}
@@ -1027,7 +1044,7 @@ function spkPaint(){const b=$('#chatSpk');b.classList.toggle('off',!spkOn);b.set
 function chatDraw(){
  const box=$('#chatMsgs');if(!box)return;
  const ho=()=>`<div class="ho"><b>${esc(t('hoH'))}</b><div class="hr"><a href="tel:8002626" dir="ltr">800 2626</a><a href="sms:2828" dir="ltr">SMS 2828</a><a href="mailto:aman@adpolice.gov.ae" dir="ltr">aman@adpolice.gov.ae</a><a class="em" href="tel:999">${esc(t('hoEm'))}</a></div></div>`;
- const bot=(x,h,n)=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${esc(x)}${h?ho():''}</div>${TTS&&n!=null?`<button type="button" class="say" data-say="${n}" title="${esc(t('sayTitle'))}" aria-label="${esc(t('sayTitle'))}"><svg class="i" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></button>`:''}</div>`;
+ const bot=(x,h,n)=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${esc(x)}${h?ho():''}</div>${(TTS||ttsSrv)&&n!=null?`<button type="button" class="say" data-say="${n}" title="${esc(t('sayTitle'))}" aria-label="${esc(t('sayTitle'))}"><svg class="i" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></button>`:''}</div>`;
  box.innerHTML=bot(t('chatHello'))+chatMsgs.map((m,n)=>m.r==='user'?`<div class="m u" dir="auto">${esc(m.c)}</div>`:bot(m.c,m.h,m.ok?n:null)).join('')+(chatBusy?bot(t('chatWait')):'');
  box.scrollTop=box.scrollHeight;
  const qs=['chatQ1','chatQ4','chatQ5','chatQ2'].concat(last?['chatQ3']:[]);
@@ -1048,7 +1065,7 @@ async function chatAsk(x){
  chatMsgs.push({r:'assistant',c:out,h:ho,ok:out!==t('chatErr')&&out!==t('chatLimit')});chatBusy=false;chatDraw();
 }
 $('#chatSend').onclick=()=>{stopSpeak();ttsUnlock();chatAsk($('#chatIn').value)};
-$('#chatMsgs').addEventListener('click',e=>{const b=e.target.closest('[data-say]');if(b){const m=chatMsgs[+b.dataset.say];if(m)speakTxt(m.c,true)}});
+$('#chatMsgs').addEventListener('click',e=>{const b=e.target.closest('[data-say]');if(b){const m=chatMsgs[+b.dataset.say];if(m){ttsUnlocked=false;ttsUnlock();speakTxt(m.c,true)}}});
 if(SR){$('#chatMic').classList.remove('hidden');$('#chatVoiceNote').classList.remove('hidden');$('#chatMic').onclick=micToggle}
 if(!TTS)$('#chatSpk').classList.add('hidden');
 $('#chatSpk').onclick=()=>{spkOn=!spkOn;store.set('speak',spkOn);if(!spkOn)stopSpeak();else{ttsUnlocked=false;ttsUnlock()}spkPaint()};

@@ -212,6 +212,7 @@ This rule set came from testing: language models alone over-flag genuine service
 | Links / domains in the message | Sent to our server **without the message text**, to open the link and check age and reputation | Kept only in a short in-memory cache (hours) for speed; never written to disk |
 | Hostname sent to Google | Only the hostname/URL, for Web Risk / Safe Browsing | By Google under its API terms |
 | Voice questions to "Ask Yaqiz" (optional, microphone button) | Converted to text by the browser's own speech-recognition service (the browser vendor's cloud, e.g. Google for Chrome); Yaqiz receives only the resulting text and never the audio. Spoken replies use the browser's built-in speech synthesis, on the device | Nothing recorded or stored by Yaqiz |
+| Spoken replies of "Ask Yaqiz" (when the server voice is on) | The reply text (card-like numbers masked) is sent to Azure Speech to make the audio; limits 60 replies/IP/day and 15,000 characters/day | Not stored |
 | Questions typed to the "Ask Yaqiz" assistant (optional feature) | Sent to our server and to the Claude API to generate the reply; card-like numbers masked first | Not stored; the conversation exists only in the open page |
 | Message, link or screenshot for AI analysis | Sent to our server and to the Claude API as part of every check (the privacy line under Check says so) | Not stored by our server; not logged |
 | Check history | The user's own browser (last 30 checks, first 140 characters) | On the device only; one-tap clear |

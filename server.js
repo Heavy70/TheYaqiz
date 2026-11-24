@@ -30,7 +30,7 @@ const SEC = {
   'Cross-Origin-Resource-Policy':'same-origin',
   'X-Permitted-Cross-Domain-Policies':'none',
   'X-Robots-Tag':'noai, noimageai',
-  'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 };
 
 const RULES_AR = `قواعد الحكم (التزم بها بدقة):
@@ -498,6 +498,7 @@ Scope: scams, fraud and online safety; what to do when something looks suspiciou
 Answer only from the knowledge base below. If the answer is not in it, say briefly that you do not have that information and point the user to the Check tab or to Aman (800 2626). Never invent phone numbers, websites, laws, fines or statistics.
 Rules:
 - Reply in the language of the user's latest message. If that is unclear (for example a single word or a number), reply in the app language given below. You support Arabic, English, Urdu, Hindi, Tagalog, Persian, Amharic and Luganda.
+- When you reply in Arabic, write in a simple, friendly Emirati dialect (for example: شو، ليش، وايد، الحين، لا تدوس على الرابط، كلّم، تراه احتيال), short sentences that sound natural when read aloud. Keep numbers, channel names and the official contact details exactly as written in the knowledge base.
 - Be short and plain: at most about 120 words, with a few short steps when useful. Write plain text only: no markdown, no asterisks, no # headings; number steps like "1.".
 - Never ask for or accept passwords, one-time codes, card numbers or Emirates ID numbers. If the user shares one, tell them not to share it and that no real organisation asks for it.
 - You cannot verify a specific message or link with certainty in chat: for that, send the user to the Check tab of the app. Never say a message is definitely safe.
@@ -551,6 +552,43 @@ async function chatApi(req, res){
     if (!reply) return json(res, 502, { error:'ai_error' });
     return json(res, 200, { reply, handover });
   } catch(e){ console.error('chat', e.message); return json(res, 502, { error:'ai_error' }); }
+}
+
+// ---- /api/tts: one natural voice on every device (Azure Speech neural voices; Arabic = Emirati ar-AE Hamdan). Nothing stored. ----
+const TTS_KEY = (process.env.AZURE_SPEECH_KEY || '').trim(), TTS_REGION = (process.env.AZURE_SPEECH_REGION || 'uaenorth').trim();
+const TTS_PER_IP_DAY = +(process.env.YAQIZ_TTS_PER_IP_DAY || 60), TTS_CHARS_DAY = +(process.env.YAQIZ_TTS_CHARS_DAY || 15000);   /* about 450k characters a month: inside the free tier (500k) */
+const TTS_VOICES = { ar:['ar-AE','ar-AE-HamdanNeural'], en:['en-GB','en-GB-RyanNeural'], ur:['ur-PK','ur-PK-AsadNeural'], hi:['hi-IN','hi-IN-MadhurNeural'], tl:['fil-PH','fil-PH-AngeloNeural'], fa:['fa-IR','fa-IR-FaridNeural'], am:['am-ET','am-ET-AmehaNeural'] };
+function ttsLang(text, ui){
+  if (/[ሀ-፿]/.test(text)) return 'am';
+  if (/[ऀ-ॿ]/.test(text)) return 'hi';
+  if (/[؀-ۿ]/.test(text)) return ui === 'ur' || ui === 'fa' ? ui : 'ar';
+  return ui === 'tl' ? 'tl' : ui === 'lg' ? null : 'en';   /* no Luganda neural voice: the browser voice is used */
+}
+function xmlEsc(x){ return x.replace(/[<>&'"]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;', "'":'&apos;', '"':'&quot;' }[c])); }
+let ttDay = new Date().toISOString().slice(0,10), ttIp = new Map(), ttChars = 0;
+function allowTts(ip, n){
+  const d = new Date().toISOString().slice(0,10);
+  if (d !== ttDay){ ttDay = d; ttIp = new Map(); ttChars = 0; }
+  const k = ttIp.get(ip) || 0;
+  if (k >= TTS_PER_IP_DAY || ttChars + n > TTS_CHARS_DAY) return false;
+  ttIp.set(ip, k + 1); ttChars += n; return true;
+}
+async function ttsApi(req, res){
+  if (!TTS_KEY) return json(res, 503, { error:'tts_off' });
+  let b; try { b = JSON.parse(await readBody(req, 16 * 1024)); } catch(e){ return json(res, 400, { error:'bad_request' }); }
+  const text = typeof b.text === 'string' ? maskNums(b.text.trim()).slice(0, 2500) : '';
+  if (!text) return json(res, 400, { error:'bad_request' });
+  const l = ttsLang(text, CHAT_LANGS[b.lang] ? b.lang : 'en');
+  if (!l) return json(res, 404, { error:'no_voice' });
+  if (!allowTts(clientIp(req), text.length)) return json(res, 429, { error:'limit' });
+  const [xl, voice] = TTS_VOICES[l];
+  const ssml = `<speak version="1.0" xml:lang="${xl}"><voice name="${voice}"><prosody rate="+0%">${xmlEsc(text)}</prosody></voice></speak>`;
+  try {
+    const r = await fetch(`https://${TTS_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`, { method:'POST', headers:{ 'Ocp-Apim-Subscription-Key':TTS_KEY, 'Content-Type':'application/ssml+xml', 'X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3', 'User-Agent':'TheYaqiz' }, body: ssml });
+    if (!r.ok){ console.error('tts upstream', r.status); return json(res, 502, { error:'tts_error' }); }
+    const buf = Buffer.from(await r.arrayBuffer());
+    return send(res, 200, buf, { 'Content-Type':'audio/mpeg', 'Cache-Control':'no-store' });
+  } catch(e){ console.error('tts', e.message); return json(res, 502, { error:'tts_error' }); }
 }
 
 function serveStatic(req, res){
@@ -608,12 +646,16 @@ function route(req, res){
   if (!pageOk(clientIp(req))) return send(res, 429, 'Too many requests', {'Retry-After':'60'});
   if (url.startsWith('/api/') && url !== '/api/health' && !apiAllowed(req)) return json(res, 403, { error:'forbidden' });
   if (url.startsWith('/api/') && !burstOk(clientIp(req))) return json(res, 429, { error:'limit' });
-  if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY, chat: !!CHAT_KEY });
+  if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY, chat: !!CHAT_KEY, tts: !!TTS_KEY });
   if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/open' && req.method === 'GET') return openApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/chat'){
     if (req.method !== 'POST') return json(res, 405, { error:'method' });
     return chatApi(req, res).catch(e => { console.error('chat', e && e.message); json(res, 500, { error:'server' }); });
+  }
+  if (url === '/api/tts'){
+    if (req.method !== 'POST') return json(res, 405, { error:'method' });
+    return ttsApi(req, res).catch(e => { console.error('tts', e && e.message); json(res, 500, { error:'server' }); });
   }
   if (url === '/api/analyze'){
     if (req.method !== 'POST') return json(res, 405, { error:'method' });
@@ -622,4 +664,4 @@ function route(req, res){
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
   serveStatic(req, res);
 }
-if (typeof module !== 'undefined') module.exports = { cleanChat, maskNums, CHAT_SYS };
+if (typeof module !== 'undefined') module.exports = { cleanChat, maskNums, CHAT_SYS, ttsLang, xmlEsc, TTS_VOICES };
