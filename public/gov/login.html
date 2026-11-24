@@ -63,6 +63,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:14px 12px cal
     if(b.disabled)return;
     b.disabled=true;c.classList.add('busy');l.textContent='Signing in… / جارٍ تسجيل الدخول';
     setTimeout(function(){
+      try{sessionStorage.setItem('yaqiz_entry','1')}catch(e){}
       location.href='/';
     },1200);
   });
