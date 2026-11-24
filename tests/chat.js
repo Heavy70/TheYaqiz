@@ -54,4 +54,6 @@ ok(/Scam Network Intelligence/.test(html) && /ذكاء شبكات الاحتيا
 ok(/chat empty reply/.test(srv) && /CHAT_FALLBACK/.test(srv) && /\[\\u0600-\\u06FF\]\/\.test\(last\)/.test(srv) && /529\]\.includes\(r\.status\)/.test(srv), 'empty or busy model replies are retried and never shown as an error; question script decides the reply language');
 ok(/m\.ok!==false/.test(html), 'failed replies are not sent back as assistant history');
 ok(/id="askTop"/.test(html) && /class="askrow"/.test(html) && /justify-content:flex-start/.test(html), 'Ask Yaqiz sits on the first header line, at the start side (right in Arabic, left otherwise)');
+ok(/max_tokens:1500/.test(srv) && /chat cut at max_tokens/.test(srv) && /CHAT_HANDOVER\.test\(last\)/.test(srv), 'replies are never cut mid-word; paid/shared-code questions always show the Aman buttons');
+ok(/max_tokens:1500, thinking:\{ type:'disabled' \}/.test(srv), 'chat turns thinking off so the whole token budget goes to the visible reply');
 console.log(fails.length ? 'CHAT FAIL\n' + fails.join('\n') : 'CHAT PASS'); process.exit(fails.length ? 1 : 0);

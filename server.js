@@ -547,8 +547,9 @@ async function chatApi(req, res){
   if (/[\u0600-\u06FF]/.test(last) && !['ar','ur','fa'].includes(c.lang)) c.lang = 'ar';
   else if (/[\u0900-\u097F]/.test(last)) c.lang = 'hi';
   else if (/[\u1200-\u137F]/.test(last)) c.lang = 'am';
+  /* Haiku 5.5 thinks by default and max_tokens covers thinking + answer, so a long hidden think left only a few words of reply: thinking is off for chat */
   const ask = async (extra) => {
-    const payload = JSON.stringify({ model:MODEL, max_tokens:700, system: CHAT_SYS + '\n\nApp language: ' + CHAT_LANGS[c.lang] + (c.ctx ? '\n\n' + c.ctx : '') + (extra || ''), messages:c.m });
+    const payload = JSON.stringify({ model:MODEL, max_tokens:1500, thinking:{ type:'disabled' }, system: CHAT_SYS + '\n\nApp language: ' + CHAT_LANGS[c.lang] + (c.ctx ? '\n\n' + c.ctx : '') + (extra || ''), messages:c.m });
     const call = k => fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{ 'x-api-key':k, 'anthropic-version':'2023-06-01', 'content-type':'application/json' }, body: payload });
     let r = await call(CHAT_KEY);
     /* the separate assistant key rejected, or the service busy: one more try (with the main key when there is one) */
@@ -556,9 +557,11 @@ async function chatApi(req, res){
     const j = await r.json().catch(() => ({}));
     if (!r.ok){ console.error('chat upstream', r.status, j && j.error && j.error.type); return null; }
     const raw = (j.content || []).map(x => x.text || '').join('');
-    const reply = raw.replace(/\[\[HANDOVER\]\]/g, '').replace(/\*\*|__|^#{1,6}\s+/gm, '').trim().slice(0, 2500);
+    let reply = raw.replace(/\[\[HANDOVER\]\]/g, '').replace(/\*\*|__|^#{1,6}\s+/gm, '').trim().slice(0, 2500);
     if (!reply) console.error('chat empty reply', j.stop_reason, (j.content || []).map(x => x.type).join(','));
-    return { reply, handover: /\[\[HANDOVER\]\]/.test(raw) };
+    /* a reply cut by the token limit ends at its last complete line or sentence, never mid-word */
+    if (reply && j.stop_reason === 'max_tokens'){ console.error('chat cut at max_tokens'); const k = Math.max(reply.lastIndexOf('\n'), reply.search(/[.!?؟।።][^.!?؟।።]*$/)); if (k > 40) reply = reply.slice(0, k + 1).trim(); }
+    return { reply, handover: /\[\[HANDOVER\]\]/.test(raw) || CHAT_HANDOVER.test(last) };
   };
   try {
     let a = await ask();
@@ -569,6 +572,8 @@ async function chatApi(req, res){
     return json(res, 502, { error:'ai_error' });
   } catch(e){ console.error('chat', e.message); return json(res, 502, { error:'ai_error' }); }
 }
+/* the user says money or a code has already gone, or they are being threatened: always show the Aman buttons, whatever the model wrote */
+const CHAT_HANDOVER = /(دفعت|حوّلت|حولت|عطيته|عطيتهم|أعطيت|اعطيت|شاركت|أرسلت (له|لهم)? ?(الكود|الرمز|رقم البطاقة)|ثبّت|ثبت تطبيق|يهددني|يبتزني|paid|transferred|sent (him|them|the) money|gave (him|them|my)|shared (my|the) (code|otp|card|password)|installed|screen ?share|threaten|blackmail|ادائیگی کر دی|पैसे भेज|nagbayad|پرداخت کردم)/i;
 const CHAT_FALLBACK = {
   ar: 'ما قدرت أجاوب على هالسؤال الحين. إذا عندك مسج أو رابط أو رقم تشك فيه، افحصه من تبويب Check. وإذا تبا تبلّغ، كلّم أمان على 800 2626 أو أرسل مسج على 2828، وفي الخطر اتصل على 999.',
   en: 'I couldn’t answer that just now. If you have a suspicious message, link or number, check it in the Check tab. To report, contact Aman on 800 2626 or SMS 2828, and call 999 in an emergency.' };
