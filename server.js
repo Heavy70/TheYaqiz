@@ -80,6 +80,9 @@ Write all text in plain, concise English: at most 4 red flags and 3 advice items
 
 // ---- verified facts: domain registration age via RDAP (cached) ----
 const OFFICIAL = Array.from(new Set(REG.official.concat(...REG.entities.map(e => e.d))));
+/* verified official contact numbers (registry R.tels), given to the AI so it can tell a genuine helpline from a fake one */
+const TEL_LINE = '\nVerified official contact numbers. A message that names one of these organisations but asks you to call or WhatsApp a different mobile or landline number is a scam sign; a call-back to one of these numbers is a genuine sign: ' +
+  Object.entries(REG.tels || {}).map(([k, v]) => { const e = REG.entities.find(x => x.id === k); return (e ? e.n[1] : k) + ' ' + v.map(x => x.length <= 4 || /^[68]00/.test(x) ? x : '0' + x).join(' / '); }).join('; ') + '.';
 const GOVSUF = REG.govSuffixes;
 const SLD = ['com','net','org','gov','edu','co','ac','sch','mil'];
 function regDomain(h){ const p = h.split('.'); return (p.length >= 3 && SLD.includes(p[p.length-2]) && p[p.length-1].length === 2) ? p.slice(-3).join('.') : p.slice(-2).join('.'); }
@@ -117,6 +120,27 @@ async function rdapBase(tld){
   for (const [tlds, urls] of boot.services){ if (tlds.includes(tld)) return urls.find(u => u.startsWith('https')) || urls[0]; }
   return null;
 }
+const rdapInfo = new Map(), ipCache = new Map();
+/* where the site is hosted: its IPv4 addresses and the network that owns the first one (RDAP for IP addresses, no key needed) */
+async function hosting(host){
+  const c = ipCache.get(host); if (c && Date.now() - c.t < 6 * 36e5) return c.v;
+  let v = null;
+  try {
+    const ips = await Promise.race([dnsMod.promises.resolve4(host), new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 3000))]);
+    const pub = ips.filter(ip => !privIp(ip)).slice(0, 3);
+    v = { ips: pub };
+    if (pub[0]){
+      try {
+        const j = await getJson('https://rdap.org/ip/' + pub[0], 4000);
+        const ent = (j.entities || []).find(e => (e.roles || []).some(r => r === 'registrant' || r === 'administrative')) || (j.entities || [])[0];
+        const fn = ent && ent.vcardArray && (ent.vcardArray[1] || []).find(x => x[0] === 'fn');
+        v.net = String(j.name || '').slice(0, 60); v.org = fn ? String(fn[3]).slice(0, 80) : ''; v.country = String(j.country || '').slice(0, 2);
+      } catch(e){}
+    }
+  } catch(e){}
+  ipCache.set(host, { t: Date.now(), v }); if (ipCache.size > 3000) ipCache.clear();
+  return v;
+}
 async function domainAge(d){
   const c = ageCache.get(d); if (c && Date.now() - c.t < c.ttl) return c.v;
   let v = null, why = 'unknown';
@@ -127,6 +151,10 @@ async function domainAge(d){
     try {
       const j = await getJson(u, 4500);
       const ev = (j.events || []).find(e => e.eventAction === 'registration');
+      const rg = (j.entities || []).find(e => (e.roles || []).includes('registrar'));
+      const fn = rg && rg.vcardArray && (rg.vcardArray[1] || []).find(x => x[0] === 'fn');
+      rdapInfo.set(d, { registrar: fn ? String(fn[3]).slice(0, 80) : '', ns: (j.nameservers || []).map(n => String(n.ldhName || '').toLowerCase()).filter(Boolean).slice(0, 4), status: (j.status || []).slice(0, 4) });
+      if (rdapInfo.size > 2000) rdapInfo.clear();
       if (ev){ v = ev.eventDate.slice(0,10); why = ''; break; }
       why = 'no_registration_event';
     } catch(e){ why = e.name === 'AbortError' ? 'timeout' : String(e.message || 'error').slice(0, 40); }
@@ -248,7 +276,7 @@ async function analyze(req, res){
   const facts = await factsFor(text, b.lang);
   content.push({ type:'text', text:(b.lang === 'en' ? 'Content to analyse:\n<<<\n' : 'المحتوى المطلوب تحليله:\n<<<\n') + (text || '(لا نص)') + '\n>>>' + facts });
   const OUTL = { ur:'Urdu', hi:'Hindi', tl:'Filipino (Tagalog)', fa:'Persian (Farsi)', am:'Amharic', lg:'Luganda (Ganda, the main local language of Uganda)' }[b.out];
-  const sys = (b.lang === 'en' ? PROMPT_EN : PROMPT_AR) + (OUTL ? `\nWrite every text value of the JSON (red_flags, explanation, advice, type) in plain ${OUTL}. Keep the JSON keys and the verdict labels exactly as specified in English.` : '');
+  const sys = (b.lang === 'en' ? PROMPT_EN : PROMPT_AR) + TEL_LINE + (OUTL ? `\nWrite every text value of the JSON (red_flags, explanation, advice, type) in plain ${OUTL}. Keep the JSON keys and the verdict labels exactly as specified in English.` : '');
   async function ask(extra){
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
@@ -378,9 +406,10 @@ async function webRisk(host){
 async function hostFacts(host){
   const c = hostCache.get(host); if (c && Date.now() - c.t < 6 * 36e5) return c.v;
   const reg = regDomain(host);
-  const [created, sb, wr] = await Promise.all([domainAge(reg), safeBrowsing(host), webRisk(host)]);
+  const [created, sb, wr, hs] = await Promise.all([domainAge(reg), safeBrowsing(host), webRisk(host), Promise.race([hosting(host), new Promise(z => setTimeout(() => z(null), 3500))])]);   /* hosting never slows the verdict: at most 3.5 s */
   const age = created ? Math.max(0, Math.floor((Date.now() - Date.parse(created)) / 864e5)) : null;
-  const v = { d: host, age, sb, wr, fd: feedHits(host) }; if (age === null) v.why = ageWhy.get(reg) || 'unknown';
+  const ri = rdapInfo.get(reg) || {};
+  const v = { d: host, age, sb, wr, fd: feedHits(host), created: created || '', registrar: ri.registrar || '', ns: ri.ns || [], hosting: hs, checked: new Date().toISOString() }; if (age === null) v.why = ageWhy.get(reg) || 'unknown';
   hostCache.set(host, { t: Date.now() - (age === null ? 5 * 36e5 + 3e5 : 0), v }); if (hostCache.size > 3000) hostCache.clear();
   return v;
 }
@@ -394,6 +423,64 @@ async function domainApi(req, res){
   return json(res, 200, { facts, sb: !!GSB_KEY, wr: !!WR_KEY });
 }
 
+
+/* ===== early warning: newly certified look-alike domains of UAE brands =====
+   Source: public Certificate Transparency logs (crt.sh). Every HTTPS site needs a certificate, and certificates are logged publicly
+   the moment they are issued, usually before the first scam SMS goes out. Each new name is scored by the same on-device engine,
+   official domains are dropped, and the domain's registration age is read over RDAP. Nothing about users is involved. */
+const ENG = require('./public/engine.js')((a, e) => e, () => 1, REG);
+/* crt.sh answers prefix searches (brand%) fast; a leading wildcard (%brand%) times out (502), so each brand is searched as a name prefix and as a subdomain (%.brand%) */
+const WATCH = ['emiratesnbd', 'uaepass', 'emiratespost', 'adpolice', 'dubaipolice', 'etisalat', 'mashreq', 'bankfab', 'adcb', 'adib', 'salik', 'tamm'].flatMap(b => [[b, b + '%'], [b, '%.' + b + '%']]);
+const WATCH_DAYS = 90;
+let watch = { t: 0, items: [], ok: 0, failed: 0 }, watchBusy = null, watchTry = 0;
+async function crtNames(q){
+  const j = await getJson('https://crt.sh/?q=' + encodeURIComponent(q) + '&output=json&exclude=expired', 25000);
+  const since = Date.now() - WATCH_DAYS * 864e5, out = new Map();
+  for (const row of Array.isArray(j) ? j : []){
+    const nb = Date.parse(String(row.not_before || '') + 'Z'); if (!(nb >= since)) continue;
+    for (let n of String(row.name_value || '').split('\n')){
+      n = n.trim().toLowerCase().replace(/^\*\./, '');
+      if (!/^(?=.{4,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,24}$/.test(n) || out.has(n)) continue;
+      out.set(n, { seen: new Date(nb).toISOString().slice(0, 10), issuer: (String(row.issuer_name || '').match(/O=([^,]+)/) || [])[1] || '' });
+    }
+  }
+  return out;
+}
+async function refreshWatch(){
+  const found = new Map(); let ok = 0, failed = 0;
+  for (let i = 0; i < WATCH.length; i += 3){
+    await Promise.all(WATCH.slice(i, i + 3).map(async ([brand, q]) => {
+      try {
+        const names = await crtNames(q); ok++;
+        names.forEach((m, n) => {
+          if (ENG.isGov(n) || ENG.isOfficial(n)) return;
+          const r = ENG.analyzeUrl('https://' + n + '/'); if (!r || r.score < 40) return;
+          const reg = regDomain(n), prev = found.get(reg);
+          if (!prev || r.score > prev.score) found.set(reg, { domain: n, reg, brand, score: r.score, seen: m.seen, issuer: m.issuer, why: r.flags.filter(f => f.w > 0).slice(0, 2).map(f => f.l) });
+        });
+      } catch(e){ failed++; console.error('watch', brand, e.name === 'AbortError' ? 'timeout' : String(e.message || e).slice(0, 60)); }
+    }));
+  }
+  const items = [...found.values()].sort((a, b) => b.score - a.score || b.seen.localeCompare(a.seen)).slice(0, 40);
+  await Promise.all(items.slice(0, 25).map(async it => { const c = await domainAge(it.reg).catch(() => null); it.created = c || ''; it.age = c ? Math.max(0, Math.floor((Date.now() - Date.parse(c)) / 864e5)) : null; }));
+  /* keep what is plausibly new: registered in the last 180 days, or age not published */
+  const keep = items.filter(it => it.age === undefined || it.age === null || it.age <= 180).slice(0, 25);
+  if (ok) watch = { t: Date.now(), items: keep, ok, failed };
+  else watch.failed = failed;
+  return watch;
+}
+function ensureWatch(){
+  if (!watchBusy && Date.now() - watch.t > 6 * 36e5 && Date.now() - watchTry > 10 * 6e4 && (watchTry = Date.now())) watchBusy = refreshWatch().catch(e => { console.error('watch', e.message); return watch; }).finally(() => { watchBusy = null; });
+  return watchBusy;
+}
+setTimeout(ensureWatch, 20000); setInterval(ensureWatch, 6 * 36e5).unref();
+async function watchApi(req, res){
+  const ip = clientIp(req);
+  if (!allowDom(ip)) return json(res, 429, { error: 'limit' });
+  const p = ensureWatch();
+  if (!watch.t && p) await Promise.race([p, new Promise(z => setTimeout(z, 45000))]);
+  return json(res, 200, { updated: watch.t ? new Date(watch.t).toISOString() : null, days: WATCH_DAYS, brands: [...new Set(WATCH.map(w => w[0]))], items: watch.items, sources: { ok: watch.ok, failed: watch.failed }, refreshing: !!watchBusy });
+}
 
 /* ===== open the link safely (follow redirects, read the landing page) ===== */
 const dnsMod = require('dns'), netMod = require('net'), httpsMod = require('https'), httpMod = require('http');
@@ -689,6 +776,7 @@ function route(req, res){
   if (url.startsWith('/api/') && !burstOk(clientIp(req))) return json(res, 429, { error:'limit' });
   if (url === '/api/health') return json(res, 200, { ok:true, ai: !!KEY, chat: !!CHAT_KEY, tts: !!(TTS_KEY || (EL_KEY && EL_VOICE_AR)) });
   if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res).catch(() => json(res, 500, { error:'server' }));
+  if (url === '/api/watch' && req.method === 'GET') return watchApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/open' && req.method === 'GET') return openApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/chat'){
     if (req.method !== 'POST') return json(res, 405, { error:'method' });
@@ -705,4 +793,4 @@ function route(req, res){
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
   serveStatic(req, res);
 }
-if (typeof module !== 'undefined') module.exports = { cleanChat, maskNums, CHAT_SYS, ttsLang, xmlEsc, TTS_VOICES };
+if (typeof module !== 'undefined') module.exports = { cleanChat, maskNums, CHAT_SYS, ttsLang, xmlEsc, TTS_VOICES, refreshWatch, hostFacts, TEL_LINE };

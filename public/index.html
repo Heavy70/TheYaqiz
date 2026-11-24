@@ -250,6 +250,9 @@ footer .dev b{color:var(--brand)}
 .chat .nt{font-size:12.5px;color:var(--muted);margin:6px 0 10px}.chat .msgs{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:4px 2px;margin-bottom:10px}.chat .m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.chat .m.u{align-self:flex-end;background:var(--brand);color:#fff;border-end-end-radius:4px}.chat .m.b{align-self:flex-start;background:var(--soft);border:1px solid var(--line);border-end-start-radius:4px}.chat .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.chat .chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}.chat .row{display:flex;gap:8px;align-items:flex-end}.chat .row textarea{resize:none;min-height:46px;flex:1;min-width:0;width:auto}.chat .row .btn{flex:none}
 .chat .chead{display:flex;align-items:center;gap:12px;margin-bottom:6px}.chat .chead h2{margin:0}.chat .chead .hint{margin:2px 0 0}.chat .av{flex:none;width:30px;height:30px;display:inline-block}.chat .av.big{width:52px;height:52px}.chat .av svg{width:100%;height:100%;display:block}.chat .mr{display:flex;gap:8px;align-items:flex-end;align-self:flex-start;max-width:92%}.chat .mr .m.b{align-self:auto;max-width:none}
 .chat .av.talk{border-radius:50%;animation:avtalk .9s ease-in-out infinite}@keyframes avtalk{50%{box-shadow:0 0 0 6px rgba(0,122,61,.18);transform:scale(1.04)}}.chat .ho{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.chat .ho b{display:block;font-size:13px;margin-bottom:8px}.chat .ho .hr{display:flex;flex-wrap:wrap;gap:6px}.chat .ho a{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;text-decoration:none;color:var(--ink);background:var(--soft)}.chat .ho a.em{background:var(--bad);color:#fff;border-color:var(--bad)}.chat .mr .say{flex:none;align-self:flex-end;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}.chat .mr .say svg{width:16px;height:16px}.chat .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.chat .ic-btn{padding:0;width:46px;height:46px;flex:none}.chat .ic-btn svg{width:22px;height:22px}.chat .ic-btn.on{background:var(--bad);color:#fff;animation:micp 1s infinite}@keyframes micp{50%{opacity:.6}}.chat #chatSpk{margin-inline-start:auto;width:40px;height:40px}.chat #chatSpk:not(.off) .x{display:none}.chat #chatSpk.off .w{display:none}
+#evPrint{display:none}
+.ewl{display:flex;flex-direction:column;gap:8px;margin-top:6px}.ewi{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 10px;border:1px solid #e3e8f2;border-radius:10px}.ewi b{word-break:break-all;flex:1 1 100%}.ewi span{font-size:12px;opacity:.8;flex:1}
+@media print{body.printing>*:not(#evPrint){display:none!important}body.printing #evPrint{display:block!important;color:#000;background:#fff;font:11pt/1.45 system-ui,sans-serif}#evPrint table{width:100%;border-collapse:collapse;margin:6px 0 14px}#evPrint th,#evPrint td{border:1px solid #999;padding:5px 7px;text-align:start;vertical-align:top;white-space:pre-wrap;word-break:break-word}#evPrint th{width:30%;background:#eee}#evPrint h1{font-size:16pt;margin:0 0 8px}#evPrint h2{font-size:12pt;margin:14px 0 4px}#evPrint .fp{font-size:8.5pt;word-break:break-all}}
 </style>
 </head>
 <body>
@@ -462,6 +465,15 @@ footer .dev b{color:var(--brand)}
       <p class="hint" data-i18n="repSumD"></p>
       <textarea id="repTxt" rows="9" dir="auto"></textarea>
       <div class="row"><button class="btn" id="repCopy"><svg class="i"><use href="#i-copy"/></svg><span data-i18n="copy"></span></button></div>
+      <h3 data-i18n="evH"></h3>
+      <p class="hint" data-i18n="evD"></p>
+      <div class="row"><button class="btn" id="evPdf"><span data-i18n="evPdf"></span></button><button class="btn alt" id="evJson"><span data-i18n="evJson"></span></button></div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="ewH"></h2>
+      <p class="hint" data-i18n="ewD"></p>
+      <div id="ewList" class="hint"></div>
+      <p class="hint" data-i18n="ewSrc"></p>
     </div>
   </section>
 
@@ -619,7 +631,17 @@ rs3:['لا تحذف شيئًا: احتفظ بلقطات الشاشة والأر�
 rs4:['أبلغ رسميًا عبر القنوات أدناه.','Report officially through the channels below.'],
 aman:['خدمة «أمان» — شرطة أبوظبي','Aman service — Abu Dhabi Police'],cCall:['اتصال مجاني','Toll-free call'],cSms:['رسالة نصية','Text message'],cMail:['بريد إلكتروني','Email'],cApp:['التطبيق الذكي','Smart app'],cAppD:['تطبيق شرطة أبوظبي','Abu Dhabi Police app'],
 emerg:['في الطوارئ: 999.','Emergency: 999.'],repSum:['ملخص بلاغ جاهز','Ready-made report summary'],repSumD:['يُعبّأ تلقائيًا من آخر فحص، لتلصقه في البلاغ أو ترسله للبنك.','Filled from your last check — paste it into your report or send it to your bank.'],
-copy:['نسخ الملخص','Copy summary'],copied:['تم النسخ','Copied'],copyMan:['حدّد النص وانسخه يدويًا','Select the text and copy it manually'],
+copy:['نسخ الملخص','Copy summary'],
+evH:['حزمة أدلة للشرطة','Evidence pack for the police'],evD:['تُصدَّر من آخر فحص: الرابط النهائي وسلسلة التحويل، وتاريخ تسجيل النطاق والمسجِّل، وعنوان IP وشبكة الاستضافة، والقوائم السوداء، والتوقيت، مع بصمة SHA-256. تُنشأ على جهازك ولا تُحفظ لدينا.','Exported from your last check: final link and redirect chain, domain registration date and registrar, IP address and hosting network, threat lists, timestamps and a SHA-256 fingerprint. Created on your device; nothing is stored by us.'],
+evPdf:['حفظ PDF / طباعة','Save PDF / print'],evJson:['تنزيل ملف الأدلة (JSON)','Download evidence file (JSON)'],
+evTitle:['حزمة أدلة احتيال إلكتروني — TheYaqiz','Online scam evidence pack — TheYaqiz'],evGen:['وقت الإنشاء','Generated'],evChecked:['وقت الفحص','Checked'],evVerdict:['النتيجة','Result'],evContent:['المحتوى','Content'],evSignals:['المؤشرات','Signals'],
+evOpen:['فتح الرابط من خادم TheYaqiz','Link opened by the TheYaqiz server'],evFinal:['الوجهة النهائية','Final destination'],evChain:['سلسلة التحويل','Redirect chain'],evTitleP:['عنوان الصفحة','Page title'],evAsks:['تطلب الصفحة','The page asks for'],
+evCreated:['تاريخ تسجيل النطاق','Domain registered'],evAge:['عمر النطاق','Domain age'],evRegistrar:['المسجِّل','Registrar'],evNs:['خوادم الأسماء','Name servers'],evIp:['عناوين IP','IP addresses'],evNet:['شبكة الاستضافة','Hosting network'],evLists:['القوائم السوداء','Threat lists'],evRows:['لوحة الأدلة','Evidence panel'],
+evTech:['أدلة تقنية','Technical evidence'],evFoot:['أُنشئت على جهاز المستخدم بواسطة TheYaqiz. البصمة SHA-256 محسوبة على ملف JSON بدون حقل البصمة.','Generated on the user’s device by TheYaqiz. The SHA-256 fingerprint is computed over the JSON file without its sha256 field.'],
+ewH:['إنذار مبكر: مواقع شبيهة جديدة','Early warning: new look-alike sites'],ewD:['نطاقات جديدة تقلّد بنوكًا وجهات إماراتية، رُصدت فور إصدار شهادة HTTPS لها، غالبًا قبل وصول أول رسالة احتيال. للمراجعة: الإدراج لا يعني أن الموقع احتيال مؤكد.','New domains imitating UAE banks and authorities, spotted as soon as their HTTPS certificate is issued, often before the first scam message goes out. For review: a listing is not proof of a scam.'],
+ewLoad:['جارٍ جلب أحدث الرصد…','Loading the latest findings…'],ewEmpty:['لا نطاقات شبيهة جديدة في آخر 90 يومًا.','No new look-alike domains in the last 90 days.'],ewFail:['تعذّر الوصول إلى سجلات الشهادات الآن؛ حاول لاحقًا.','The certificate logs could not be reached right now; try again later.'],
+ewCheck:['افحص','Check'],ewSeen:['شهادة صدرت','certificate issued'],ewAge:['عمر النطاق','domain age'],ewDays:['يوم','days'],ewUnknown:['غير منشور','not published'],ewUpd:['آخر تحديث:','Last updated:'],
+ewSrc:['المصدر: سجلات شفافية الشهادات العامة (crt.sh)، تُحدَّث كل 6 ساعات، وكل نطاق يُقيَّم بمحرك TheYaqiz ويُفحص عمره.','Source: public Certificate Transparency logs (crt.sh), refreshed every 6 hours; each domain is scored by the TheYaqiz engine and its age is checked.'],copied:['تم النسخ','Copied'],copyMan:['حدّد النص وانسخه يدويًا','Select the text and copy it manually'],
 noScan:['لم تُجرِ فحصًا بعد. افحص رسالة أو رابطًا أو أجب عن قائمة المكالمة ليُعبَّأ الملخص تلقائيًا.','No check yet. Check a message or link, or answer the call checklist, to fill this summary automatically.'],
 dev:['برمجة وتطوير: <b>خلدون عبد الهادي</b> · <b dir="ltr">Khaldun Abdalhadi</b>','Designed &amp; developed by <b>Khaldun Abdalhadi</b>'],
 footer:['يقِظ نموذج أولي مستقل مقدَّم لتحدي هاكاثون ScamShield AI، وليس تطبيقًا رسميًا لأي جهة حكومية. للتحقق والإبلاغ اعتمد دائمًا على القنوات الرسمية.','TheYaqiz is an independent prototype for the ScamShield AI Hackathon and is not an official app of any government entity. Always rely on official channels to verify and report.'],
@@ -730,7 +752,7 @@ function go(v,mode){
   $$('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.go===nv));
   $$('#dnav button').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
   if(mode)setMode(mode);
-  if(v==='report')fillReport();
+  if(v==='report'){fillReport();loadWatch()}
   if(v==='home')renderHome();
   if(v==='chat')chatDraw();else{try{stopSpeak();if(listening)rec.stop()}catch(e){}}
   window.scrollTo({top:0,behavior:'smooth'});
@@ -779,7 +801,7 @@ function render(res,kind,input,opts={}){
  body+=fold('why',res.flags.length?t('why'):t('result'),res.flags.length||null,res.flags.length?`<ul class="flags">${res.flags.map(f=>`<li class="${f.good?'good':f.neutral?'neu':''}"><span class="ic"><svg class="i" style="width:18px;height:18px"><use href="#${f.good?'i-check':f.neutral?'i-bulb':'i-alert'}"/></svg></span><div>${esc(f.l)}${f.tip?`<small>${esc(f.tip)}</small>`:''}</div></li>`).join('')}</ul>`:`<p class="hint" style="margin:0">${t('noPat')}</p>`,false);
  el.innerHTML=`<div class="rh">${gauge(res.score,L.col)}<div><p class="vt">${L.t}</p><p class="vs">${t('riskOf')} · ${opts.src||t('localSrc')}</p></div></div><div class="rb">${body}</div>`;
  requestAnimationFrame(()=>setTimeout(()=>el.querySelectorAll('.fl').forEach(f=>f.style.width=f.dataset.w+'%'),30));
- last={kind,input,score:res.score,lvl:L.c,flags:res.flags.filter(f=>!f.good).map(f=>f.l),time:Date.now()};
+ last={kind,input,score:res.score,lvl:L.c,flags:res.flags.filter(f=>!f.good).map(f=>f.l),time:Date.now(),res};
  if(opts.upd){const hh=store.get('hist',[]),i=hh.findIndex(z=>z.t===opts.upd);if(i>=0){hh[i].s=last.score;hh[i].l=last.lvl;hh[i].f=last.flags;store.set('hist',hh)}last.time=opts.upd}
  if(!opts.noSave)saveHist(last);
  if(opts.scroll!==false)el.scrollIntoView({behavior:'smooth',block:'start'});
@@ -832,10 +854,10 @@ async function enrich(res){
  if(!(srv&&res.pending&&res.pending.length))return res;
  const [o,f0]=await Promise.all([res.pendingUrl?getOpen(res.pendingUrl):null,getFacts(res.pending)]);   /* in parallel: faster */
  const fin=o&&o.ok?analyzeUrl(o.url):null;
- if(fin&&fin.official)return applyOpen(res,o);
+ if(fin&&fin.official)return Object.assign(applyOpen(res,o),{_open:o,_facts:f0||[]});
  let f=f0||[];
  if(o&&o.ok&&o.host&&!res.pending.includes(o.host)&&!E.isOfficial(o.host)){const f2=await getFacts([o.host]);f=f.concat(f2||[])}
- return applyOpen(applyFacts(res,f),o)}
+ return Object.assign(applyOpen(applyFacts(res,f),o),{_open:o,_facts:f})}
 function finish(res,kind,x,noSave){
  const net=srv&&res.pending&&res.pending.length, auto=(kind==='msg'||kind==='url')&&!!ai;   /* one unified check: on-device engine, then link opening, then the AI, merged into a single result */
  if(net)res.evidence=(res.evidence||[]).concat([{id:'load',st:'load',t:T('عمر النطاق وسمعته','Domain age & reputation'),v:T('جارٍ فتح الرابط وفحصه…','opening and checking the link…')}]);
@@ -847,7 +869,7 @@ function finish(res,kind,x,noSave){
   if(net){c=await enrich(res);if(!cur())return;render(c,kind,x,{noSave:true,scroll:false,upd:time})}
   if(auto){
    render(Object.assign({},c,{evidence:(c.evidence||[]).concat([{id:'load',st:'load',t:t('aiRow'),v:t('aiRun')}])}),kind,x,{noSave:true,scroll:false,upd:time});
-   try{const j=await aiAnalyze(x);if(!cur())return;c=applyAi(c,j);render(c,kind,x,{noSave:true,scroll:false,upd:time});const s=$('#res .aiSlot');if(s)s.innerHTML=aiHtml(j)}
+   try{const j=await aiAnalyze(x);if(!cur())return;c=Object.assign(applyAi(c,j),{_open:c._open,_facts:c._facts,_ai:{score:j.score,verdict:j.verdict,type:j.type}});render(c,kind,x,{noSave:true,scroll:false,upd:time});const s=$('#res .aiSlot');if(s)s.innerHTML=aiHtml(j)}
    catch(e){if(cur())render(c,kind,x,{noSave:true,scroll:false,upd:time})}
   }
  })();
@@ -938,7 +960,7 @@ lg:['Alipoota y’okugezaako obufere obw’oku intaneeti','Olunaku n’essaawa',
 function fillReport(){
  if(!last){$('#repTxt').value=t('noScan');return}
  const L=level(last.score);const kl=t((KIC[kindKey(last.kind)]||KIC.msg)[3]);
- if(REP[lang]){const r=REP[lang];$('#repTxt').value=`${r[0]}\n${r[1]}: ${new Date(last.time).toLocaleString(r[10])}\n${r[2]}: ${kl}\n${r[3]}:\n${last.input}\n\n${r[4]}: ${L.t} (${last.score}/100)\n${r[5]}:\n${last.flags.length?'- '+last.flags.join('\n- '):'- '+r[6]}\n\n${r[7]}:\n${r[8]}\n${r[9]}: `;return}
+ if(REP[lang]){const r=REP[lang];$('#repTxt').value=`${r[0]}\n${r[1]}: ${new Date(last.time).toLocaleString(r[10])}\n${r[2]}: ${kl}\n${r[3]}:\n${last.input}\n\n${r[4]}: ${L.t} (${last.score}/100)\n${r[5]}:\n${last.flags.length?'- '+last.flags.join('\n- '):'- '+r[6]}\n\n${r[7]}:\n${r[8]}\n${r[9]}: `+techLines();return}
  $('#repTxt').value=T(`بلاغ محاولة احتيال إلكتروني
 التاريخ والوقت: ${new Date(last.time).toLocaleString('ar-AE')}
 نوع المحتوى: ${kl}
@@ -963,8 +985,45 @@ ${last.flags.length?'- '+last.flags.join('\n- '):'- none'}
 
 Sender/caller number:
 Did you pay or share any details?
-Amount and bank (if any): `);
+Amount and bank (if any): `)+techLines();
 }
+/* ===== evidence pack for the police: technical facts from the last check, exportable as PDF (print) or JSON, with a SHA-256 fingerprint ===== */
+function techLines(){
+ const r=last&&last.res;if(!r)return '';const out=[],o=r._open;
+ if(o&&o.ok){out.push(t('evFinal')+': '+o.url);const ch=(o.hops||[]).map(h=>h.host);if(ch.length>1)out.push(t('evChain')+': '+ch.join(' → '))}
+ (r._facts||[]).forEach(f=>{const h=f.hosting||{};out.push('['+f.d+']');if(f.created)out.push(t('evCreated')+': '+f.created+(f.age!=null?' ('+f.age+' '+t('ewDays')+')':''));if(f.registrar)out.push(t('evRegistrar')+': '+f.registrar);if(h.ips&&h.ips.length)out.push(t('evIp')+': '+h.ips.join(', ')+(h.net||h.org?' · '+[h.net,h.org,h.country].filter(Boolean).join(' · '):''));if(f.fd&&f.fd.length)out.push(t('evLists')+': '+[].concat(f.fd).join(', '))});
+ return out.length?'\n\n'+t('evTech')+':\n'+out.join('\n'):'';
+}
+async function evPack(){
+ if(!last)return null;const r=last.res||{},L=level(last.score),o=r._open;
+ const p={app:'TheYaqiz',appUrl:location.origin,packVersion:1,generatedAt:new Date().toISOString(),checkedAt:new Date(last.time).toISOString(),contentType:last.kind,content:last.input,verdict:L.t,score:last.score,signals:last.flags,
+  evidence:(r.evidence||[]).filter(e=>e.st!=='load').map(e=>({item:e.t,value:e.v,status:e.st})),
+  linkOpened:o?{ok:!!o.ok,finalUrl:o.url||null,finalHost:o.host||null,httpStatus:o.status||null,redirectChain:(o.hops||[]).map(h=>h.host+(h.status?' ('+h.status+')':'')),pageTitle:o.title||null,asksPassword:!!o.pw,asksCardOrCode:!!o.sens}:null,
+  domains:(r._facts||[]).map(f=>{const h=f.hosting||{};return{host:f.d,registered:f.created||null,ageDays:f.age,registrar:f.registrar||null,nameServers:f.ns||[],ips:h.ips||[],network:[h.net,h.org,h.country].filter(Boolean).join(' · ')||null,googleWebRisk:f.wr||null,safeBrowsing:f.sb||null,threatLists:f.fd||[],checkedAt:f.checked||null}}),
+  ai:r._ai||null};
+ try{const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(p)));p.sha256=[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){}
+ return p}
+$('#evJson').onclick=async()=>{const p=await evPack();if(!p){toast(t('noScan'));return}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}));a.download='TheYaqiz-evidence-'+p.checkedAt.slice(0,19).replace(/[:T]/g,'-')+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)};
+$('#evPdf').onclick=async()=>{
+ const p=await evPack();if(!p){toast(t('noScan'));return}
+ const row=(k,v)=>v===null||v===undefined||v===''||(Array.isArray(v)&&!v.length)?'':`<tr><th>${esc(k)}</th><td dir="auto">${esc(Array.isArray(v)?v.join('\n'):String(v))}</td></tr>`;
+ let h=`<h1>${esc(t('evTitle'))}</h1><table>${row(t('evGen'),new Date(p.generatedAt).toLocaleString())}${row(t('evChecked'),new Date(p.checkedAt).toLocaleString())}${row(t('evVerdict'),p.verdict+' ('+p.score+'/100)')}${row(t('evContent'),p.content)}${row(t('evSignals'),p.signals)}</table>`;
+ const lo=p.linkOpened;if(lo&&lo.ok)h+=`<h2>${esc(t('evOpen'))}</h2><table>${row(t('evFinal'),lo.finalUrl)}${row(t('evChain'),lo.redirectChain)}${row(t('evTitleP'),lo.pageTitle)}${row(t('evAsks'),[lo.asksPassword?'password':'',lo.asksCardOrCode?'card / OTP / ID':''].filter(Boolean))}</table>`;
+ p.domains.forEach(d=>{const tb=row(t('evCreated'),d.registered)+row(t('evAge'),d.ageDays!=null?d.ageDays+' '+t('ewDays'):null)+row(t('evRegistrar'),d.registrar)+row(t('evNs'),d.nameServers)+row(t('evIp'),d.ips)+row(t('evNet'),d.network)+row(t('evLists'),d.threatLists);if(tb)h+=`<h2 dir="ltr">${esc(d.host)}</h2><table>${tb}</table>`});
+ h+=`<h2>${esc(t('evRows'))}</h2><table>${p.evidence.map(e=>row(e.item,e.value)).join('')}</table><p class="fp" dir="ltr">SHA-256: ${esc(p.sha256||'')}</p><p class="fp">${esc(t('evFoot'))}</p>`;
+ let box=document.getElementById('evPrint');if(!box){box=document.createElement('div');box.id='evPrint';document.body.appendChild(box)}
+ box.setAttribute('dir',lang==='ar'||lang==='ur'||lang==='fa'?'rtl':'ltr');box.innerHTML=h;document.body.classList.add('printing');
+ const done=()=>{document.body.classList.remove('printing');box.innerHTML='';window.removeEventListener('afterprint',done)};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),60)};
+/* ===== early warning: new look-alike domains from public certificate logs (server, refreshed every 6 h) ===== */
+let ewAt=0;
+async function loadWatch(){
+ const box=$('#ewList');if(!box||!srv||Date.now()-ewAt<6e5)return;ewAt=Date.now();box.textContent=t('ewLoad');
+ try{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),50000);const r=await fetch('/api/watch',{signal:ac.signal,cache:'no-store'});clearTimeout(tm);if(!r.ok)throw 0;const j=await r.json();
+  if(!j.updated){box.textContent=t('ewFail');ewAt=0;return}
+  if(!j.items.length){box.textContent=t('ewEmpty');return}
+  box.innerHTML=`<div class="ewl">${j.items.slice(0,12).map(i=>`<div class="ewi"><b dir="ltr">${esc(i.domain)}</b><span>${esc(i.brand)} · ${esc(t('ewSeen'))} ${esc(i.seen)} · ${esc(t('ewAge'))}: ${i.age==null?esc(t('ewUnknown')):esc(i.age+' '+t('ewDays'))} · ${esc(i.score)}/100</span><button class="btn alt" data-ew="${esc(i.domain)}">${esc(t('ewCheck'))}</button></div>`).join('')}</div><p class="hint">${esc(t('ewUpd'))} ${esc(new Date(j.updated).toLocaleString())}</p>`;
+  box.querySelectorAll('[data-ew]').forEach(b=>b.onclick=()=>{go('scan','url');$('#urlIn').value='https://'+b.dataset.ew;runUrl()});
+ }catch(e){box.textContent=t('ewFail');ewAt=0}}
 $('#repCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#repTxt').value);toast(t('copied'))}catch(e){$('#repTxt').select();toast(t('copyMan'))}};
 
 /* ===== AI: Claude artifact capability OR own server ===== */

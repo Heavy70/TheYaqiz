@@ -33,6 +33,8 @@
         re: new RegExp('(?:' + SV + '[^.؟!\\n]{0,45}?' + SECRET + ')|(?:' + SECRET + '[^]{0,90}?(?:send|share|forward|read|tell|give)\\w* (?:it|them|that|the code) (?:back )?to me)|(?:(?:send|tell|give|share) me (?:the |that |this |your )?(?:code|otp|pin|password))') },
       { id: 'update', ax: 'sens', w: 12, l: ['يطلب تحديث بيانات أو تفعيل حساب عبر رابط', 'Asks you to update details or activate an account via a link'], tip: ['تحديث البيانات يتم من التطبيق الرسمي مباشرة لا من رابط في رسالة.', 'Update details in the official app — never via a link in a message.'],
         re: /(حدث بياناتك|تحديث (البيانات|بياناتك|الحساب)|تفعيل (حسابك|البطاقه)|تاكيد (هويتك|بياناتك)|verify your (account|identity|details|information)|update your (details|account|information|records)|confirm your (identity|account|details)|re-?activate (your|the) (account|card)|تحقق من (حسابك|بياناتك|هويتك))/ },
+      { id: 'idreq', ax: 'sens', w: 20, neg: NEG, skipIf: /((in|via|through|using|from) (the )?(official )?([a-z0-9+&]+ ){0,2}app\b|من (خلال )?(ال)?تطبيق|عبر (ال)?تطبيق|في (ال)?تطبيق|at (any|the|our) branch|اقرب فرع|في الفرع)/, l: ['يطلب إرسال الهوية الإماراتية أو جواز السفر', 'Asks you to send your Emirates ID or passport'], tip: ['لا يطلب بنك أو سحب جوائز أو صاحب عمل إرسال الهوية أو الجواز عبر رسالة أو رابط. استخدم التطبيق الرسمي أو زر الفرع.', 'No bank, prize draw or employer asks you to send your Emirates ID or passport by message or link. Use the official app or visit a branch.'],
+        re: /(?:(?:send|share|reply with|provide|submit|upload|enter|give|attach|forward|whatsapp)\b[^.؟!\n]{0,40}?(?:emirates ?id|\beid\b|\bid (?:number|card|copy)|passport|copy of (?:your )?(?:id|passport)))|(?:(?:ارسل|ارسال|زودنا|تزويدنا|شارك|ابعث|ادخل|ارفق|ارفاق|رد ب|صور)[^.؟!\n]{0,40}?(?:رقم (?:ال)?هويه|صوره (?:ال)?هويه|(?:ال)?هويه (?:ال)?اماراتيه|بطاقه (?:ال)?هويه|جواز (?:ال)?سفر|صوره (?:ال)?جواز))|(?:(?:بھیج|بھیجیں|شیئر|بفرستید|ارسال کنید)[^.\n]{0,30}?(?:ایمریٹس آئی ڈی|شناختی کارڈ|پاسپورٹ|کارت شناسایی|گذرنامه))|(?:(?:भेज|शेयर)[^.\n]{0,30}?(?:एमिरेट्स आईडी|पासपोर्ट|पहचान पत्र))|(?:(?:ipadala|ibigay|i-?send)[^.\n]{0,30}?(?:emirates id|passport))/ },
       { id: 'payupd', ax: 'sens', w: 25, neg: NEG, l: ['يطلب تحديث أو تأكيد بيانات الدفع أو البطاقة', 'Asks you to update or confirm payment or card details'], tip: ['حدّث بيانات الدفع من التطبيق أو الموقع الرسمي الذي تكتبه بنفسك، لا من زر أو رابط في رسالة.', 'Update payment details only in the official app or a website you type yourself — never from a button or link in a message.'],
         re: /((update|confirm|verify|re-?enter|re-?add|add|provide|fix|correct|enter|renew)\s+(your\s+|a\s+|the\s+|new\s+)*(payment|billing|card|credit card|debit card|bank card)\b|(حدث|تحديث|اكد|تاكيد|ادخل|ادخال|اضف|اضافه|جدد|تجديد)\s+(طريقه|وسيله|بيانات|معلومات|تفاصيل)\s+(ال)?(دفع|بطاقتك|بطاقه|البطاقه|الفوتره|السداد)|(اكد|ادخل|حدث)\s+بيانات\s+بطاقتك)/ },
       { id: 'bill', ax: 'press', w: 20, l: ['ذريعة فشل الدفع أو انتهاء الاشتراك أو امتلاء التخزين أو حذف الملفات', 'Failed-payment, expired-subscription, full-storage or file-deletion pretext'], tip: ['رسائل «فشل الدفع» و«امتلاء التخزين» من أشهر طُعوم سرقة البطاقات؛ افتح التطبيق الرسمي بنفسك لتتأكد.', '“Payment failed” and “storage full” messages are top card-theft lures — open the official app yourself to check.'],
@@ -149,13 +151,66 @@
       return R.brandTokens.find(b => { const bb = b.replace(/[^a-z0-9]/g, ''); return toks.includes(bb) || (bb.length >= 7 && joined.includes(bb)); });
     }
 
+    /* ===== look-alike letters: decode punycode (RFC 3492) and fold confusable letters to Latin ===== */
+    function punyDecode(label) {
+      const base = 36, tMin = 1, tMax = 26, skew = 38, damp = 700; let n = 128, i = 0, bias = 72; const out = [];
+      const b = label.lastIndexOf('-'); for (let j = 0; j < Math.max(0, b); j++) out.push(label.charCodeAt(j));
+      const adapt = (d, np, first) => { d = first ? Math.floor(d / damp) : d >> 1; d += Math.floor(d / np); let k = 0; while (d > ((base - tMin) * tMax) >> 1) { d = Math.floor(d / (base - tMin)); k += base; } return k + Math.floor((base - tMin + 1) * d / (d + skew)); };
+      for (let idx = b > 0 ? b + 1 : 0; idx < label.length;) {
+        const oldi = i; let w = 1;
+        for (let k = base; ; k += base) {
+          if (idx >= label.length) return null;
+          const c = label.charCodeAt(idx++), dg = c >= 48 && c <= 57 ? c - 22 : c >= 97 && c <= 122 ? c - 97 : c >= 65 && c <= 90 ? c - 65 : base;
+          if (dg >= base) return null;
+          i += dg * w; const t = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
+          if (dg < t) break; w *= base - t;
+        }
+        bias = adapt(i - oldi, out.length + 1, oldi === 0); n += Math.floor(i / (out.length + 1)); i %= out.length + 1; out.splice(i, 0, n); i++;
+      }
+      try { return String.fromCodePoint.apply(null, out); } catch (e) { return null; }
+    }
+    const CONF = { 'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c', 'у': 'y', 'х': 'x', 'і': 'i', 'ј': 'j', 'ԁ': 'd', 'ɡ': 'g', 'ո': 'n', 'ս': 'u', 'ν': 'v', 'ο': 'o', 'α': 'a', 'ρ': 'p', 'ϲ': 'c', 'ı': 'i', 'ӏ': 'l', 'ɩ': 'i', 'ѕ': 's', 'һ': 'h', 'ԛ': 'q', 'ԝ': 'w', 'ⅼ': 'l', 'к': 'k', 'м': 'm', 'т': 't', 'в': 'b', 'н': 'h', 'ɑ': 'a', 'ɛ': 'e', 'ł': 'l', 'ø': 'o', 'đ': 'd', 'ħ': 'h' };
+    function skeleton(h) { return h.normalize('NFD').replace(/[\u0300-\u036f]/g, '').split('').map(c => CONF[c] || c).join(''); }
+    function unicodeHost(h) { return h.split('.').map(l => l.startsWith('xn--') ? (punyDecode(l.slice(4)) || l) : l).join('.'); }
+    /* official numbers (registry R.tels): stored without +971 / leading 0 */
+    const TELS = R.tels || {};
+    function telNorm(x) { return String(x).replace(/[^\d+]/g, '').replace(/^(\+|00)971/, '').replace(/^\+/, '').replace(/^0/, ''); }
+    function telOwner(x) { const d = telNorm(x); return d ? (Object.keys(TELS).find(k => TELS[k].includes(d)) || null) : null; }
+    function entName(id) { const e = ENT.find(x => x.id === id); return e ? TX(e.n[LI()]) : id; }
+
     /* ===== URL engine ===== */
-    function analyzeUrl(raw) {
+    function analyzeUrl(raw, depth) {
       let s = raw.trim(); if (!s) return null; const flags = []; let score = 0;
       if (!/^[a-z]+:\/\//i.test(s)) s = 'http://' + s;
       let u; try { u = new URL(s); } catch (e) { return { score: 40, flags: [{ l: T('الرابط غير صالح أو مشوَّه عمدًا', 'The link is invalid or deliberately malformed'), w: 40 }], host: raw, evidence: [] }; }
       const host = u.hostname.toLowerCase().replace(/^www\./, '').replace(/\.$/, ''), reg = regDomain(host);
       const add = (w, a, e) => { score += w; flags.push({ l: T(a, e), w }); };
+      /* a link that wraps another link (google.com/url?q=…, l.facebook.com/l.php?u=…, ?redirect=…): judge the real destination */
+      if (!depth) {
+        let inner = null;
+        u.searchParams.forEach(v => { if (inner || !/^https?:\/\//i.test(v)) return; try { const ih = new URL(v).hostname.toLowerCase().replace(/^www\./, ''); if (regDomain(ih) !== reg) inner = v; } catch (e) { } });
+        if (inner) {
+          const r = analyzeUrl(inner, 1);
+          if (r && !r.official && r.score >= 20) {
+            const w = 15, sc = Math.min(100, Math.max(r.score + w, r.decisive ? 75 : r.score >= 40 ? 62 : 0));
+            return Object.assign({}, r, { score: sc, decisive: true, wrapper: host, flags: [{ l: T('يخفي الوجهة الحقيقية خلف تحويل عبر', 'Hides the real destination behind a redirect through') + ': ' + host, w, rule: 'redir' }].concat(r.flags), evidence: [{ id: 'dom', st: 'bad', t: T('النطاق', 'Domain'), v: host + ' → ' + r.host }] });
+          }
+        }
+      }
+      /* internationalised (punycode) domain: decode it and fold look-alike letters; if it then reads as an official name, it is an imitation */
+      if (host.includes('xn--')) {
+        const uni = unicodeHost(host), sk = skeleton(uni);
+        if (sk !== uni || /[^\x00-\x7f]/.test(uni)) {
+          const skReg = regDomain(sk), skCore = skReg.split('.')[0];
+          const target = OFFICIAL.find(o => o === skReg || o.split('.')[0] === skCore) || R.brandTokens.find(b => b.replace(/[^a-z0-9]/g, '') === skCore) || brandIn(sk, '') || (skCore.length >= 4 ? (OFFICIAL.find(o => lev(skCore, o.split('.')[0]) === 1) || null) : null);
+          if (target && /^[\x00-\x7f]+$/.test(sk)) {
+            score += 45; flags.push({ l: T('يستخدم حروفًا مشابهة لتقليد', 'Uses look-alike letters to imitate') + ': ' + target + ' (' + uni + ')', w: 45, rule: 'homo' });
+            const res0 = analyzeUrl('https://' + sk + u.pathname, 1);
+            const sc = Math.min(100, Math.max(75, score + (res0 ? Math.round(res0.score / 2) : 0) + 30));
+            return { score: sc, flags: flags.concat([{ l: T('حروف مموَّهة (Punycode) تقلّد اسمًا معروفًا', 'Disguised characters (Punycode) mimicking a known name'), w: 30 }]), host, reg, decisive: true, evidence: [{ id: 'dom', st: 'bad', t: T('النطاق', 'Domain'), v: uni + ' ≈ ' + target }], pending: [host], pendingUrl: u.href };
+          }
+        }
+      }
       if (isGov(host)) return { score: 0, flags: [{ l: T('نطاق حكومي مقيَّد (', 'Government-restricted domain (') + reg + T(') — لا يستطيع تسجيله إلا جهة حكومية', ') — only a government body can register it'), w: 0, good: true }], host, reg, official: true, gov: true, evidence: [{ id: 'dom', st: 'ok', t: T('النطاق', 'Domain'), v: host + ' · ' + T('حكومي مقيَّد', 'government-restricted') }] };
       if (isOfficial(host)) return { score: 0, flags: [{ l: T('النطاق يطابق موقعًا رسميًا معروفًا (', 'The domain matches a known official site (') + reg + ')', w: 0, good: true }], host, reg, official: true, evidence: [{ id: 'dom', st: 'ok', t: T('النطاق', 'Domain'), v: host + ' · ' + T('رسمي معروف', 'known official') }] };
       if (u.protocol !== 'https:') add(10, 'الاتصال غير مشفّر (لا يبدأ بـ https)', 'Unencrypted connection (doesn’t start with https)');
@@ -277,14 +332,19 @@
         const e = ENT.find(x => x.rx.test(s));
         if (e) evidence.push({ id: 'match', st: 'ok', t: T('تطابق الجهة والرابط', 'Organisation ↔ link'), v: TX(e.n[LI()]) + ' ✓' });
       }
-      const sens = flags.some(f => f.rule === 'cred' || f.rule === 'update' || f.rule === 'payupd'), money = flags.some(f => f.rule === 'pay');
+      const sens = flags.some(f => f.rule === 'cred' || f.rule === 'update' || f.rule === 'payupd' || f.rule === 'idreq'), money = flags.some(f => f.rule === 'pay');
       evidence.push({ id: 'ask', st: sens || money ? 'bad' : 'ok', t: T('طلب بيانات أو أموال', 'Asks for data or money'), v: sens || money ? (sens ? T('يطلب بيانات حساسة', 'asks for sensitive data') : T('يطلب دفعًا', 'asks for payment')) : T('لا يوجد', 'none') });
       if (foreignIb) evidence.push({ id: 'rcpt', st: 'warn', t: T('حساب المستلم', 'Recipient account'), v: 'IBAN ' + foreignIb.cc + ' · ' + T('خارج الإمارات', 'outside the UAE') });
       else if (uaeIb) evidence.push({ id: 'rcpt', st: 'unk', t: T('حساب المستلم', 'Recipient account'), v: 'IBAN AE · ' + T('بنك إماراتي (لا يمكن تأكيد المالك)', 'UAE bank (owner cannot be confirmed)') });
       /* sender evidence (optional field) */
       const snd = senderInfo(opts.sender), entHit = ENT.find(x => x.rx.test(s));
       let sndFloor = 0;
-      if (snd) {
+      const sndOwn = snd && ['service', 'landline', 'short'].includes(snd.k) ? telOwner(snd.v) : null;
+      if (sndOwn) {
+        evidence.push({ id: 'sender', st: entHit && entHit.id !== sndOwn && TELS[entHit.id] ? 'warn' : 'ok', t: T('المرسل', 'Sender'), v: snd.v + ' · ' + T('رقم رسمي لـ', 'official number of') + ' ' + entName(sndOwn) });
+      } else if (snd && entHit && TELS[entHit.id] && ['service', 'landline'].includes(snd.k)) {
+        evidence.push({ id: 'sender', st: 'warn', t: T('المرسل', 'Sender'), v: snd.v + ' · ' + T('ليس من الأرقام الرسمية لـ', 'not one of the official numbers of') + ' ' + entName(entHit.id) });
+      } else if (snd) {
         const personal = snd.k === 'mobile' || snd.k === 'foreign';
         const kindTxt = { mobile: T('رقم جوال شخصي', 'a personal mobile number'), foreign: T('رقم أجنبي', 'a foreign number'), landline: T('رقم أرضي', 'a landline'), service: T('رقم خدمة (800/600)', 'a service number (800/600)'), short: T('رمز قصير', 'a short code'), alpha: T('اسم مرسل نصّي', 'a text sender ID') }[snd.k];
         const GEN_ORG = /(شرطه|الداخليه|وزاره|النيابه|المحكمه|القضاء|الجمارك|الضرايب|الضرائب|البنك|مصرف|حسابك|بطاقتك|الاتصالات|بريد|police|prosecut|ministry|court|customs|\bbank\b|your account|your card|telecom|courier|government)/;
@@ -304,6 +364,26 @@
           evidence.push({ id: 'sender', st: ok ? 'unk' : 'warn', t: T('المرسل', 'Sender'), v: snd.v + ' · ' + (ok ? T('يطابق الجهة، لكن الأسماء قابلة للتزوير', 'matches the organisation, but sender names can be spoofed') : T('لا يطابق اسم الجهة', 'does not match the organisation’s name')) });
         } else evidence.push({ id: 'sender', st: 'unk', t: T('المرسل', 'Sender'), v: snd.v + ' · ' + kindTxt });
       }
+      /* helpline check: the message asks you to call a number; is it the named organisation's official number? */
+      let callFloor = false, callOfficial = false;
+      if (/(call|ring|dial|contact (us|our)|helpline|hotline|customer (care|service|support)|whatsapp us|اتصل|اتصال|كلمنا|تواصل|الخط الساخن|خدمه العملاء|رقم الدعم)/.test(s)) {
+        const scan = s.replace(/\b[a-z]{2}\d{2}(?:[ -]?[a-z0-9]){11,34}/g, ' ');
+        const found = scan.match(/(?:\+|00)971[\s-]?\d(?:[\s-]?\d){6,9}|(?<![\d])0\d(?:[\s-]?\d){6,9}|(?<![\d])[68]00(?:[\s-]?\d){3,7}/g) || [];
+        const seen = new Set();
+        found.forEach(raw0 => {
+          const raw = raw0.trim(), d = telNorm(raw); if (d.length < 6 || seen.has(d)) return; seen.add(d);
+          const own = telOwner(d), service = /^[68]00/.test(d);
+          if (own) { if (!entHit || entHit.id === own) callOfficial = true; evidence.push({ id: 'tel', st: entHit && entHit.id !== own && TELS[entHit.id] ? 'warn' : 'ok', t: T('رقم الهاتف', 'Phone number'), v: raw + ' · ' + T('رقم رسمي لـ', 'official number of') + ' ' + entName(own) }); return; }
+          if (service) { evidence.push({ id: 'tel', st: 'unk', t: T('رقم الهاتف', 'Phone number'), v: raw + ' · ' + T('رقم خدمة غير موجود في قائمتنا للأرقام الرسمية؛ تحقق منه على بطاقتك أو في الموقع الرسمي', 'service number not in our list of official numbers; check it on your card or the official website') }); return; }
+          const named = (entHit && !entHit.soft) || /(بنك|مصرف|بطاقت|حسابك|الشرطه|الهويه|bank|your card|your account|debit card|credit card|police|emirates id)/.test(s);
+          if (!named) return;
+          const tels = entHit && TELS[entHit.id];
+          score += 30; axes.imp = (axes.imp || 0) + 30;
+          flags.unshift({ l: T('يطلب الاتصال برقم ليس رقمًا رسميًا للجهة التي يذكرها', 'Asks you to call a number that is not an official number of the organisation it names') + ': ' + raw, w: 30, rule: 'callx', tip: tels ? T('الأرقام الرسمية لهذه الجهة', 'Official numbers of this organisation') + ': ' + tels.map(x => x.length <= 4 ? x : (/^[68]00/.test(x) ? x : '0' + x)).join(', ') : T('اتصل بالرقم المطبوع على بطاقتك أو في الموقع الرسمي.', 'Call the number printed on your card or on the official website.') });
+          evidence.push({ id: 'tel', st: 'bad', t: T('رقم الهاتف', 'Phone number'), v: raw + ' · ' + T('ليس من الأرقام الرسمية لـ', 'not one of the official numbers of') + ' ' + (entHit ? entName(entHit.id) : T('الجهة المذكورة', 'the organisation named')) });
+          callFloor = true;
+        });
+      }
       const others = flags.filter(f => f.w > 0 && !['mism', 'imp', 'link', 'sndr'].includes(f.rule)).length;
       if (flags.filter(f => f.w > 0).length >= 3) score += 10;
       if (mism && !mism.e.soft) score = Math.max(score, others ? 90 : 62);
@@ -315,6 +395,11 @@
       if (linkScore >= 20 && (others >= 1 || mism)) score = Math.max(score, 62);
       /* prompt injection / addressing the checker: genuine senders never do this */
       if (has('inj')) score = Math.max(score, 70);
+      /* an ID/passport request next to a lure, pressure or impersonation; a fake helpline next to pressure */
+      if (has('idreq') && has('prize', 'job', 'advfee', 'pay', 'urg', 'threat', 'imp', 'family', 'hold', 'rent', 'link')) score = Math.max(score, 70);
+      /* the message sends you to the organisation's own official number, with no link and no request for data or money: a service notice, not a scam */
+      if (callOfficial && !callFloor && !links.length && !has('cred', 'credx', 'pay', 'payupd', 'idreq', 'acct', 'family', 'secret', 'inj')) score = Math.min(score, 20);
+      if (callFloor && (has('threat', 'urg', 'update', 'cred', 'credx', 'payupd', 'prize', 'idreq', 'pay') || /(blocked|suspend|locked|frozen|deactivat|on hold|موقوف|ايقاف|مجمد|تجميد|محظور|معلق|حظر)/.test(s))) score = Math.max(score, 70);
       if (has('cred', 'credx') && has('urg', 'threat', 'secret')) score = Math.max(score, 70);
       if (has('credx')) score = Math.max(score, 62);
       if (has('family') && has('pay', 'urg')) score = Math.max(score, 62);
@@ -421,7 +506,7 @@
 
     /* ===== merge an AI verdict into a local result (conservative) ===== */
     /* verifiable evidence = something we can check ourselves, not just a model's impression */
-    const HARD = ['mism', 'sb', 'age', 'link', 'sndr', 'lists', 'cred', 'credx', 'pay', 'payupd', 'bill', 'advfee', 'secret', 'family', 'acct', 'threat', 'inj'];
+    const HARD = ['mism', 'sb', 'age', 'link', 'sndr', 'lists', 'cred', 'credx', 'pay', 'payupd', 'bill', 'advfee', 'secret', 'family', 'acct', 'threat', 'inj', 'idreq', 'callx', 'homo', 'redir'];
     function hardEvidence(res) { return (res.flags || []).some(f => f.w > 0 && HARD.includes(f.rule)); }
     function applyAi(res, j) {
       const r = Object.assign({}, res, { flags: res.flags.slice(), evidence: (res.evidence || []).filter(e => e.st !== 'load') });
@@ -452,7 +537,7 @@
       return r;
     }
 
-    return { analyzeMsg, analyzeUrl, applyFacts, applyOpen, applyAi, hardEvidence, senderInfo, normMap, RULES, AXES, isGov, isOfficial, regDomain, OFFICIAL, ENT };
+    return { telOwner, telNorm, unicodeHost, skeleton, analyzeMsg, analyzeUrl, applyFacts, applyOpen, applyAi, hardEvidence, senderInfo, normMap, RULES, AXES, isGov, isOfficial, regDomain, OFFICIAL, ENT };
   }
   if (typeof module !== 'undefined' && module.exports) module.exports = createEngine;
   else root.createEngine = createEngine;

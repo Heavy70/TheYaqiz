@@ -51,6 +51,9 @@ TheYaqiz helps people decide, in the few seconds that matter, whether a message,
 - **Ask Yaqiz**: a virtual assistant persona (a young Emirati man wearing the TheYaqiz shield, clearly labelled as an AI assistant) that answers by text or voice in eight languages, Arabic in Emirati dialect and an Emirati voice, English in a British voice, and hands the user over to Aman when needed
 - Call companion (live risk meter that updates with each answer during a suspicious call)
 - Gamified training ("scam or safe?" local scenarios with explanations)
+- Early warning: new look-alike domains of 12 UAE brands from public Certificate Transparency logs (crt.sh), refreshed every 6 hours, scored by the engine and filtered by RDAP domain age (`GET /api/watch`)
+- Evidence pack for the police: PDF (print) or JSON export of the last check with final link, redirect chain, registrar, name servers, IP and hosting network, threat lists, timestamps and a SHA-256 fingerprint
+- Official contact numbers of 13 banks and authorities (`R.tels` in `registry.js`): a different number to call is flagged, a call-back to the official number is recognised
 - Reporting bridge (ready report summary for Abu Dhabi Police's Aman service)
 
 ---
@@ -278,6 +281,12 @@ Additional measures:
 
 All responses are JSON with `Cache-Control: no-store`.
 
+### `GET /api/watch`
+
+Early-warning list. Returns `{ updated, days, brands, items:[{ domain, reg, brand, score, seen, issuer, created, age, why }], sources:{ ok, failed }, refreshing }`. Built on the server from crt.sh queries for 12 brand names (only brand names are sent, nothing about users), refreshed every 6 hours; items are domains whose certificate was first seen in the last 90 days, scored 40+ by `engine.js`, not official, and registered in the last 180 days (or age not published). Same per-IP limit as `/api/domain`.
+
+`/api/domain` facts now also carry `created`, `registrar`, `ns`, `hosting:{ ips, net, org, country }` and `checked` (ISO time). The hosting lookup sends only the hostname to DNS and the IP address to rdap.org, and is capped at 3.5 s so it never slows the verdict.
+
 ### `GET /api/health`
 
 Status of optional services (example values):
@@ -333,9 +342,9 @@ Spoken reply for Ask Yaqiz. Body: `{ "text": "...", "lang": "ar" }` (text up to 
 
 **Accuracy gate (`npm test`)**
 
-- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **339 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
+- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **388 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
 - The test **fails** if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%.
-- Current result: **339/339 correct (100%), 0 missed scams, 0 false alarms.**
+- Current result: **388/388 correct (100%), 0 missed scams, 0 false alarms.** `tests/blind5.js` (24 Nov) adds look-alike letters, redirect wrappers, fake helplines, ID requests and genuine bank call-backs; `tests/watch.js` covers the early-warning filter, the evidence facts and translations.
 - `tests/chat.js` checks the assistant: input cleaning, card-number masking, limits, knowledge-base grounding, Aman handover, translations of every assistant, Safe Pay and number-check string in all six community languages, the server voices and the deep links.
 - `tests/facts.js` checks how verified facts (domain age, Google and list hits, link opening) change a verdict.
 - `tests/billing.js` and `tests/blind4.js` cover billing/subscription lures; `tests/holdout.js`, `tests/blind3.js`, `tests/registry2.js` and `tests/sender.js` are focused sets for blind batches, the registry and sender checks.

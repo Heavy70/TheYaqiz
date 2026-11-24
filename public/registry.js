@@ -267,7 +267,24 @@
   /* Registry-restricted academic and school suffixes: only accredited universities, colleges and schools can register them. */
   R.eduSuffixes = ['ac.ae', 'sch.ae'];
   R.official = Array.from(new Set(R.official.concat(R.eduSuffixes, ...R.orgs.map(o => o.d))));
-  R.version = '2026-11-23';
+  /* Official contact numbers (verified on each organisation's own website, 24 Nov 2026). Stored without +971 / leading 0.
+     Used to tell a genuine helpline from a fake one in messages and in the number check. */
+  R.tels = {
+    police: ['999', '901', '8002626'],
+    adcb: ['600502030', '600502004', '600508008', '600502322', '600555000', '600503325', '26210090'],
+    enbd: ['600540000', '600540009'],
+    fab: ['600525500', '600522235', '26811511'],
+    adib: ['600543216', '26100600', '26100116'],
+    mashreq: ['44244444', '44244763', '44244466'],
+    dib: ['46092222'],
+    eib: ['600599995'],
+    rak: ['42130000'],
+    empost: ['600599999'],
+    icp: ['600522222'],
+    rta: ['8009090', '46051414'],
+    dewa: ['46019999', '991']
+  };
+  R.version = '2026-11-24';
 
   if (typeof module !== 'undefined' && module.exports) module.exports = R;
   else root.YAQIZ_REGISTRY = R;
