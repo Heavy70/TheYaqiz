@@ -47,4 +47,8 @@ ok(S.xmlEsc('<a&"b">') === '&lt;a&amp;&quot;b&quot;&gt;', 'text is escaped befor
 ok(/\/api\/tts/.test(srv) && /TTS_CHARS_DAY/.test(srv) && /TTS_PER_IP_DAY/.test(srv) && /tts: !!(TTS_KEY || (EL_KEY && EL_VOICE_AR))/.test(srv) && /media-src 'self' data: blob:/.test(srv), 'server voice route with daily limits, health flag and CSP for audio');
 ok(/fetch\('\/api\/tts'/.test(html) && /speakBrowser\(x\)/.test(html) && /TTS_SIL/.test(html), 'app uses the server voice and falls back to the browser voice');
 ok(/api\.elevenlabs\.io\/v1\/text-to-speech/.test(srv) && /ELEVEN_VOICE_AR/.test(srv) && /EL_CHARS_DAY/.test(srv) && /if \(l === 'ar'\)\{ const el = await elevenTts/.test(srv), 'Arabic uses the ElevenLabs Emirati voice when set, with a daily cap and Azure fallback');
+ok(/id="m-pay"/.test(html) && /function payVerdict\(/.test(html) && /data-mode="pay"/.test(html) && /q\.get\('pay'\)/.test(html) && /q\.get\('n'\)/.test(html), 'Safe Pay tab, home button and ?pay= / ?n= deep links exist');
+['Pay','Verify before I pay','Verify a payment link before you pay','Don’t pay','Check first','Official payment page','Check a number'].forEach(k => ['ur','hi','tl','fa','am','lg'].forEach(l => ok(X[l][k], l + ' translation missing: ' + k)));
+['ur','hi','tl','fa','am','lg'].forEach(l => ok(/\{X\}/.test(X[l]['Claims to be from “{X}”, but this is not its official website'] || ''), l + ' claim flag must keep {X}'));
+ok(/Scam Network Intelligence/.test(html) && /ذكاء شبكات الاحتيال/.test(html), 'roadmap lists Scam Network Intelligence');
 console.log(fails.length ? 'CHAT FAIL\n' + fails.join('\n') : 'CHAT PASS'); process.exit(fails.length ? 1 : 0);
