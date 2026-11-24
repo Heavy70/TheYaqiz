@@ -19,7 +19,7 @@ ok(/Never ask for or accept passwords/.test(srv) && /Stay on topic/.test(srv), '
 ok(/plain text only/i.test(srv) && /replace\(\/\\\*\\\*/.test(srv), 'replies are plain text (markdown stripped)');
 ok(/CHAT_PER_IP_DAY/.test(srv) && /allowChat\(/.test(srv), 'per-IP daily limit is applied to the assistant');
 ok(/\/api\/chat/.test(srv) && /chat: !!CHAT_KEY/.test(srv), 'route and health flag exist');
-['chatH', 'chatD', 'chatNote', 'chatPh', 'chatSend', 'chatErr', 'chatLimit', 'chatWait','chatAi','micTitle','micListen','micDenied','micNone','spkTitle','voiceNote', 'chatQ1', 'chatQ2', 'chatQ3', 'chatHello', 'chatQ4', 'chatQ5', 'hoH', 'hoEm'].forEach(k => {
+['chatH', 'chatD', 'chatNote', 'chatPh', 'chatSend', 'chatErr', 'chatLimit', 'chatWait','chatAi','micTitle','micListen','micDenied','micNone','spkTitle','voiceNote', 'chatQ1', 'chatQ2', 'chatQ3', 'chatHello', 'chatQ4', 'chatQ5', 'hoH', 'hoEm', 'noVoice', 'sayTitle'].forEach(k => {
   const m = html.match(new RegExp(k + ":\\['([^']*(?:\\\\'[^']*)*)','([^']*(?:\\\\'[^']*)*)'\\]"));
   ok(m, 'dictionary entry missing: ' + k);
   if (m) ['ur', 'hi', 'tl', 'fa', 'am', 'lg'].forEach(l => ok(X[l] && X[l][m[2]], l + ' translation missing: ' + k));
