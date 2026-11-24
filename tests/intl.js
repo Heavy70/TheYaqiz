@@ -1,0 +1,13 @@
+const R=require('../public/registry.js'),C=require('../public/engine.js');const E=C((a,e)=>e,()=>1,R);
+let bad=0;const ck=(n,c)=>{if(!c){bad++;console.log('FAIL',n)}};
+const sc=x=>E.analyzeMsg(x);
+const a=sc('URGENT: your account is blocked. Transfer the fee abroad via Western Union today or you will be arrested.');
+ck('intl scam flagged',a.score>=62&&a.flags.some(f=>f.rule==='intl'));
+const b=sc('Congratulations you won a prize! Pay the fee to IBAN GB82 WEST 1234 5698 7654 32 now.');
+ck('foreign IBAN flagged with scam signals',b.score>=62&&b.flags.some(f=>f.rule==='oreg')&&b.evidence.some(e=>e.id==='rcpt'&&/outside/.test(e.v)));
+ck('legit remittance not flagged',sc('I will send money abroad to my mother via Western Union tomorrow, hi').score<30);
+ck('friend IBAN not a scam',sc('Hi, can you send 500 to IBAN GB82 WEST 1234 5698 7654 32 for the dinner?').score<50);
+ck('UAE IBAN has no foreign flag',!sc('Please pay the rent to AE07 0331 2345 6789 0123 456 by Friday').flags.some(f=>f.rule==='oreg'));
+ck('random code is not an IBAN',!sc('Ref AB12 3456 7890 invoice number 55').evidence.some(e=>e.id==='rcpt'));
+ck('arabic intl',sc('عاجل: حسابك موقوف، حوّل الرسوم إلى الخارج عبر ويسترن يونيون فورًا وإلا سيتم القبض عليك').flags.some(f=>f.rule==='intl'));
+console.log(bad?'INTL FAIL':'INTL PASS');process.exit(bad?1:0);

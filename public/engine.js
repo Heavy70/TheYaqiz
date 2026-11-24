@@ -63,6 +63,8 @@
         re: /((registration|processing|admin|clearance|release|insurance|visa|application|handling) fees?|رسوم (التسجيل|المعالجه|التاشيره|الافراج|التخليص))/ },
       { id: 'tech', ax: 'sens', w: 25, l: ['ادّعاء إصابة الجهاز بفيروس أو طلب وصول عن بُعد', 'Claims your device has a virus or asks for remote access'], tip: ['لا تتصل بأرقام تظهر في رسالة أو نافذة منبثقة، ولا تثبّت برامج تحكم عن بُعد.', 'Never call numbers from a message or pop-up and never install remote-control tools.'],
         re: /(virus (was )?(detected|found)|detected (a )?virus|(device|computer|pc|phone) (is|has been|was) (infected|hacked|compromised)|remote access|anydesk|teamviewer|فيروس|جهازك مصاب|تم اختراق جهازك)/ },
+      { id: 'intl', ax: 'money', w: 15, withOthers: true, l: ['طلب تحويل دولي أو إلى الخارج', 'International or overseas transfer requested'], tip: ['المحتالون يدفعون الضحية لإرسال المال إلى الخارج أو بعملة رقمية حيث يصعب استرداده. تحقق من البنك أولًا.', 'Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.'],
+        re: /(?:(?:wire|transfer|send|remit|deposit|pay)\b[^.\n]{0,40}?\b(?:abroad|overseas|outside (?:the )?uae|international(?:ly)?|foreign (?:account|bank)|swift|western union|moneygram|crypto(?:currency)?|bitcoin|usdt|binance|wallet)|\b(?:international|overseas|foreign) (?:transfer|wire|payment|bank account|account)|\bswift\b|western union|moneygram|\busdt\b|bitcoin)|(?:(?:حول|تحويل|ارسل|ارسال|دفع)[^.\n]{0,40}?(?:الي الخارج|للخارج|خارج الامارات|خارج الدوله|دولي|حساب اجنبي|حساب خارجي|ويسترن|عمله رقميه|بيتكوين|محفظه)|تحويل (?:دولي|خارجي)|ويسترن يونيون|سويفت|بيتكوين|عمله رقميه)/ },
       { id: 'pay', ax: 'money', w: 15, l: ['يطلب دفع رسوم أو تحويل أموال', 'Asks you to pay fees or transfer money'], tip: ['دفع «رسوم» صغيرة لاستلام شحنة أو جائزة أو وظيفة علامة احتيال كلاسيكية.', 'Paying a small “fee” to release a parcel, prize or job is a classic scam sign.'],
         re: /(ادفع|(?<![؀-ۿ])سدد(?![؀-ۿ])|سداد|رسوم|حول (المبلغ|لي)|حولي|حساب امن|pay (now|the|your|within|a|an|some)\b|pay (the |your |a |an |some )?(\w+ )?(fees?|charges?|fine|tax|duty|duties)|(ارسل|حول|ادفع)( لي)? (ال)?(عربون|دفعه مقدمه|مبلغ)|payment (link|required|is required|due)|unpaid|customs (fee|duty|charge)|delivery (charge|fee)|[\d,. ]+(aed|dirhams?|usd|\$)( \w+)? (fee|fees|charge|deposit|tax)|pay [\d,. ]+(aed|dirhams?|usd|\$)|بالدفع|الدفع (الان|فورا)|\bwire\b|safe account|transfer [\d,. ]*(aed|dirhams?|usd|\$)|transfer (the|your|a) (money|amount|fee))/ }
     ];
@@ -101,6 +103,10 @@
     const SECX_LG = '(?:\\botp\\b|\\bpin\\b|cvv|password|ekigambo ekikuumi|koodi|ebikwata ku (?:kaadi|banka)|namba ya kaadi)';
     const VB_LG = '(?:weereza|tuma|buulira|tubuulire|gabana|sindika|mpa|wandiika|saba)';
     const EXTRA2 = {
+      intl: [
+        '(?:بیرون ملک|بیرون ملک رقم|ویسٹرن یونین|بین الاقوامی ٹرانسفر)', '(?:विदेश में|विदेशी खाते|वेस्टर्न यूनियन|अंतरराष्ट्रीय ट्रांसफ़र|अंतरराष्ट्रीय ट्रांसफर)', '(?:sa ibang bansa|sa abroad|international transfer|western union)',
+        '(?:خارج از کشور|حواله بین‌المللی|حواله بین المللی|وسترن یونیون)', '(?:ወደ ውጭ አገር|ወደ ውጭ ሀገር|ዌስተርን ዩኒየን)', '(?:bweru w.eggwanga|mu mawanga ag.ebweru|western union)'
+      ],
       cred: [
         '(?:' + SECX_FA + '[^.\\n]{0,40}?' + VB_FA + ')', '(?:' + VB_FA + '[^.\\n]{0,40}?' + SECX_FA + ')',
         '(?:' + SECX_AM + '[^.\\n]{0,40}?' + VB_AM + ')', '(?:' + VB_AM + '[^.\\n]{0,40}?' + SECX_AM + ')',
@@ -204,6 +210,23 @@
     }
 
     /* ===== message engine ===== */
+    /* ===== recipient account (IBAN) check: a valid IBAN whose country is not the UAE ===== */
+    const IBAN_LEN = { AE: 23, SA: 24, QA: 29, KW: 30, BH: 22, OM: 23, JO: 30, LB: 28, EG: 29, IQ: 23, PS: 29, PK: 24, TR: 26, GB: 22, IE: 22, DE: 22, FR: 27, IT: 27, ES: 24, NL: 18, CH: 21, BE: 16, AT: 20, PT: 25, GR: 27, CY: 28, MT: 31, PL: 28, RO: 24, BG: 22, LT: 20, LV: 21, EE: 20, FI: 18, SE: 24, NO: 15, DK: 18, LU: 20, MA: 28, TN: 24, DZ: 26, LY: 25, SD: 18, SO: 23, MR: 27, BR: 29, MU: 30, SC: 31, UA: 29, RU: 33, KZ: 20, AZ: 28, GE: 22, MD: 24, XK: 20, HR: 21, HU: 28, CZ: 24, SK: 24, SI: 19, RS: 22, ME: 22, MK: 19, AL: 28, BA: 20, IL: 23, VG: 24 };
+    function ibanOk(c) {
+      const r = c.slice(4) + c.slice(0, 4); let rem = 0;
+      for (let i = 0; i < r.length; i++) { const ch = r.charCodeAt(i), v = ch >= 65 ? String(ch - 55) : r[i]; for (let j = 0; j < v.length; j++) rem = (rem * 10 + (v.charCodeAt(j) - 48)) % 97; }
+      return rem === 1;
+    }
+    function ibanCheck(txt) {
+      const out = []; const re = /\b([A-Za-z]{2}\d{2}(?:[ -]?[A-Za-z0-9]){11,34})/g; let m;
+      while ((m = re.exec(txt))) {
+        const c = m[1].replace(/[ -]/g, '').toUpperCase(), cc = c.slice(0, 2), L = IBAN_LEN[cc];
+        if (!L || c.length < L) continue;
+        const iban = c.slice(0, L); if (ibanOk(iban)) out.push({ cc, iban, uae: cc === 'AE' });
+      }
+      return out;
+    }
+
     function analyzeMsg(txt, opts) {
       opts = opts || {};
       const { s, map } = normMap(txt); const flags = [], ranges = [], axes = {}; let score = 0;
@@ -228,6 +251,12 @@
         if (r.withOthers && (allVerified || !strong.length)) return;
         score += r.w; axes[r.ax] = (axes[r.ax] || 0) + r.w; flags.push({ l: TX(r.l[LI()]), w: r.w, tip: TX(r.tip[LI()]), rule: r.id });
       });
+      /* recipient account: a valid non-UAE IBAN is shown as evidence; it adds to the score only next to other scam signals */
+      const ibs = ibanCheck(txt), foreignIb = ibs.find(x => !x.uae), uaeIb = ibs.find(x => x.uae);
+      if (foreignIb && !allVerified && strong.some(r => ['pay', 'urg', 'threat', 'secret', 'prize', 'job', 'family', 'advfee', 'hold', 'acct'].includes(r.id))) {
+        score += 15; axes.money = (axes.money || 0) + 15;
+        flags.push({ l: TX(T('حساب المستلم خارج الإمارات', 'Recipient account is outside the UAE')), w: 15, tip: TX(T('رقم الآيبان في الرسالة لا يتبع بنكًا إماراتيًا (آيبان الإمارات يبدأ بـ AE). توخَّ حذرًا إضافيًا وتحقق من المستلم أو تواصل مع الجهات المختصة قبل التحويل.', 'The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.')), rule: 'oreg' });
+      }
       /* 3) link evidence */
       const worst = bad.slice().sort((a, b) => b.score - a.score)[0];
       if (allVerified) flags.push({ l: T('الرابط يعود لنطاق رسمي موثّق: ', 'The link belongs to a verified official domain: ') + links[0].host, w: 0, good: true });
@@ -250,6 +279,8 @@
       }
       const sens = flags.some(f => f.rule === 'cred' || f.rule === 'update' || f.rule === 'payupd'), money = flags.some(f => f.rule === 'pay');
       evidence.push({ id: 'ask', st: sens || money ? 'bad' : 'ok', t: T('طلب بيانات أو أموال', 'Asks for data or money'), v: sens || money ? (sens ? T('يطلب بيانات حساسة', 'asks for sensitive data') : T('يطلب دفعًا', 'asks for payment')) : T('لا يوجد', 'none') });
+      if (foreignIb) evidence.push({ id: 'rcpt', st: 'warn', t: T('حساب المستلم', 'Recipient account'), v: 'IBAN ' + foreignIb.cc + ' · ' + T('خارج الإمارات', 'outside the UAE') });
+      else if (uaeIb) evidence.push({ id: 'rcpt', st: 'unk', t: T('حساب المستلم', 'Recipient account'), v: 'IBAN AE · ' + T('بنك إماراتي (لا يمكن تأكيد المالك)', 'UAE bank (owner cannot be confirmed)') });
       /* sender evidence (optional field) */
       const snd = senderInfo(opts.sender), entHit = ENT.find(x => x.rx.test(s));
       let sndFloor = 0;
@@ -290,6 +321,7 @@
       if (has('acct') && has('pay')) score = Math.max(score, 62);
       if (has('advfee') && has('pay') && /(job|offer|visa|vacanc|prize|winner|وظيف|تاشير|جائز|عرض)/.test(s)) score = Math.max(score, 62);
       if (has('prize', 'job', 'rent', 'hold') && has('pay')) score = Math.max(score, 62);
+      if (has('intl', 'oreg') && has('pay', 'urg', 'threat', 'secret', 'prize', 'job', 'family', 'advfee', 'hold')) score = Math.max(score, 62);
       /* billing / subscription / storage / account-lock lures (often a screenshot with a button and no visible link):
          a pretext + a request to act, with no pointer to the official app/settings, rarely comes from a genuine company */
       const officialRef = /(in (the )?settings|settings ?>|(in|via|from|using|through|open) (the )?(official )?([a-z0-9+&]+ ){0,2}app\b|app store app|من (خلال )?(ال)?تطبيق|عبر (ال)?تطبيق|في (ال)?تطبيق|(افتح|من|في) (ال)?اعدادات)/.test(s);

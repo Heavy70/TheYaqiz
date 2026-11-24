@@ -1,6 +1,13 @@
 /* Community-language strings (Urdu, Hindi, Tagalog, Persian, Amharic, Luganda). Keyed by the English source string. */
 const YAQIZ_X={
 "ur": {
+"International or overseas transfer requested": "بیرون ملک یا بین الاقوامی ٹرانسفر کا مطالبہ",
+"Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "فراڈ کرنے والے رقم بیرون ملک یا کرپٹو میں بھیجنے پر مجبور کرتے ہیں، جہاں واپس ملنا مشکل ہوتا ہے۔ پہلے اپنے بینک سے پوچھیں۔",
+"Recipient account is outside the UAE": "وصول کنندہ کا اکاؤنٹ امارات سے باہر ہے",
+"The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.": "پیغام میں موجود IBAN کسی اماراتی بینک کا نہیں (اماراتی IBAN کی ابتدا AE سے ہوتی ہے)۔ اضافی احتیاط کریں: بھیجنے سے پہلے وصول کنندہ کی تصدیق کریں یا متعلقہ حکام سے رابطہ کریں۔",
+"Recipient account": "وصول کنندہ کا اکاؤنٹ",
+"outside the UAE": "امارات سے باہر",
+"UAE bank (owner cannot be confirmed)": "اماراتی بینک (مالک کی تصدیق ممکن نہیں)",
 "Check a caller or sender number": "کالر یا بھیجنے والے کا نمبر چیک کریں",
 "Paste the number calling or messaging you, and the organisation they claim to be, if any.": "وہ نمبر پیسٹ کریں جو آپ کو کال یا میسج کر رہا ہے، اور وہ ادارہ بھی لکھیں جس کا وہ دعویٰ کرتا ہے۔",
 "Number or name (e.g. +971 55 123 4567)": "نمبر یا نام (مثال: +971 55 123 4567)",
@@ -311,6 +318,13 @@ const YAQIZ_X={
 "English": "انگریزی"
 },
 "hi": {
+"International or overseas transfer requested": "विदेश या अंतरराष्ट्रीय ट्रांसफ़र की माँग",
+"Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "ठग पैसे विदेश या क्रिप्टो में भिजवाते हैं, जहाँ वापस पाना मुश्किल होता है। पहले अपने बैंक से पूछें।",
+"Recipient account is outside the UAE": "पाने वाले का खाता UAE के बाहर है",
+"The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.": "संदेश का IBAN किसी UAE बैंक का नहीं है (UAE IBAN AE से शुरू होता है)। अतिरिक्त सावधानी रखें: भेजने से पहले पाने वाले की पुष्टि करें या अधिकारियों से संपर्क करें।",
+"Recipient account": "पाने वाले का खाता",
+"outside the UAE": "UAE के बाहर",
+"UAE bank (owner cannot be confirmed)": "UAE बैंक (मालिक की पुष्टि संभव नहीं)",
 "Check a caller or sender number": "कॉलर या भेजने वाले का नंबर जाँचें",
 "Paste the number calling or messaging you, and the organisation they claim to be, if any.": "जो नंबर आपको कॉल या मैसेज कर रहा है उसे पेस्ट करें, और वह किस संस्था का होने का दावा करता है, यदि बताया हो।",
 "Number or name (e.g. +971 55 123 4567)": "नंबर या नाम (उदाहरण: +971 55 123 4567)",
@@ -621,6 +635,13 @@ const YAQIZ_X={
 "English": "अंग्रेज़ी"
 },
 "tl": {
+"International or overseas transfer requested": "Hinihiling ang paglilipat ng pera sa ibang bansa",
+"Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "Pinapapadala ng mga scammer ang pera sa ibang bansa o sa crypto, kung saan mahirap itong mabawi. Magtanong muna sa iyong bangko.",
+"Recipient account is outside the UAE": "Ang account ng tatanggap ay nasa labas ng UAE",
+"The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.": "Ang IBAN sa mensaheng ito ay hindi sa bangko sa UAE (ang IBAN ng UAE ay nagsisimula sa AE). Mag-ingat nang higit: tiyakin ang tatanggap o makipag-ugnayan sa mga awtoridad bago magpadala.",
+"Recipient account": "Account ng tatanggap",
+"outside the UAE": "labas ng UAE",
+"UAE bank (owner cannot be confirmed)": "Bangko sa UAE (hindi makumpirma ang may-ari)",
 "Check a caller or sender number": "Suriin ang numero ng tumatawag o nagpadala",
 "Paste the number calling or messaging you, and the organisation they claim to be, if any.": "I-paste ang numerong tumatawag o nagme-message sa iyo, at ang organisasyong inaangkin nila, kung mayroon.",
 "Number or name (e.g. +971 55 123 4567)": "Numero o pangalan (hal. +971 55 123 4567)",
@@ -931,6 +952,13 @@ const YAQIZ_X={
 "English": "English"
 },
 "fa": {
+"International or overseas transfer requested": "درخواست انتقال بین‌المللی یا به خارج از کشور",
+"Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "کلاهبرداران قربانی را وادار می‌کنند پول را به خارج از کشور یا با ارز دیجیتال بفرستد که بازگرداندنش دشوار است. ابتدا از بانک خود بپرسید.",
+"Recipient account is outside the UAE": "حساب گیرنده خارج از امارات است",
+"The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.": "IBAN این پیام متعلق به بانک امارات نیست (IBAN امارات با AE شروع می‌شود). احتیاط بیشتری کنید: پیش از ارسال، گیرنده را بررسی کنید یا با مراجع مسئول تماس بگیرید.",
+"Recipient account": "حساب گیرنده",
+"outside the UAE": "خارج از امارات",
+"UAE bank (owner cannot be confirmed)": "بانک امارات (مالک قابل تأیید نیست)",
 "Check a caller or sender number": "شماره تماس‌گیرنده یا فرستنده را بررسی کنید",
 "Paste the number calling or messaging you, and the organisation they claim to be, if any.": "شمارهٔ فردی را که با شما تماس می‌گیرد یا پیام می‌دهد و نهادی را که خود را نماینده‌اش معرفی می‌کند (در صورت وجود) وارد کنید.",
 "Number or name (e.g. +971 55 123 4567)": "شماره یا نام (مثال: +971 55 123 4567)",
@@ -1241,6 +1269,13 @@ const YAQIZ_X={
 "English": "انگلیسی"
 },
 "am": {
+"International or overseas transfer requested": "ወደ ውጭ አገር ገንዘብ እንዲልኩ ይጠይቃል",
+"Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "አጭበርባሪዎች ገንዘብ ወደ ውጭ አገር ወይም በክሪፕቶ እንዲልኩ ያስገድዳሉ፤ መመለስ ከባድ ነው። መጀመሪያ ባንክዎን ይጠይቁ።",
+"Recipient account is outside the UAE": "የተቀባዩ አካውንት ከUAE ውጭ ነው",
+"The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.": "በዚህ መልዕክት ያለው IBAN የUAE ባንክ አይደለም (የUAE IBAN በAE ይጀምራል)። ከመላክዎ በፊት ተቀባዩን ያረጋግጡ ወይም ባለሥልጣናትን ያነጋግሩ፤ ተጨማሪ ጥንቃቄ ያድርጉ።",
+"Recipient account": "የተቀባይ አካውንት",
+"outside the UAE": "ከUAE ውጭ",
+"UAE bank (owner cannot be confirmed)": "የUAE ባንክ (ባለቤቱ ሊረጋገጥ አይችልም)",
 "Check a caller or sender number": "የደዋይ ወይም የላኪ ቁጥር ያረጋግጡ",
 "Paste the number calling or messaging you, and the organisation they claim to be, if any.": "የሚደውልልዎትን ወይም መልእክት የሚልክልዎትን ቁጥር እና እሱ ነኝ የሚለውን ተቋም (ካለ) ያስገቡ።",
 "Number or name (e.g. +971 55 123 4567)": "ቁጥር ወይም ስም (ምሳሌ፦ +971 55 123 4567)",
@@ -1551,6 +1586,13 @@ const YAQIZ_X={
 "English": "እንግሊዝኛ"
 },
 "lg": {
+"International or overseas transfer requested": "Asaba okusindika ssente ebweru w’eggwanga",
+"Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "Abafere basindika ssente ebweru w’eggwanga oba mu crypto, nga kizibu okuzizzaawo. Sooka obuuze bbanka yo.",
+"Recipient account is outside the UAE": "Akawunti y’afuna eri bweru wa UAE",
+"The IBAN in this message does not belong to a UAE bank (UAE IBANs start with AE). Be extra careful: verify the recipient, or contact the authorities before sending.": "IBAN eri mu bubaka eno si ya bbanka ya UAE (IBAN za UAE zitandika na AE). Weetegereze nnyo: kakasa afuna oba labira abakulu nga tonnasindika.",
+"Recipient account": "Akawunti y’afuna",
+"outside the UAE": "bweru wa UAE",
+"UAE bank (owner cannot be confirmed)": "Bbanka ya UAE (nnannyini tasobola kukakasibwa)",
 "Check a caller or sender number": "Kebera namba y’oyimba oba atuma obubaka",
 "Paste the number calling or messaging you, and the organisation they claim to be, if any.": "Teeka namba eyimba oba etuma obubaka, ne kampuni gy’egamba nti eriko (bwe kiba kiri).",
 "Number or name (e.g. +971 55 123 4567)": "Namba oba erinnya (okugeza: +971 55 123 4567)",

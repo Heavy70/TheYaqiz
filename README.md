@@ -24,7 +24,7 @@ TheYaqiz is a bilingual Progressive Web App (works on Android, iPhone and deskto
 
 ### Features
 
-- **Message checker:** scam patterns, interface and results in eight languages (Arabic, English, Urdu, Hindi, Tagalog, Persian, Amharic, Luganda), sender check, highlighted suspicious phrases and an evidence panel.
+- **Message checker:** scam patterns, interface and results in eight languages (Arabic, English, Urdu, Hindi, Tagalog, Persian, Amharic, Luganda), sender check, international-transfer and non-UAE recipient (IBAN) alerts, highlighted suspicious phrases and an evidence panel.
 - **Link checker:** recognises restricted government domains, spots impersonation and lookalike domains, opens the link safely to read its final destination, and checks domain age and reputation.
 - **Image checker:** reads QR codes on the device; screenshots and ads are read by AI on request.
 - **Call companion:** a live risk meter that updates with every answer during a suspicious call.

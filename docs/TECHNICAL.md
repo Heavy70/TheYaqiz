@@ -158,6 +158,7 @@ Runs only when the user asks for deep analysis (or, if the user turns it on, aut
 
 - Brand-vs-link mismatch: score of at least 90 if other scam signals are present, at least 62 if it is the only one.
 - Sender impersonation (organisation name sent from a personal number): up to 92.
+- International or overseas transfer wording (SWIFT, Western Union, crypto, "send abroad") and a valid IBAN that is not a UAE IBAN: +15 each, counted only next to other scam signals (payment, urgency, threat, prize, job, family or account pretext), never alone, so legitimate remittances are not flagged. The IBAN is verified by length and mod-97 checksum, and shown in the evidence panel as "Recipient account".
 - Converging signals that rarely appear together in genuine messages raise the floor to 62–70. Examples: credential request + urgency/threat; relative impersonation + payment or urgency; prize/job/rental + payment; advance fee + payment for a job or visa.
 - Google Web Risk / Safe Browsing threat: floor 92. Listed on OpenPhish or URLhaus: floor 90. Listed only on the noisier community lists: floor 62, unless the domain is over 3 years old and Google reports it clean (then only a warning).
 - Domain younger than 30 days: +30. Younger than 180 days: +18.
