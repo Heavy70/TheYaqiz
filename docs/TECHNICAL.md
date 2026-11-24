@@ -2,7 +2,7 @@
 
 **Project:** TheYaqiz, an AI scam shield for UAE residents  
 **Event:** ScamShield AI Hackathon — Abu Dhabi Police × 42 Abu Dhabi, November 2026  
-**Version:** v66 (24 November 2026)  
+**Version:** v74 (24 November 2026)  
 **Live MVP:** https://www.theyaqiz.com  
 **Repository:** https://github.com/Heavy70/TheYaqiz  
 **Developer:** Khaldun Abdalhadi  
