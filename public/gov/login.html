@@ -23,8 +23,8 @@ h1{font-size:22px;color:var(--navy);margin-top:10px;font-weight:700;letter-spaci
 .sub{color:var(--muted);font-size:14px;margin-top:4px}
 .ar{font-size:15px;color:var(--navy2);margin-top:2px}
 .hr{height:1px;background:var(--line);margin:22px 0}
-button.uaepass{width:100%;border:0;border-radius:10px;background:var(--navy);color:#fff;font:600 16px/1 "IBM Plex Sans Arabic",system-ui,sans-serif;padding:16px 18px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:background .15s,transform .05s}
-button.uaepass:hover{background:var(--navy2)}
+button.uaepass{width:100%;border:0;border-radius:10px;background:#00843d;color:#fff;font:600 16px/1 "IBM Plex Sans Arabic",system-ui,sans-serif;padding:16px 18px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:background .15s,transform .05s}
+button.uaepass:hover{background:#006b32}
 button.uaepass:active{transform:translateY(1px)}
 button.uaepass:focus-visible{outline:3px solid #7aa7ff;outline-offset:2px}
 button.uaepass[disabled]{opacity:.75;cursor:default}
@@ -63,8 +63,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:14px 12px cal
     if(b.disabled)return;
     b.disabled=true;c.classList.add('busy');l.textContent='Signing in… / جارٍ تسجيل الدخول';
     setTimeout(function(){
-      try{sessionStorage.setItem('yaqiz_demo_session','1')}catch(e){}
-      location.href='portal.html';
+      location.href='/';
     },1200);
   });
 })();
