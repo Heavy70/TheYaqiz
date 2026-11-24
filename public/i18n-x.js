@@ -1,6 +1,7 @@
 /* Community-language strings (Urdu, Hindi, Tagalog, Persian, Amharic, Luganda). Keyed by the English source string. */
 const YAQIZ_X={
 "ur": {
+"AI virtual assistant — not an official body": "اے آئی ورچوئل معاون — کوئی سرکاری ادارہ نہیں",
 "Ask Yaqiz": "یقظ سے پوچھیں",
 "A smart assistant that answers your questions about scams and tells you what to do.": "ایک سمارٹ معاون جو فراڈ کے بارے میں آپ کے سوالوں کے جواب دیتا ہے اور بتاتا ہے کہ کیا کرنا ہے۔",
 "Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.": "آپ کے پیغامات جواب تیار کرنے کے لیے ایک اے آئی سروس کو بھیجے جاتے ہیں اور محفوظ نہیں کیے جاتے۔ کبھی پاس ورڈ، تصدیقی کوڈ یا کارڈ نمبر نہ لکھیں۔",
@@ -332,6 +333,7 @@ const YAQIZ_X={
 "English": "انگریزی"
 },
 "hi": {
+"AI virtual assistant — not an official body": "एआई वर्चुअल सहायक — कोई सरकारी संस्था नहीं",
 "Ask Yaqiz": "यक़ज़ से पूछें",
 "A smart assistant that answers your questions about scams and tells you what to do.": "एक स्मार्ट सहायक जो ठगी के बारे में आपके सवालों के जवाब देता है और बताता है कि क्या करना है।",
 "Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.": "आपके संदेश जवाब बनाने के लिए एक एआई सेवा को भेजे जाते हैं और सहेजे नहीं जाते। कभी पासवर्ड, सत्यापन कोड या कार्ड नंबर न लिखें।",
@@ -663,6 +665,7 @@ const YAQIZ_X={
 "English": "अंग्रेज़ी"
 },
 "tl": {
+"AI virtual assistant — not an official body": "AI virtual assistant — hindi opisyal na ahensya",
 "Ask Yaqiz": "Tanungin si Yaqiz",
 "A smart assistant that answers your questions about scams and tells you what to do.": "Isang matalinong katulong na sumasagot sa mga tanong mo tungkol sa scam at nagsasabi kung ano ang gagawin.",
 "Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.": "Ipinapadala ang iyong mga mensahe sa isang AI service para makabuo ng sagot at hindi ito iniimbak. Huwag kailanman mag-type ng password, verification code o card number.",
@@ -994,6 +997,7 @@ const YAQIZ_X={
 "English": "English"
 },
 "fa": {
+"AI virtual assistant — not an official body": "دستیار مجازی هوش مصنوعی — نهاد رسمی نیست",
 "Ask Yaqiz": "از یقظ بپرسید",
 "A smart assistant that answers your questions about scams and tells you what to do.": "یک دستیار هوشمند که به پرسش‌های شما درباره کلاهبرداری پاسخ می‌دهد و می‌گوید چه کنید.",
 "Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.": "پیام‌های شما برای تولید پاسخ به یک سرویس هوش مصنوعی ارسال می‌شود و ذخیره نمی‌شود. هرگز رمز عبور، کد تأیید یا شماره کارت وارد نکنید.",
@@ -1325,6 +1329,7 @@ const YAQIZ_X={
 "English": "انگلیسی"
 },
 "am": {
+"AI virtual assistant — not an official body": "AI ምናባዊ ረዳት — ኦፊሴላዊ ተቋም አይደለም",
 "Ask Yaqiz": "ያቂዝን ይጠይቁ",
 "A smart assistant that answers your questions about scams and tells you what to do.": "ስለ ማጭበርበር ጥያቄዎችዎን የሚመልስና ምን ማድረግ እንዳለብዎ የሚነግርዎ ብልህ ረዳት።",
 "Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.": "መልእክቶችዎ ምላሽ ለማመንጨት ወደ AI አገልግሎት ይላካሉ፤ አይቀመጡም። የይለፍ ቃል፣ የማረጋገጫ ኮድ ወይም የካርድ ቁጥር ፈጽሞ አይጻፉ።",
@@ -1656,6 +1661,7 @@ const YAQIZ_X={
 "English": "እንግሊዝኛ"
 },
 "lg": {
+"AI virtual assistant — not an official body": "Omuyambi wa AI ku mutimbagano — si kitongole kya gavumenti",
 "Ask Yaqiz": "Buuza Yaqiz",
 "A smart assistant that answers your questions about scams and tells you what to do.": "Omuyambi omugezi addamu ebibuuzo byo ku bufere era akugamba eky’okukola.",
 "Your messages are sent to an AI service to generate the reply and are not stored. Never type passwords, verification codes or card numbers.": "Obubaka bwo butwalibwa ku ntambula ya AI okuzza eky’okuddamu era tebutereka. Togwandiika password, koodi y’okukakasa oba namba ya kaadi.",
