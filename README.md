@@ -29,7 +29,9 @@ TheYaqiz is a bilingual Progressive Web App (works on Android, iPhone and deskto
 - **Image checker:** reads QR codes on the device; screenshots and ads are read by AI on request.
 - **Call companion:** a live risk meter that updates with every answer during a suspicious call.
 - **Gamified training:** short local "scam or safe?" scenarios with explanations.
-- **Reporting bridge:** a ready report summary pointing to Abu Dhabi Police's Aman service.
+- **Reporting bridge:** a ready report summary pointing to Abu Dhabi Police's Aman service. For high-risk results (75%+) the app opens a report panel with the channels pre-filled; nothing is sent until the user presses send in their own mail or SMS app.
+- **Ask Yaqiz (virtual assistant):** a chat assistant that answers questions about scams, by typing or by voice (microphone input and optional spoken replies), in the user's language. It is clearly labelled as an AI assistant, not a police officer or an official body; it refers to Aman (800 2626, SMS 2828, aman@adpolice.gov.ae, 999 in danger), never asks for passwords, codes or card numbers, and stays on the topic of scams and online safety. Replies are plain text. Chat history is not stored.
+- **Demo entry page:** `/gov/login.html` is a simulated "Government Intelligence Portal" sign-in screen with a UAE PASS-style button, used as an entry gate for the demo. It is not a real UAE PASS integration and collects nothing.
 - **Installable PWA:** "Add to Home Screen", works offline for the core check, and on Android appears in the share menu ("Share to TheYaqiz").
 
 ### How a check works (layered evidence)
@@ -59,12 +61,13 @@ The final verdict combines the layers. Hard evidence (threat-list hit, credentia
 - No accounts, no sign-in, no tracking, no analytics.
 - **Local first:** the core check runs on the device; the message text is not sent. For link checks only the link itself is sent, never the message.
 - **With user consent:** deep AI analysis runs only on request; automatic analysis of unclear cases is off by default. Messages and screenshots sent for AI analysis are **not stored** by the server; server logs record technical errors only.
+- **Ask Yaqiz:** each question (last 10 messages, masked for card-like numbers, with only the score, verdict and signal names of the last check, never its message text) is sent to Claude to generate the reply and is not stored; per-IP and daily limits apply. If the microphone is used, the browser's own speech service turns voice into text and TheYaqiz never receives or stores the recording; spoken replies use the browser's speech synthesis on the device.
 - The short check history is kept only in the user's own browser (last 30 checks) and can be cleared with one tap.
 - The only third-party content the page loads is Google Fonts.
 - The on-device engine needs no network at all.
 - Threat-list matching happens on our server; only Google Web Risk / Safe Browsing receive a hostname (not the message).
 - All API keys live in Google Secret Manager / environment variables. **No secret is in this repository.**
-- Strict security headers: CSP, HSTS, `X-Frame-Options: DENY`, no camera/microphone/location permissions requested by the page.
+- Strict security headers: CSP, HSTS, `X-Frame-Options: DENY`, camera and location are blocked; the microphone is allowed for the page only (`microphone=(self)`) and is used only when the user taps the mic button in Ask Yaqiz.
 
 ## 5. Accuracy testing
 
@@ -75,6 +78,8 @@ npm test
 ```
 
 The official-domain registry (`public/registry.js`) lists government suffixes plus 164 trusted UAE organisations plus the restricted academic and school suffixes (ac.ae, sch.ae) (universities, banks, telecoms, airlines, utilities, retail, and the Podium+ hackathon platform), so a genuine message linking to one of them is verified instead of judged on an unfamiliar domain; look-alike domains of these names are still flagged. **Trusted-domain rule:** when every link in a message is an exact verified official domain and nothing sensitive or payment-related is requested, the verdict is 0 (safe) on every path (on-device engine, server AI layer, screenshot reader, on-device AI); lookalike domains are still treated as scams.
+
+`npm test` also runs the multilingual, AI-layer, international-transfer, entry-page and Ask Yaqiz checks (`tests/chat.js`: input cleaning, card-number masking, limits).
 
 Current result: **339 cases, 100% correct, 0 missed scams, 0 false alarms.** The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
 
@@ -114,13 +119,14 @@ gcloud run deploy yaqiz --source . --region europe-west1 \
 ## 7. Project structure
 
 ```
-server.js              Node server: static PWA + /api/analyze, /api/domain, /api/open, /api/health
+server.js              Node server: static PWA + /api/analyze, /api/domain, /api/open, /api/chat, /api/health
+public/gov/login.html  Demo entry page (simulated sign-in, no real UAE PASS integration)
 public/index.html      Bilingual app UI (Arabic/English)
 public/engine.js       On-device detection engine (shared with tests)
 public/registry.js     Official-domain registry
 public/sw.js           Service worker (offline / installable PWA)
 public/jsQR.js         QR-code reader (third-party, see jsQR.LICENSE.txt)
-tests/                 Accuracy gate and fact tests
+tests/                 Accuracy gate, fact, multilingual, AI, international, gov-entry and chat tests
 ```
 
 ## 8. Trade-offs, what was left out, and next steps
@@ -129,7 +135,7 @@ tests/                 Accuracy gate and fact tests
 - **Left out:** user accounts and any server-side storage of messages, to keep the MVP private by design.
 - **Roadmap** (see the deck in `docs/`):
   - +3 months: store release, a labelled local dataset, a trial with 500 users.
-  - +12 months: "TheYaqiz ambassadors" in schools, and bank integration for pre-transfer alerts.
+  - +12 months: "TheYaqiz ambassadors" in schools, and bank and government-portal integration: a quick-verify shortcut before any transfer (concept only; it needs an agreement with each bank, and no partnership exists today).
 - **What we would do differently with more time:** a larger, independently labelled test set with third-party evaluation, and measuring precision and recall on real (consented) messages.
 
 ## 9. Team
@@ -142,13 +148,13 @@ Team **TheYaqiz** (ScamShield AI, Podium+):
 | Amna Alaryani | United Arab Emirates University |
 | Mahra Aldhanhani | United Arab Emirates University |
 | Sara Almaazmi | Zayed University |
-| Rafa Khalife | |
-| Meznah Alawlaqi | |
+| Rafa Khalife | Manipal University |
+| Meznah Alawlaqi | Zayed University |
 
 ## 10. Documents
 
 - `docs/TECHNICAL.md`: technical documentation (architecture, model choices, privacy design, security, testing).
-- `docs/TheYaqiz-Presentation-EN-AR.pptx` and `docs/TheYaqiz-Presentation-EN-AR.pdf`: pitch deck (v17), English then Arabic (30 slides). Online version: https://drive.google.com/file/d/1a1OtGuXGMf_qDWVGNBReukAieVfrtjLe/view?usp=drivesdk
+- `docs/TheYaqiz-Presentation-EN-AR.pptx` and `docs/TheYaqiz-Presentation-EN-AR.pdf`: pitch deck (v19), English then Arabic (34 slides). Online version: https://drive.google.com/file/d/1a1OtGuXGMf_qDWVGNBReukAieVfrtjLe/view?usp=drivesdk
 
 ---
 
