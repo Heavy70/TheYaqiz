@@ -108,7 +108,7 @@ let boot = null, bootAt = 0;
 async function getJson(url, ms){
   const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), ms);
   try {
-    const r = await fetch(url, { signal: ac.signal, redirect: 'follow', headers:{ accept:'application/rdap+json, application/json' } });
+    const r = await fetch(url, { signal: ac.signal, redirect: 'follow', headers:{ accept:'application/rdap+json, application/json', 'user-agent':'TheYaqiz/1.0 (+https://www.theyaqiz.com)' } });
     if (!r.ok) throw new Error('http_' + r.status);
     return await r.json();
   } finally { clearTimeout(tm); }
@@ -131,8 +131,10 @@ async function hosting(host){
     v = { ips: pub };
     if (pub[0]){
       try {
-        const j = await getJson('https://rdap.org/ip/' + pub[0], 4000);
-        const ent = (j.entities || []).find(e => (e.roles || []).some(r => r === 'registrant' || r === 'administrative')) || (j.entities || [])[0];
+        /* ARIN answers for every address and redirects to the right regional registry (RIPE, APNIC, AFRINIC, LACNIC) */
+        const j = await getJson('https://rdap.arin.net/registry/ip/' + pub[0], 3000);
+        /* only the organisation that holds the network, never a named contact person */
+        const ent = (j.entities || []).find(e => (e.roles || []).includes('registrant') && !((e.vcardArray && e.vcardArray[1]) || []).some(x => x[0] === 'kind' && x[3] === 'individual'));
         const fn = ent && ent.vcardArray && (ent.vcardArray[1] || []).find(x => x[0] === 'fn');
         v.net = String(j.name || '').slice(0, 60); v.org = fn ? String(fn[3]).slice(0, 80) : ''; v.country = String(j.country || '').slice(0, 2);
       } catch(e){}
@@ -446,21 +448,25 @@ async function crtNames(q){
   }
   return out;
 }
+/* the brand's own country sites (emiratesnbd.com.eg, mashreq.com.cn) are the brand itself or a defensive registration, not a look-alike */
+const OFF_CORES = new Set(OFFICIAL.map(o => o.split('.')[0]).filter(c => c.length >= 4));
+function brandCountrySite(reg){ const p = reg.split('.'); return OFF_CORES.has(p[0]) && p.length <= 3 && p[p.length - 1].length === 2 && (p.length === 2 || SLD.includes(p[1])); }
 async function refreshWatch(){
   const found = new Map(); let ok = 0, failed = 0;
-  for (let i = 0; i < WATCH.length; i += 3){
-    await Promise.all(WATCH.slice(i, i + 3).map(async ([brand, q]) => {
+  /* crt.sh is often slow or answers 502: 4 queries at a time, then one retry of the failed ones */
+  const run = async (list, onFail) => { for (let i = 0; i < list.length; i += 4) await Promise.all(list.slice(i, i + 4).map(async ([brand, q]) => {
       try {
         const names = await crtNames(q); ok++;
         names.forEach((m, n) => {
           if (ENG.isGov(n) || ENG.isOfficial(n)) return;
           const r = ENG.analyzeUrl('https://' + n + '/'); if (!r || r.score < 40) return;
-          const reg = regDomain(n), prev = found.get(reg);
+          const reg = regDomain(n), prev = found.get(reg); if (brandCountrySite(reg)) return;
           if (!prev || r.score > prev.score) found.set(reg, { domain: n, reg, brand, score: r.score, seen: m.seen, issuer: m.issuer, why: r.flags.filter(f => f.w > 0).slice(0, 2).map(f => f.l) });
         });
-      } catch(e){ failed++; console.error('watch', brand, e.name === 'AbortError' ? 'timeout' : String(e.message || e).slice(0, 60)); }
-    }));
-  }
+      } catch(e){ onFail([brand, q]); console.error('watch', q, e.name === 'AbortError' ? 'timeout' : String(e.message || e).slice(0, 60)); }
+    })); };
+  const again = []; await run(WATCH, x => again.push(x));
+  if (again.length) await run(again, () => failed++);
   const items = [...found.values()].sort((a, b) => b.score - a.score || b.seen.localeCompare(a.seen)).slice(0, 40);
   await Promise.all(items.slice(0, 25).map(async it => { const c = await domainAge(it.reg).catch(() => null); it.created = c || ''; it.age = c ? Math.max(0, Math.floor((Date.now() - Date.parse(c)) / 864e5)) : null; }));
   /* keep what is plausibly new: registered in the last 180 days, or age not published */

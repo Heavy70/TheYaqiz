@@ -6,7 +6,8 @@ const CRT = [
   { issuer_name: 'C=US, O=DigiCert Inc, CN=x', name_value: 'www.adcb.com', not_before: iso(Date.now() - 3 * day) },
   { issuer_name: 'C=US, O=Google Trust Services, CN=WE1', name_value: 'uaepass-verify.com', not_before: iso(Date.now() - 1 * day) },
   { issuer_name: 'C=US, O=Let\'s Encrypt, CN=R11', name_value: 'old-adcb-fan.com', not_before: iso(Date.now() - 4 * day) },
-  { issuer_name: 'C=US, O=Let\'s Encrypt, CN=R11', name_value: 'adcb-loan-offer.xyz', not_before: iso(Date.now() - 120 * day) }
+  { issuer_name: 'C=US, O=Let\'s Encrypt, CN=R11', name_value: 'adcb-loan-offer.xyz', not_before: iso(Date.now() - 120 * day) },
+  { issuer_name: 'C=US, O=DigiCert Inc, CN=x', name_value: 'www.emiratesnbd.com.eg\nmashreq.com.cn', not_before: iso(Date.now() - 2 * day) }
 ];
 global.fetch = async (url) => {
   const u = String(url), ok = (j) => ({ ok: true, status: 200, json: async () => j, text: async () => JSON.stringify(j), body: null });
@@ -25,6 +26,7 @@ const S = require('../server.js');
   chk(!doms.includes('adcb.com'), 'official domain dropped');
   chk(!doms.includes('old-adcb-fan.com'), 'domain registered years ago dropped');
   chk(!doms.includes('adcb-loan-offer.xyz'), 'certificate older than the window dropped');
+  chk(!doms.includes('emiratesnbd.com.eg') && !doms.includes('mashreq.com.cn'), 'the brand\'s own country sites dropped');
   const it = w.items.find(i => i.reg === 'adcb-secure-login.top') || {};
   chk(it.age !== null && it.age <= 6 && it.seen && it.issuer === 'Let\'s Encrypt', 'age, first-seen date and issuer recorded');
   const f = await S.hostFacts('adcb-secure-login.top');
