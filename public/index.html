@@ -242,6 +242,7 @@ footer .dev{font-size:13.5px;color:var(--ink);margin-bottom:4px}
 footer .dev b{color:var(--brand)}
 .chat .nt{font-size:12.5px;color:var(--muted);margin:6px 0 10px}.chat .msgs{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:4px 2px;margin-bottom:10px}.chat .m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.chat .m.u{align-self:flex-end;background:var(--brand);color:#fff;border-end-end-radius:4px}.chat .m.b{align-self:flex-start;background:var(--soft);border:1px solid var(--line);border-end-start-radius:4px}.chat .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.chat .chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}.chat .row{display:flex;gap:8px;align-items:flex-end}.chat .row textarea{resize:none;min-height:46px;flex:1;min-width:0;width:auto}.chat .row .btn{flex:none}
 .chat .chead{display:flex;align-items:center;gap:12px;margin-bottom:6px}.chat .chead h2{margin:0}.chat .chead .hint{margin:2px 0 0}.chat .av{flex:none;width:30px;height:30px;display:inline-block}.chat .av.big{width:52px;height:52px}.chat .av svg{width:100%;height:100%;display:block}.chat .mr{display:flex;gap:8px;align-items:flex-end;align-self:flex-start;max-width:92%}.chat .mr .m.b{align-self:auto;max-width:none}
+.chat .av img{width:100%;height:100%;object-fit:contain;display:block}.chat .ic-btn{padding:0;width:46px;height:46px;flex:none}.chat .ic-btn svg{width:22px;height:22px}.chat .ic-btn.on{background:var(--bad);color:#fff;animation:micp 1s infinite}@keyframes micp{50%{opacity:.6}}.chat #chatSpk{margin-inline-start:auto;width:40px;height:40px}.chat #chatSpk:not(.off) .x{display:none}.chat #chatSpk.off .w{display:none}
 </style>
 </head>
 <body>
@@ -415,12 +416,13 @@ footer .dev b{color:var(--brand)}
 
   <section class="view" id="v-chat">
     <div class="card chat">
-      <div class="chead"><span class="av big" id="chatAv"></span><div><h2 data-i18n="chatH"></h2><p class="hint" data-i18n="chatAi"></p></div></div>
+      <div class="chead"><span class="av big" id="chatAv"></span><div><h2 data-i18n="chatH"></h2><p class="hint" data-i18n="chatAi"></p></div><button type="button" class="btn alt ic-btn" id="chatSpk"><svg class="i" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path class="w" d="M16 9a4 4 0 0 1 0 6"/><path class="x" d="M4 4l16 16"/></svg></button></div>
       <p class="hint" data-i18n="chatD"></p>
       <p class="nt" data-i18n="chatNote"></p>
+      <p class="nt hidden" id="chatVoiceNote" data-i18n="voiceNote"></p>
       <div class="msgs" id="chatMsgs" aria-live="polite"></div>
       <div class="chips" id="chatChips"></div>
-      <div class="row"><textarea id="chatIn" rows="2" maxlength="1000" dir="auto" data-i18n-ph="chatPh"></textarea><button class="btn" id="chatSend" data-i18n="chatSend"></button></div>
+      <div class="row"><button type="button" class="btn alt ic-btn hidden" id="chatMic"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><textarea id="chatIn" rows="2" maxlength="1000" dir="auto" data-i18n-ph="chatPh"></textarea><button class="btn" id="chatSend" data-i18n="chatSend"></button></div>
     </div>
   </section>
 
@@ -636,6 +638,12 @@ chatWait:['يكتب…','Typing…'],
 chatQ1:['وصلتني رسالة مشبوهة، ماذا أفعل؟','I got a suspicious message. What should I do?'],
 chatQ2:['كيف أبلّغ شرطة أبوظبي عن احتيال؟','How do I report a scam to Abu Dhabi Police?'],
 chatQ3:['اشرح لي نتيجة آخر فحص','Explain my last check result'],
+micTitle:['تحدّث','Speak'],
+micListen:['أستمع…','Listening…'],
+micDenied:['الميكروفون محظور. اسمح به من إعدادات المتصفح.','Microphone is blocked. Allow it in your browser settings.'],
+micNone:['لم أسمع شيئًا. حاول مرة أخرى.','I didn’t hear anything. Try again.'],
+spkTitle:['قراءة الردود بصوت عالٍ','Read replies aloud'],
+voiceNote:['عند استخدام الميكروفون، تتولى خدمة التعرف على الكلام في متصفحك تحويل صوتك إلى نص، ولا يحفظ يقِظ التسجيل.','If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.'],
 chatAi:['مساعد افتراضي بالذكاء الاصطناعي — ليس جهة رسمية','AI virtual assistant — not an official body'],
 chatHello:['مرحبًا، أنا يقِظ. اسألني عن أي رسالة أو مكالمة أو موقف يبدو لك احتيالًا.','Hi, I’m Yaqiz. Ask me about any message, call or situation that looks like a scam.']
 });
@@ -680,7 +688,7 @@ function go(v,mode){
   if(mode)setMode(mode);
   if(v==='report')fillReport();
   if(v==='home')renderHome();
-  if(v==='chat')chatDraw();
+  if(v==='chat')chatDraw();else{try{stopSpeak();if(listening)rec.stop()}catch(e){}}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go,b.dataset.mode)});
@@ -975,9 +983,27 @@ function enableAi(){
 
 /* ===== Ask Yaqiz: assistant chat (in memory only; the server masks card-like numbers; only the last result's score/signals are sent as context, never the message text) ===== */
 let chatMsgs=[],chatBusy=false;
-/* original mascot (a friendly shield guardian): not a police officer, not a uniform, not an official badge */
-const AVATAR='<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#0b2a5b"/><path d="M32 10 50 17v13c0 11-7.5 19.5-18 24C21.5 49.5 14 41 14 30V17z" fill="#d6283f"/><path d="M32 10 50 17v13c0 11-7.5 19.5-18 24z" fill="#b01f33"/><circle cx="25.5" cy="28" r="3.2" fill="#fff"/><circle cx="38.5" cy="28" r="3.2" fill="#fff"/><circle cx="26.2" cy="28.5" r="1.4" fill="#0b2a5b"/><circle cx="39.2" cy="28.5" r="1.4" fill="#0b2a5b"/><path d="M26 37q6 5 12 0" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>';
+/* the assistant's picture is the app's own logo shield */
+const AVATAR='<img src="/logo-mark.png" alt="" width="52" height="52">';
 $('#chatAv').innerHTML=AVATAR;
+/* voice: the browser's own speech recognition (input) and speech synthesis (output); nothing is recorded or stored by Yaqiz */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition,TTS='speechSynthesis' in window;
+const SRL={ar:'ar-AE',en:'en-US',ur:'ur-PK',hi:'hi-IN',tl:'fil-PH',fa:'fa-IR',am:'am-ET',lg:'en-UG'};
+let rec=null,listening=false,spkOn=store.get('speak',true)!==false;
+function stopSpeak(){try{if(TTS)speechSynthesis.cancel()}catch(e){}}
+function speakLang(x){if(/[\u0600-\u06FF]/.test(x))return lang==='ur'?'ur-PK':lang==='fa'?'fa-IR':'ar-SA';if(/[\u0900-\u097F]/.test(x))return 'hi-IN';if(/[\u1200-\u137F]/.test(x))return 'am-ET';return lang==='tl'?'fil-PH':'en-US'}
+function speakTxt(x){if(!TTS||!spkOn||!x)return;try{stopSpeak();const u=new SpeechSynthesisUtterance(x),l=speakLang(x);u.lang=l;const v=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(l.slice(0,2).toLowerCase()));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function micPaint(){const b=$('#chatMic');b.classList.toggle('on',listening);b.setAttribute('aria-pressed',listening);$('#chatIn').placeholder=t(listening?'micListen':'chatPh')}
+function micToggle(){
+ if(listening){try{rec.stop()}catch(e){}return}
+ stopSpeak();$('#chatIn').value='';
+ rec=new SR();rec.lang=SRL[lang]||'en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
+ rec.onresult=e=>{let s='';for(let i=0;i<e.results.length;i++)s+=e.results[i][0].transcript;$('#chatIn').value=s};
+ rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')toast(t('micDenied'));else if(e.error==='no-speech')toast(t('micNone'))};
+ rec.onend=()=>{listening=false;micPaint();const x=($('#chatIn').value||'').trim();if(x)chatAsk(x)};
+ try{rec.start();listening=true;micPaint()}catch(e){listening=false;micPaint()}
+}
+function spkPaint(){const b=$('#chatSpk');b.classList.toggle('off',!spkOn);b.setAttribute('aria-pressed',spkOn);b.title=b.ariaLabel=t('spkTitle')}
 function chatDraw(){
  const box=$('#chatMsgs');if(!box)return;
  const bot=x=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${esc(x)}</div></div>`;
@@ -985,7 +1011,7 @@ function chatDraw(){
  box.scrollTop=box.scrollHeight;
  const qs=['chatQ1','chatQ2'].concat(last?['chatQ3']:[]);
  $('#chatChips').innerHTML=chatMsgs.length?'':qs.map(k=>`<button type="button" data-q="${k}">${esc(t(k))}</button>`).join('');
- $('#chatSend').disabled=chatBusy;
+ $('#chatSend').disabled=chatBusy;$('#chatMic').disabled=chatBusy;$('#chatMic').title=$('#chatMic').ariaLabel=t('micTitle');spkPaint();
 }
 async function chatAsk(x){
  x=String(x||'').trim().slice(0,1000);if(!x||chatBusy)return;
@@ -996,11 +1022,14 @@ async function chatAsk(x){
   if(last)body.ctx={score:last.score,verdict:last.lvl,type:last.kind,flags:(last.flags||[]).slice(0,5)};
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  out=r.ok&&j.reply?j.reply:t(r.status===429?'chatLimit':'chatErr');
+  out=r.ok&&j.reply?j.reply:t(r.status===429?'chatLimit':'chatErr');if(r.ok&&j.reply)setTimeout(()=>speakTxt(j.reply),0);
  }catch(e){out=t('chatErr')}
  chatMsgs.push({r:'assistant',c:out});chatBusy=false;chatDraw();
 }
-$('#chatSend').onclick=()=>chatAsk($('#chatIn').value);
+$('#chatSend').onclick=()=>{stopSpeak();chatAsk($('#chatIn').value)};
+if(SR){$('#chatMic').classList.remove('hidden');$('#chatVoiceNote').classList.remove('hidden');$('#chatMic').onclick=micToggle}
+if(!TTS)$('#chatSpk').classList.add('hidden');
+$('#chatSpk').onclick=()=>{spkOn=!spkOn;store.set('speak',spkOn);if(!spkOn)stopSpeak();spkPaint()};
 $('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatAsk($('#chatIn').value)}});
 $('#chatChips').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(b)chatAsk(t(b.dataset.q))});
 

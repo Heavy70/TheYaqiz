@@ -1,6 +1,12 @@
 /* Community-language strings (Urdu, Hindi, Tagalog, Persian, Amharic, Luganda). Keyed by the English source string. */
 const YAQIZ_X={
 "ur": {
+"Speak": "بولیں",
+"Listening…": "سن رہا ہوں…",
+"Microphone is blocked. Allow it in your browser settings.": "مائیکروفون بند ہے۔ اسے براؤزر کی سیٹنگز میں اجازت دیں۔",
+"I didn’t hear anything. Try again.": "مجھے کچھ سنائی نہیں دیا۔ دوبارہ کوشش کریں۔",
+"Read replies aloud": "جوابات بلند آواز میں پڑھیں",
+"If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.": "اگر آپ مائیکروفون استعمال کریں تو آپ کے براؤزر کی اسپیچ سروس آپ کی آواز کو متن میں بدلتی ہے؛ یقظ ریکارڈنگ محفوظ نہیں کرتا۔",
 "AI virtual assistant — not an official body": "اے آئی ورچوئل معاون — کوئی سرکاری ادارہ نہیں",
 "Ask Yaqiz": "یقظ سے پوچھیں",
 "A smart assistant that answers your questions about scams and tells you what to do.": "ایک سمارٹ معاون جو فراڈ کے بارے میں آپ کے سوالوں کے جواب دیتا ہے اور بتاتا ہے کہ کیا کرنا ہے۔",
@@ -333,6 +339,12 @@ const YAQIZ_X={
 "English": "انگریزی"
 },
 "hi": {
+"Speak": "बोलें",
+"Listening…": "सुन रहा हूँ…",
+"Microphone is blocked. Allow it in your browser settings.": "माइक्रोफ़ोन अवरुद्ध है। इसे ब्राउज़र सेटिंग्स में अनुमति दें।",
+"I didn’t hear anything. Try again.": "मुझे कुछ सुनाई नहीं दिया। फिर से कोशिश करें।",
+"Read replies aloud": "जवाब ज़ोर से पढ़ें",
+"If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.": "यदि आप माइक्रोफ़ोन का उपयोग करते हैं, तो आपके ब्राउज़र की स्पीच सेवा आपकी आवाज़ को टेक्स्ट में बदलती है; यक़ज़ रिकॉर्डिंग सहेजता नहीं।",
 "AI virtual assistant — not an official body": "एआई वर्चुअल सहायक — कोई सरकारी संस्था नहीं",
 "Ask Yaqiz": "यक़ज़ से पूछें",
 "A smart assistant that answers your questions about scams and tells you what to do.": "एक स्मार्ट सहायक जो ठगी के बारे में आपके सवालों के जवाब देता है और बताता है कि क्या करना है।",
@@ -665,6 +677,12 @@ const YAQIZ_X={
 "English": "अंग्रेज़ी"
 },
 "tl": {
+"Speak": "Magsalita",
+"Listening…": "Nakikinig…",
+"Microphone is blocked. Allow it in your browser settings.": "Naka-block ang mikropono. Payagan ito sa settings ng browser mo.",
+"I didn’t hear anything. Try again.": "Wala akong narinig. Subukan muli.",
+"Read replies aloud": "Basahin nang malakas ang mga sagot",
+"If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.": "Kung gagamitin mo ang mikropono, ang speech service ng browser mo ang magko-convert ng boses mo sa teksto; hindi nag-iimbak ng recording si Yaqiz.",
 "AI virtual assistant — not an official body": "AI virtual assistant — hindi opisyal na ahensya",
 "Ask Yaqiz": "Tanungin si Yaqiz",
 "A smart assistant that answers your questions about scams and tells you what to do.": "Isang matalinong katulong na sumasagot sa mga tanong mo tungkol sa scam at nagsasabi kung ano ang gagawin.",
@@ -997,6 +1015,12 @@ const YAQIZ_X={
 "English": "English"
 },
 "fa": {
+"Speak": "صحبت کنید",
+"Listening…": "در حال گوش دادن…",
+"Microphone is blocked. Allow it in your browser settings.": "میکروفون مسدود است. در تنظیمات مرورگر اجازه دهید.",
+"I didn’t hear anything. Try again.": "چیزی نشنیدم. دوباره تلاش کنید.",
+"Read replies aloud": "خواندن پاسخ‌ها با صدای بلند",
+"If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.": "اگر از میکروفون استفاده کنید، سرویس گفتار مرورگر شما صدایتان را به متن تبدیل می‌کند؛ یقظ ضبط را ذخیره نمی‌کند.",
 "AI virtual assistant — not an official body": "دستیار مجازی هوش مصنوعی — نهاد رسمی نیست",
 "Ask Yaqiz": "از یقظ بپرسید",
 "A smart assistant that answers your questions about scams and tells you what to do.": "یک دستیار هوشمند که به پرسش‌های شما درباره کلاهبرداری پاسخ می‌دهد و می‌گوید چه کنید.",
@@ -1329,6 +1353,12 @@ const YAQIZ_X={
 "English": "انگلیسی"
 },
 "am": {
+"Speak": "ተናገር",
+"Listening…": "እያዳመጥኩ ነው…",
+"Microphone is blocked. Allow it in your browser settings.": "ማይክሮፎኑ ታግዷል። በአሳሽ ቅንብሮች ውስጥ ይፍቀዱ።",
+"I didn’t hear anything. Try again.": "ምንም አልሰማሁም። እንደገና ይሞክሩ።",
+"Read replies aloud": "መልሶችን ጮክ ብለህ አንብብ",
+"If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.": "ማይክሮፎን ከተጠቀሙ፣ የአሳሽዎ የንግግር አገልግሎት ድምጽዎን ወደ ጽሑፍ ይቀይራል፤ ያቂዝ ቀረጻውን አያስቀምጥም።",
 "AI virtual assistant — not an official body": "AI ምናባዊ ረዳት — ኦፊሴላዊ ተቋም አይደለም",
 "Ask Yaqiz": "ያቂዝን ይጠይቁ",
 "A smart assistant that answers your questions about scams and tells you what to do.": "ስለ ማጭበርበር ጥያቄዎችዎን የሚመልስና ምን ማድረግ እንዳለብዎ የሚነግርዎ ብልህ ረዳት።",
@@ -1661,6 +1691,12 @@ const YAQIZ_X={
 "English": "እንግሊዝኛ"
 },
 "lg": {
+"Speak": "Yogera",
+"Listening…": "Mpuliriza…",
+"Microphone is blocked. Allow it in your browser settings.": "Maikulofooni ekwatiddwa. Ogikkirize mu settings za browser yo.",
+"I didn’t hear anything. Try again.": "Sigguliddeko kintu. Gezaako nate.",
+"Read replies aloud": "Soma eby’okuddamu n’eddoboozi",
+"If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.": "Bw’okozesa maikulofooni, empeereza y’eddoboozi eya browser yo ekyusa eddoboozi lyo mu byawandiikibwa; Yaqiz tetereka kukwata.",
 "AI virtual assistant — not an official body": "Omuyambi wa AI ku mutimbagano — si kitongole kya gavumenti",
 "Ask Yaqiz": "Buuza Yaqiz",
 "A smart assistant that answers your questions about scams and tells you what to do.": "Omuyambi omugezi addamu ebibuuzo byo ku bufere era akugamba eky’okukola.",
