@@ -16,6 +16,7 @@ ok(/score 100\/100/.test(c.ctx), 'context score is clamped to 100');
 ok(S.cleanChat({ messages: Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: 'm' + i })).concat([{ role: 'user', content: 'last' }]) }).m.length <= 10, 'at most 10 messages are forwarded');
 ok(/800 2626/.test(srv) && /2828/.test(srv) && /aman@adpolice\.gov\.ae/.test(srv), 'assistant knows the official channels');
 ok(/Never ask for or accept passwords/.test(srv) && /Stay on topic/.test(srv), 'assistant prompt keeps the safety and scope rules');
+ok(/plain text only/i.test(srv) && /replace\(\/\\\*\\\*/.test(srv), 'replies are plain text (markdown stripped)');
 ok(/CHAT_PER_IP_DAY/.test(srv) && /allowChat\(/.test(srv), 'per-IP daily limit is applied to the assistant');
 ok(/\/api\/chat/.test(srv) && /chat: !!CHAT_KEY/.test(srv), 'route and health flag exist');
 ['chatH', 'chatD', 'chatNote', 'chatPh', 'chatSend', 'chatErr', 'chatLimit', 'chatWait', 'chatQ1', 'chatQ2', 'chatQ3', 'chatHello'].forEach(k => {

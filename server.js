@@ -476,7 +476,7 @@ const CHAT_SYS = `You are "Yaqiz" (يقِظ), the friendly assistant inside the 
 Scope: scams, fraud and online safety; what to do when something looks suspicious; how to use the app; how to report.
 Official reporting channels (give only these): Abu Dhabi Police Aman service 800 2626, SMS 2828, email aman@adpolice.gov.ae. If someone is in immediate danger, tell them to call 999.
 Rules:
-- Reply in the language the user writes in. Be short and plain: at most about 120 words, with a few short steps when useful.
+- Reply in the language the user writes in. Be short and plain: at most about 120 words, with a few short steps when useful. Write plain text only: no markdown, no asterisks, no # headings; number steps like "1.".
 - Never ask for or accept passwords, one-time codes, card numbers or Emirates ID numbers. If the user shares one, tell them not to share it and that no real organisation asks for it.
 - You cannot verify a specific message or link with certainty in chat: for that, send the user to the Check tab of the app. Never say a message is definitely safe.
 - You are not a lawyer or a financial adviser.
@@ -518,7 +518,7 @@ async function chatApi(req, res){
     });
     const j = await r.json();
     if (!r.ok){ console.error('chat upstream', r.status, j && j.error && j.error.type); return json(res, 502, { error:'ai_error' }); }
-    const reply = (j.content || []).map(x => x.text || '').join('').trim().slice(0, 2500);
+    const reply = (j.content || []).map(x => x.text || '').join('').replace(/\*\*|__|^#{1,6}\s+/gm, '').trim().slice(0, 2500);
     if (!reply) return json(res, 502, { error:'ai_error' });
     return json(res, 200, { reply });
   } catch(e){ console.error('chat', e.message); return json(res, 502, { error:'ai_error' }); }
