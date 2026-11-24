@@ -542,21 +542,36 @@ async function chatApi(req, res){
   if (!allowChat(ip)) return json(res, 429, { error:'limit' });
   let b; try { b = JSON.parse(await readBody(req, 60 * 1024)); } catch(e){ return json(res, 400, { error:'bad_request' }); }
   const c = cleanChat(b); if (!c) return json(res, 400, { error:'bad_request' });
-  try {
-    const payload = JSON.stringify({ model:MODEL, max_tokens:600, system: CHAT_SYS + '\n\nApp language: ' + CHAT_LANGS[c.lang] + (c.ctx ? '\n\n' + c.ctx : ''), messages:c.m });
+  /* the script of the latest question wins over the app language, so the prompt never asks for two languages at once */
+  const last = c.m[c.m.length - 1].content;
+  if (/[\u0600-\u06FF]/.test(last) && !['ar','ur','fa'].includes(c.lang)) c.lang = 'ar';
+  else if (/[\u0900-\u097F]/.test(last)) c.lang = 'hi';
+  else if (/[\u1200-\u137F]/.test(last)) c.lang = 'am';
+  const ask = async (extra) => {
+    const payload = JSON.stringify({ model:MODEL, max_tokens:700, system: CHAT_SYS + '\n\nApp language: ' + CHAT_LANGS[c.lang] + (c.ctx ? '\n\n' + c.ctx : '') + (extra || ''), messages:c.m });
     const call = k => fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{ 'x-api-key':k, 'anthropic-version':'2023-06-01', 'content-type':'application/json' }, body: payload });
     let r = await call(CHAT_KEY);
-    /* if the separate assistant key is rejected (invalid, no credit, not permitted), fall back once to the main analysis key */
-    if ([400, 401, 402, 403].includes(r.status) && KEY && KEY !== CHAT_KEY){ console.error('chat key rejected', r.status, '- using main key'); r = await call(KEY); }
+    /* the separate assistant key rejected, or the service busy: one more try (with the main key when there is one) */
+    if ([400, 401, 402, 403, 429, 500, 502, 503, 529].includes(r.status)){ console.error('chat upstream', r.status, '- retrying'); if (r.status >= 429) await new Promise(z => setTimeout(z, 800)); r = await call(KEY && KEY !== CHAT_KEY ? KEY : CHAT_KEY); }
     const j = await r.json().catch(() => ({}));
-    if (!r.ok){ console.error('chat upstream', r.status, j && j.error && j.error.type); return json(res, 502, { error:'ai_error' }); }
+    if (!r.ok){ console.error('chat upstream', r.status, j && j.error && j.error.type); return null; }
     const raw = (j.content || []).map(x => x.text || '').join('');
-    const handover = /\[\[HANDOVER\]\]/.test(raw);
     const reply = raw.replace(/\[\[HANDOVER\]\]/g, '').replace(/\*\*|__|^#{1,6}\s+/gm, '').trim().slice(0, 2500);
-    if (!reply) return json(res, 502, { error:'ai_error' });
-    return json(res, 200, { reply, handover });
+    if (!reply) console.error('chat empty reply', j.stop_reason, (j.content || []).map(x => x.type).join(','));
+    return { reply, handover: /\[\[HANDOVER\]\]/.test(raw) };
+  };
+  try {
+    let a = await ask();
+    /* an empty answer (for example a declined or cut-off turn) is retried once with a plain instruction, and never shown as an error */
+    if (a && !a.reply) a = await ask('\n\nAlways answer with at least one helpful sentence within your scope. If the question is outside the knowledge base, say so briefly and point to the Check tab or Aman (800 2626).');
+    if (a && a.reply) return json(res, 200, a);
+    if (a) return json(res, 200, { reply: CHAT_FALLBACK[c.lang] || CHAT_FALLBACK.en, handover: true });
+    return json(res, 502, { error:'ai_error' });
   } catch(e){ console.error('chat', e.message); return json(res, 502, { error:'ai_error' }); }
 }
+const CHAT_FALLBACK = {
+  ar: 'ما قدرت أجاوب على هالسؤال الحين. إذا عندك مسج أو رابط أو رقم تشك فيه، افحصه من تبويب Check. وإذا تبا تبلّغ، كلّم أمان على 800 2626 أو أرسل مسج على 2828، وفي الخطر اتصل على 999.',
+  en: 'I couldn’t answer that just now. If you have a suspicious message, link or number, check it in the Check tab. To report, contact Aman on 800 2626 or SMS 2828, and call 999 in an emergency.' };
 
 // ---- /api/tts: one natural voice on every device (Azure Speech neural voices; Arabic = Emirati ar-AE Hamdan). Nothing stored. ----
 const TTS_KEY = (process.env.AZURE_SPEECH_KEY || '').trim(), TTS_REGION = (process.env.AZURE_SPEECH_REGION || 'uaenorth').trim();

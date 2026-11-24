@@ -1110,7 +1110,7 @@ async function chatAsk(x){
  chatMsgs.push({r:'user',c:x});chatBusy=true;$('#chatIn').value='';chatDraw();
  let out,ho=false;
  try{
-  const body={lang,messages:chatMsgs.slice(-10).map(m=>({role:m.r,content:m.c}))};
+  const body={lang,messages:chatMsgs.filter(m=>m.r==='user'||m.ok!==false).slice(-10).map(m=>({role:m.r,content:m.c}))};   /* failed replies are never sent back as the assistant's words */
   if(last)body.ctx={score:last.score,verdict:last.lvl,type:last.kind,flags:(last.flags||[]).slice(0,5)};
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));

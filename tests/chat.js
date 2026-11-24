@@ -51,4 +51,6 @@ ok(/id="m-pay"/.test(html) && /function payVerdict\(/.test(html) && /data-mode="
 ['Pay','Verify before I pay','Verify a payment link before you pay','Don’t pay','Check first','Official payment page','Check a number'].forEach(k => ['ur','hi','tl','fa','am','lg'].forEach(l => ok(X[l][k], l + ' translation missing: ' + k)));
 ['ur','hi','tl','fa','am','lg'].forEach(l => ok(/\{X\}/.test(X[l]['Claims to be from “{X}”, but this is not its official website'] || ''), l + ' claim flag must keep {X}'));
 ok(/Scam Network Intelligence/.test(html) && /ذكاء شبكات الاحتيال/.test(html), 'roadmap lists Scam Network Intelligence');
+ok(/chat empty reply/.test(srv) && /CHAT_FALLBACK/.test(srv) && /\[\\u0600-\\u06FF\]\/\.test\(last\)/.test(srv) && /529\]\.includes\(r\.status\)/.test(srv), 'empty or busy model replies are retried and never shown as an error; question script decides the reply language');
+ok(/m\.ok!==false/.test(html), 'failed replies are not sent back as assistant history');
 console.log(fails.length ? 'CHAT FAIL\n' + fails.join('\n') : 'CHAT PASS'); process.exit(fails.length ? 1 : 0);
