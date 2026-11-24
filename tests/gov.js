@@ -7,4 +7,5 @@ ck('login redirects to main page',/location\.href='\/'/.test(L));
 ck('login marked as demo',/DEMO/.test(L)&&/never asks for/i.test(L));
 ck('portal placeholder removed',!fs.existsSync(__dirname+'/../public/gov/portal.html'));
 ck('sw does not cache /gov/',/startsWith\('\/gov\/'\)/.test(fs.readFileSync(__dirname+'/../public/sw.js','utf8')));
+ck('main page links to login',/href="\/gov\/login\.html"/.test(fs.readFileSync(__dirname+'/../public/index.html','utf8')));
 console.log(bad?'GOV FAIL':'GOV PASS');process.exit(bad?1:0);

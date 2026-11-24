@@ -224,6 +224,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 16px 20px
 .toast{position:fixed;bottom:calc(96px + var(--safe-b));left:50%;transform:translateX(-50%);background:#0e1c33;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:60}
 .toast.show{opacity:1}
 .hidden{display:none!important}
+.uaep{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:999px;background:#00843d;color:#fff;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap}.uaep:hover{background:#006b32}
+@media(max-width:480px){.uaep{height:30px;padding:0 9px;font-size:12px}.top .flag,.pill #statusTxt{display:none}}
 .lang{border:1px solid #ffffff38;background:#ffffff1a;color:#fff;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
 html[dir=ltr] body{font-family:Inter,"IBM Plex Sans Arabic",system-ui,sans-serif}
 html[dir=ltr] .display,html[dir=ltr] h2,html[dir=ltr] .vt,html[dir=ltr] .stat .n,html[dir=ltr] .ch .n{font-family:"Space Grotesk",Inter,sans-serif}
@@ -268,6 +270,7 @@ footer .dev b{color:var(--brand)}
     <nav class="dnav" id="dnav"></nav>
     <div class="sp"></div>
     <img class="flag" src="uae-flag.png" alt="" data-i18n-alt="flagAlt" width="251" height="160">
+    <a class="uaep" href="/gov/login.html" dir="ltr">UAE PASS</a>
     <button class="lang" id="langBtn" aria-label="Switch language">EN</button>
     <span class="pill" id="statusPill"><span class="dot"></span><span id="statusTxt"></span></span>
   </div>
