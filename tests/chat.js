@@ -19,13 +19,13 @@ ok(/Never ask for or accept passwords/.test(srv) && /Stay on topic/.test(srv), '
 ok(/plain text only/i.test(srv) && /replace\(\/\\\*\\\*/.test(srv), 'replies are plain text (markdown stripped)');
 ok(/CHAT_PER_IP_DAY/.test(srv) && /allowChat\(/.test(srv), 'per-IP daily limit is applied to the assistant');
 ok(/\/api\/chat/.test(srv) && /chat: !!CHAT_KEY/.test(srv), 'route and health flag exist');
-['chatH', 'chatD', 'chatNote', 'chatPh', 'chatSend', 'chatErr', 'chatLimit', 'chatWait','chatAi','micTitle','micListen','micDenied','micNone','spkTitle','voiceNote', 'chatQ1', 'chatQ2', 'chatQ3', 'chatHello'].forEach(k => {
+['chatH', 'chatD', 'chatNote', 'chatPh', 'chatSend', 'chatErr', 'chatLimit', 'chatWait','chatAi','micTitle','micListen','micDenied','micNone','spkTitle','voiceNote', 'chatQ1', 'chatQ2', 'chatQ3', 'chatHello', 'chatQ4', 'chatQ5', 'hoH', 'hoEm'].forEach(k => {
   const m = html.match(new RegExp(k + ":\\['([^']*(?:\\\\'[^']*)*)','([^']*(?:\\\\'[^']*)*)'\\]"));
   ok(m, 'dictionary entry missing: ' + k);
   if (m) ['ur', 'hi', 'tl', 'fa', 'am', 'lg'].forEach(l => ok(X[l] && X[l][m[2]], l + ' translation missing: ' + k));
 });
 ok(/not a police officer/.test(srv), 'assistant must never claim to be police or a government body');
-ok(/const AVATAR='<img src="\/logo-mark\.png"/.test(html), 'assistant picture is the app logo shield');
+ok(/const AVATAR='<img src="\/persona\.jpg"/.test(html) && fs.existsSync(path.join(__dirname, '../public/persona.jpg')), 'assistant picture is the Yaqiz persona');
 ok(/microphone=\(self\)/.test(srv), 'microphone must be allowed for the page (Permissions-Policy), camera stays blocked');
 ok(/camera=\(\)/.test(srv), 'camera stays blocked');
 ok(/SpeechRecognition/.test(html) && /speechSynthesis/.test(html) && /id="chatMic"/.test(html) && /id="chatSpk"/.test(html), 'voice input and spoken replies exist');

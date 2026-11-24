@@ -242,7 +242,7 @@ footer .dev{font-size:13.5px;color:var(--ink);margin-bottom:4px}
 footer .dev b{color:var(--brand)}
 .chat .nt{font-size:12.5px;color:var(--muted);margin:6px 0 10px}.chat .msgs{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:4px 2px;margin-bottom:10px}.chat .m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}.chat .m.u{align-self:flex-end;background:var(--brand);color:#fff;border-end-end-radius:4px}.chat .m.b{align-self:flex-start;background:var(--soft);border:1px solid var(--line);border-end-start-radius:4px}.chat .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.chat .chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}.chat .row{display:flex;gap:8px;align-items:flex-end}.chat .row textarea{resize:none;min-height:46px;flex:1;min-width:0;width:auto}.chat .row .btn{flex:none}
 .chat .chead{display:flex;align-items:center;gap:12px;margin-bottom:6px}.chat .chead h2{margin:0}.chat .chead .hint{margin:2px 0 0}.chat .av{flex:none;width:30px;height:30px;display:inline-block}.chat .av.big{width:52px;height:52px}.chat .av svg{width:100%;height:100%;display:block}.chat .mr{display:flex;gap:8px;align-items:flex-end;align-self:flex-start;max-width:92%}.chat .mr .m.b{align-self:auto;max-width:none}
-.chat .av img{width:100%;height:100%;object-fit:contain;display:block}.chat .ic-btn{padding:0;width:46px;height:46px;flex:none}.chat .ic-btn svg{width:22px;height:22px}.chat .ic-btn.on{background:var(--bad);color:#fff;animation:micp 1s infinite}@keyframes micp{50%{opacity:.6}}.chat #chatSpk{margin-inline-start:auto;width:40px;height:40px}.chat #chatSpk:not(.off) .x{display:none}.chat #chatSpk.off .w{display:none}
+.chat .av.talk{border-radius:50%;animation:avtalk .9s ease-in-out infinite}@keyframes avtalk{50%{box-shadow:0 0 0 6px rgba(0,122,61,.18);transform:scale(1.04)}}.chat .ho{margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.chat .ho b{display:block;font-size:13px;margin-bottom:8px}.chat .ho .hr{display:flex;flex-wrap:wrap;gap:6px}.chat .ho a{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;text-decoration:none;color:var(--ink);background:var(--soft)}.chat .ho a.em{background:var(--bad);color:#fff;border-color:var(--bad)}.chat .av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.chat .ic-btn{padding:0;width:46px;height:46px;flex:none}.chat .ic-btn svg{width:22px;height:22px}.chat .ic-btn.on{background:var(--bad);color:#fff;animation:micp 1s infinite}@keyframes micp{50%{opacity:.6}}.chat #chatSpk{margin-inline-start:auto;width:40px;height:40px}.chat #chatSpk:not(.off) .x{display:none}.chat #chatSpk.off .w{display:none}
 </style>
 </head>
 <body>
@@ -604,7 +604,7 @@ iosH:['ثبّت يقِظ على آيفون','Install TheYaqiz on iPhone'],ios1:[
 iosAnd:['على أندرويد: من قائمة Chrome (⋮) اختر «تثبيت التطبيق».','On Android: in Chrome’s menu (⋮) choose “Install app”.'],ok:['حسنًا','OK'],
 pasteFirst:['الصق رسالة أولًا','Paste a message first'],enterUrl:['أدخل رابطًا','Enter a link'],
 textHl:['النص مع تظليل العبارات المريبة','Text with suspicious phrases highlighted'],signals:['مؤشرات الخطر','Risk signals'],why:['لماذا هذا الحكم؟','Why this verdict?'],result:['النتيجة','Result'],
-noPat:['لم تُرصد أنماط احتيال معروفة.','No known scam patterns found.'],evid:['الأدلة','Evidence'],senderPh:['المرسل (اختياري): رقم الجوال أو الاسم الظاهر','Sender (optional): number or displayed name'],mAuto:['تحليل معمّق تلقائي للحالات غير الواضحة','Automatic deep analysis for unclear cases'],autoOffD:['متوقف — يبقى نص الرسالة على جهازك','Off — your message text stays on your device'],autoOnD:['مفعّل — يُرسَل النص للتحليل عند عدم الوضوح فقط','On — the text is sent for analysis only when the result is unclear'],privacyAuto:['الفحص الأساسي داخل جهازك. في الحالات غير الواضحة فقط يُرسَل النص للتحليل المعمّق (فعّلتَ ذلك).','The basic check runs on your device. Only for unclear results the text is sent for deep analysis (you turned this on).'],qrFound:['الصورة تحتوي رمز QR يقود إلى: ','The image contains a QR code leading to: '],aiRow:['تحليل الذكاء الاصطناعي','AI analysis'],aiRun:['جارٍ التحليل…','analysing…'],whatNow:['ماذا أفعل الآن؟','What should I do now?'],repNowH:['خطر مرتفع (75% فأكثر): بلّغ شرطة أبوظبي الآن','High risk (75%+): report it to Abu Dhabi Police now'],repNowD:['اضغط قناة: يفتح تطبيق البريد أو الرسائل لديك والبلاغ جاهز. لا يُرسل شيء إلا بعد أن تضغط إرسال.','Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.'],prepRep:['جهّز بلاغًا','Prepare a report'],
+noPat:['لم تُرصد أنماط احتيال معروفة.','No known scam patterns found.'],evid:['الأدلة','Evidence'],senderPh:['المرسل (اختياري): رقم الجوال أو الاسم الظاهر','Sender (optional): number or displayed name'],mAuto:['تحليل معمّق تلقائي للحالات غير الواضحة','Automatic deep analysis for unclear cases'],autoOffD:['متوقف — يبقى نص الرسالة على جهازك','Off — your message text stays on your device'],autoOnD:['مفعّل — يُرسَل النص للتحليل عند عدم الوضوح فقط','On — the text is sent for analysis only when the result is unclear'],privacyAuto:['الفحص الأساسي داخل جهازك. في الحالات غير الواضحة فقط يُرسَل النص للتحليل المعمّق (فعّلتَ ذلك).','The basic check runs on your device. Only for unclear results the text is sent for deep analysis (you turned this on).'],privacyAi:['يبدأ الفحص داخل جهازك، ثم يُرسَل النص إلى خدمة ذكاء اصطناعي لتحليل أعمق، ولا يُحفظ.','The check runs on your device first, then the text is sent to an AI service for a deeper analysis. It is not stored.'],qrFound:['الصورة تحتوي رمز QR يقود إلى: ','The image contains a QR code leading to: '],aiRow:['تحليل الذكاء الاصطناعي','AI analysis'],aiRun:['جارٍ التحليل…','analysing…'],whatNow:['ماذا أفعل الآن؟','What should I do now?'],repNowH:['خطر مرتفع (75% فأكثر): بلّغ شرطة أبوظبي الآن','High risk (75%+): report it to Abu Dhabi Police now'],repNowD:['اضغط قناة: يفتح تطبيق البريد أو الرسائل لديك والبلاغ جاهز. لا يُرسل شيء إلا بعد أن تضغط إرسال.','Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.'],prepRep:['جهّز بلاغًا','Prepare a report'],
 riskOf:['درجة الخطورة من 100','Risk score out of 100'],localSrc:['تحليل محلي فوري','instant on-device analysis'],aiSrc:['تحليل بالذكاء الاصطناعي','AI analysis'],
 aiT:['تحليل الذكاء الاصطناعي','AI analysis'],aiFlags:['المؤشرات','Signals'],aiAdv:['ماذا أفعل','What to do'],analyzing:['جارٍ التحليل…','Analysing…'],reading:['يقرأ يقِظ الصورة…','TheYaqiz is reading the image…'],
 eGrant:['لم يُسمح بالتحليل بالذكاء الاصطناعي.','AI analysis was not allowed.'],eLimit:['بلغتَ حدّ الاستخدام، حاول لاحقًا.','Usage limit reached. Please try again later.'],eFail:['تعذّر التحليل المعمّق الآن؛ النتيجة المحلية متاحة.','Deep analysis is unavailable right now; the on-device result is shown.'],
@@ -645,7 +645,11 @@ micNone:['لم أسمع شيئًا. حاول مرة أخرى.','I didn’t hear 
 spkTitle:['قراءة الردود بصوت عالٍ','Read replies aloud'],
 voiceNote:['عند استخدام الميكروفون، تتولى خدمة التعرف على الكلام في متصفحك تحويل صوتك إلى نص، ولا يحفظ يقِظ التسجيل.','If you use the microphone, your browser’s speech service turns your voice into text; Yaqiz does not store the recording.'],
 chatAi:['مساعد افتراضي بالذكاء الاصطناعي — ليس جهة رسمية','AI virtual assistant — not an official body'],
-chatHello:['مرحبًا، أنا يقِظ. اسألني عن أي رسالة أو مكالمة أو موقف يبدو لك احتيالًا.','Hi, I’m Yaqiz. Ask me about any message, call or situation that looks like a scam.']
+chatHello:['مرحبًا، أنا يقِظ. اسألني عن أي رسالة أو مكالمة أو موقف يبدو لك احتيالًا.','Hi, I’m Yaqiz. Ask me about any message, call or situation that looks like a scam.'],
+chatQ4:['اتصل بي شخص يقول إنه من الشرطة أو من بنكي. هل هذا احتيال؟','Someone called saying they are from the police or my bank. Is it a scam?'],
+chatQ5:['كيف أفحص رابطًا قبل أن أفتحه؟','How do I check a link before I open it?'],
+hoH:['تواصل الآن مع القناة الرسمية (شرطة أبوظبي – أمان):','Contact the official channel now (Abu Dhabi Police – Aman):'],
+hoEm:['الطوارئ 999','Emergency 999']
 });
 const t=k=>{const a=D[k]||[k,k];return T(a[0],a[1])};
 const OUT={ur:'Urdu',hi:'Hindi',tl:'Filipino (Tagalog)',fa:'Persian (Farsi)',am:'Amharic',lg:'Luganda (Ganda, the main local language of Uganda)'};
@@ -793,7 +797,7 @@ async function enrich(res){
  if(o&&o.ok&&o.host&&!res.pending.includes(o.host)&&!E.isOfficial(o.host)){const f2=await getFacts([o.host]);f=f.concat(f2||[])}
  return applyOpen(applyFacts(res,f),o)}
 function finish(res,kind,x,noSave){
- const net=srv&&res.pending&&res.pending.length, auto=kind==='msg'&&store.get('auto',false)&&ai;
+ const net=srv&&res.pending&&res.pending.length, auto=(kind==='msg'||kind==='url')&&!!ai;   /* one unified check: on-device engine, then link opening, then the AI, merged into a single result */
  if(net)res.evidence=(res.evidence||[]).concat([{id:'load',st:'load',t:T('عمر النطاق وسمعته','Domain age & reputation'),v:T('جارٍ فتح الرابط وفحصه…','opening and checking the link…')}]);
  render(res,kind,x,{noSave});
  if(!net&&!auto)return;
@@ -801,7 +805,7 @@ function finish(res,kind,x,noSave){
  (async()=>{
   let c=res;
   if(net){c=await enrich(res);if(!cur())return;render(c,kind,x,{noSave:true,scroll:false,upd:time})}
-  if(auto&&c.score>=25&&c.score<=59){
+  if(auto){
    render(Object.assign({},c,{evidence:(c.evidence||[]).concat([{id:'load',st:'load',t:t('aiRow'),v:t('aiRun')}])}),kind,x,{noSave:true,scroll:false,upd:time});
    try{const j=await aiAnalyze(x);if(!cur())return;c=applyAi(c,j);render(c,kind,x,{noSave:true,scroll:false,upd:time});const s=$('#res .aiSlot');if(s)s.innerHTML=aiHtml(j)}
    catch(e){if(cur())render(c,kind,x,{noSave:true,scroll:false,upd:time})}
@@ -964,12 +968,12 @@ function showQr(v){
 }
 $('#imgIn').onchange=e=>{const f=e.target.files[0];if(!f)return;imgBlob=f;const p=$('#imgPrev');p.src=URL.createObjectURL(f);p.classList.remove('hidden');$('#dropTxt').textContent=f.name;if(ai&&ai.images)$('#imgGo').disabled=false;qrScan(f).then(l=>{if(l.length&&imgBlob===f)showQr(l[0])})};
 /* ----- automatic deep analysis (opt-in: sends the text only for unclear results) ----- */
-function paintAuto(){const on=store.get('auto',false);const s=$('#autoSt');if(s)s.textContent=t(on?'autoOnD':'autoOffD');const pv=document.querySelector('.privacy span');if(pv)pv.textContent=t(on&&ai?'privacyAuto':'privacy')}
+function paintAuto(){const on=store.get('auto',false);const s=$('#autoSt');if(s)s.textContent=t(on?'autoOnD':'autoOffD');const pv=document.querySelector('.privacy span');if(pv)pv.textContent=t(ai?'privacyAi':'privacy')}
 $('#moreAuto').onclick=()=>{store.set('auto',!store.get('auto',false));paintAuto()};
 
 function imgNote(){$('#imgNote').textContent=!ai?t('imgNeedNet'):ai.images?t('imgPriv'):t('imgNo')}
 function enableAi(){
- aiOn=true;$('#msgAi').classList.remove('hidden');$('#moreAuto').classList.remove('hidden');paintAuto();$('#statusTxt').textContent=t('stAi');imgNote();
+ aiOn=true;paintAuto();$('#statusTxt').textContent=t('stAi');imgNote();
  $('#msgAi').onclick=()=>{const x=$('#msgIn').value.trim();if(!x){toast(t('pasteFirst'));return}runAi(x,$('#msgAi'))};
  if(!ai.images)return;
  $('#imgGo').onclick=()=>{if(imgBlob)runAi(T('لقطة شاشة مرفقة: اقرأ النص والروابط والشعارات فيها وحلّلها.','Attached screenshot: read its text, links and logos and analyse it.'),$('#imgGo'),imgBlob)};
@@ -983,16 +987,16 @@ function enableAi(){
 
 /* ===== Ask Yaqiz: assistant chat (in memory only; the server masks card-like numbers; only the last result's score/signals are sent as context, never the message text) ===== */
 let chatMsgs=[],chatBusy=false;
-/* the assistant's picture is the app's own logo shield */
-const AVATAR='<img src="/logo-mark.png" alt="" width="52" height="52">';
+/* the assistant's picture: the Yaqiz persona (a young Emirati man wearing the Yaqiz shield) */
+const AVATAR='<img src="/persona.jpg" alt="" width="52" height="52">';
 $('#chatAv').innerHTML=AVATAR;
 /* voice: the browser's own speech recognition (input) and speech synthesis (output); nothing is recorded or stored by Yaqiz */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition,TTS='speechSynthesis' in window;
 const SRL={ar:'ar-AE',en:'en-US',ur:'ur-PK',hi:'hi-IN',tl:'fil-PH',fa:'fa-IR',am:'am-ET',lg:'en-UG'};
 let rec=null,listening=false,spkOn=store.get('speak',true)!==false;
-function stopSpeak(){try{if(TTS)speechSynthesis.cancel()}catch(e){}}
+function stopSpeak(){try{if(TTS)speechSynthesis.cancel()}catch(e){}const a=document.getElementById('chatAv');if(a)a.classList.remove('talk')}
 function speakLang(x){if(/[\u0600-\u06FF]/.test(x))return lang==='ur'?'ur-PK':lang==='fa'?'fa-IR':'ar-SA';if(/[\u0900-\u097F]/.test(x))return 'hi-IN';if(/[\u1200-\u137F]/.test(x))return 'am-ET';return lang==='tl'?'fil-PH':'en-US'}
-function speakTxt(x){if(!TTS||!spkOn||!x)return;try{stopSpeak();const u=new SpeechSynthesisUtterance(x),l=speakLang(x);u.lang=l;const v=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(l.slice(0,2).toLowerCase()));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+function speakTxt(x){if(!TTS||!spkOn||!x)return;try{stopSpeak();const u=new SpeechSynthesisUtterance(x),l=speakLang(x);u.lang=l;const av=$('#chatAv');u.onstart=()=>av.classList.add('talk');u.onend=u.onerror=()=>av.classList.remove('talk');const v=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(l.slice(0,2).toLowerCase()));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 function micPaint(){const b=$('#chatMic');b.classList.toggle('on',listening);b.setAttribute('aria-pressed',listening);$('#chatIn').placeholder=t(listening?'micListen':'chatPh')}
 function micToggle(){
  if(listening){try{rec.stop()}catch(e){}return}
@@ -1006,25 +1010,26 @@ function micToggle(){
 function spkPaint(){const b=$('#chatSpk');b.classList.toggle('off',!spkOn);b.setAttribute('aria-pressed',spkOn);b.title=b.ariaLabel=t('spkTitle')}
 function chatDraw(){
  const box=$('#chatMsgs');if(!box)return;
- const bot=x=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${esc(x)}</div></div>`;
- box.innerHTML=bot(t('chatHello'))+chatMsgs.map(m=>m.r==='user'?`<div class="m u" dir="auto">${esc(m.c)}</div>`:bot(m.c)).join('')+(chatBusy?bot(t('chatWait')):'');
+ const ho=()=>`<div class="ho"><b>${esc(t('hoH'))}</b><div class="hr"><a href="tel:8002626" dir="ltr">800 2626</a><a href="sms:2828" dir="ltr">SMS 2828</a><a href="mailto:aman@adpolice.gov.ae" dir="ltr">aman@adpolice.gov.ae</a><a class="em" href="tel:999">${esc(t('hoEm'))}</a></div></div>`;
+ const bot=(x,h)=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${esc(x)}${h?ho():''}</div></div>`;
+ box.innerHTML=bot(t('chatHello'))+chatMsgs.map(m=>m.r==='user'?`<div class="m u" dir="auto">${esc(m.c)}</div>`:bot(m.c,m.h)).join('')+(chatBusy?bot(t('chatWait')):'');
  box.scrollTop=box.scrollHeight;
- const qs=['chatQ1','chatQ2'].concat(last?['chatQ3']:[]);
+ const qs=['chatQ1','chatQ4','chatQ5','chatQ2'].concat(last?['chatQ3']:[]);
  $('#chatChips').innerHTML=chatMsgs.length?'':qs.map(k=>`<button type="button" data-q="${k}">${esc(t(k))}</button>`).join('');
  $('#chatSend').disabled=chatBusy;$('#chatMic').disabled=chatBusy;$('#chatMic').title=$('#chatMic').ariaLabel=t('micTitle');spkPaint();
 }
 async function chatAsk(x){
  x=String(x||'').trim().slice(0,1000);if(!x||chatBusy)return;
  chatMsgs.push({r:'user',c:x});chatBusy=true;$('#chatIn').value='';chatDraw();
- let out;
+ let out,ho=false;
  try{
-  const body={messages:chatMsgs.slice(-10).map(m=>({role:m.r,content:m.c}))};
+  const body={lang,messages:chatMsgs.slice(-10).map(m=>({role:m.r,content:m.c}))};
   if(last)body.ctx={score:last.score,verdict:last.lvl,type:last.kind,flags:(last.flags||[]).slice(0,5)};
   const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  out=r.ok&&j.reply?j.reply:t(r.status===429?'chatLimit':'chatErr');if(r.ok&&j.reply)setTimeout(()=>speakTxt(j.reply),0);
+  out=r.ok&&j.reply?j.reply:t(r.status===429?'chatLimit':'chatErr');ho=!!(r.ok&&j.handover);if(r.ok&&j.reply)setTimeout(()=>speakTxt(j.reply),0);
  }catch(e){out=t('chatErr')}
- chatMsgs.push({r:'assistant',c:out});chatBusy=false;chatDraw();
+ chatMsgs.push({r:'assistant',c:out,h:ho});chatBusy=false;chatDraw();
 }
 $('#chatSend').onclick=()=>{stopSpeak();chatAsk($('#chatIn').value)};
 if(SR){$('#chatMic').classList.remove('hidden');$('#chatVoiceNote').classList.remove('hidden');$('#chatMic').onclick=micToggle}

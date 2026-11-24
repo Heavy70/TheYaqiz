@@ -136,7 +136,7 @@ Official and government domains skip these lookups (they are already verified). 
 
 ### Layer 4 — Optional AI analysis (`/api/analyze`)
 
-Runs only when the user asks for deep analysis (or, if the user turns it on, automatically for unclear cases; this setting is **off by default**). The server:
+Since v59 it is part of the single Check button: every message or link check runs the on-device engine, then opens the link, then this AI analysis, and the three are merged into one result (the AI cannot call a message a scam without verifiable evidence). If the AI is unavailable or the daily limit is reached, the on-device result stands. The server:
 
 1. collects verified facts about any domains in the text (RDAP age and reputation) and appends them to the prompt as "verified facts";
 2. sends the text (max 6,000 characters) and optional image to Claude with a strict bilingual system prompt (section 5);
@@ -213,7 +213,7 @@ This rule set came from testing: language models alone over-flag genuine service
 | Hostname sent to Google | Only the hostname/URL, for Web Risk / Safe Browsing | By Google under its API terms |
 | Voice questions to "Ask Yaqiz" (optional, microphone button) | Converted to text by the browser's own speech-recognition service (the browser vendor's cloud, e.g. Google for Chrome); Yaqiz receives only the resulting text and never the audio. Spoken replies use the browser's built-in speech synthesis, on the device | Nothing recorded or stored by Yaqiz |
 | Questions typed to the "Ask Yaqiz" assistant (optional feature) | Sent to our server and to the Claude API to generate the reply; card-like numbers masked first | Not stored; the conversation exists only in the open page |
-| Message or screenshot for deep AI analysis | Sent to our server and to the Claude API, **only when the user asks** | Not stored by our server; not logged |
+| Message, link or screenshot for AI analysis | Sent to our server and to the Claude API as part of every check (the privacy line under Check says so) | Not stored by our server; not logged |
 | Check history | The user's own browser (last 30 checks, first 140 characters) | On the device only; one-tap clear |
 | Settings (language, auto-analysis) | The user's own browser | On the device only |
 
@@ -290,7 +290,7 @@ Errors: `503 ai_off` (no key configured), `429 limit`, `400 bad_request`, `502 a
 
 ### `POST /api/chat`
 
-The "Ask Yaqiz" assistant. Body: `{ "messages": [{"role":"user","content":"..."}], "ctx": { "score": 82, "verdict": "bad", "type": "msg", "flags": ["..."] } }` (`ctx` optional: the last check's score and signals, never its message text). At most the last 10 messages are used, each capped at 1200 characters; card-like numbers (13–19 digits) are masked on the server before anything is sent on. Replies `{ "reply": "..." }`. The assistant is scoped to scams and online safety, gives only the official Abu Dhabi Police channels, and refuses to take passwords, codes or card numbers. Conversations live in the page's memory only and are never stored. Limits: 30 messages/IP/day, 1500/day total. Errors as for `/api/analyze`.
+The "Ask Yaqiz" assistant. Body: `{ "messages": [{"role":"user","content":"..."}], "ctx": { "score": 82, "verdict": "bad", "type": "msg", "flags": ["..."] } }` (`ctx` optional: the last check's score and signals, never its message text). At most the last 10 messages are used, each capped at 1200 characters; card-like numbers (13–19 digits) are masked on the server before anything is sent on. Optional `"lang"` (one of ar, en, ur, hi, tl, fa, am, lg) sets the reply language when the question is ambiguous. Answers come only from a built-in TheYaqiz knowledge base. Replies `{ "reply": "...", "handover": true|false }`; `handover` makes the app show the official Aman contact buttons. The assistant is scoped to scams and online safety, gives only the official Abu Dhabi Police channels, and refuses to take passwords, codes or card numbers. Conversations live in the page's memory only and are never stored. Limits: 30 messages/IP/day, 1500/day total. Errors as for `/api/analyze`.
 
 ---
 
