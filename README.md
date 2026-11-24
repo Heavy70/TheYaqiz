@@ -138,8 +138,8 @@ tests/                 Accuracy gate, fact, multilingual, AI, international, gov
 - **Trade-off:** rules plus AI instead of a custom-trained model. With no large labelled UAE scam dataset available in a hackathon timeframe, explainable rules and an LLM grounded on verified facts give higher, auditable accuracy. A trained classifier is a natural next step once data is collected with consent.
 - **Left out:** user accounts and any server-side storage of messages, to keep the MVP private by design.
 - **Roadmap** (see the deck in `docs/`):
-  - +3 months: store release, a labelled local dataset, a trial with 500 users.
-  - +12 months: "TheYaqiz ambassadors" in schools, and bank and government-portal integration: a quick-verify shortcut before any transfer (concept only; it needs an agreement with each bank, and no partnership exists today).
+  - +3 months: store release, a labelled local dataset, a trial with 500 users, and **Scam Network Intelligence**: a visual map linking suspicious sites that share hosting, IP addresses, name patterns, designs or redirects (shared CDN addresses excluded to avoid false links).
+  - +12 months: a native app that checks the caller's number as the phone rings; "TheYaqiz ambassadors" in schools, and bank and government-portal integration: a quick-verify shortcut before any transfer (concept only; it needs an agreement with each bank, and no partnership exists today).
 - **What we would do differently with more time:** a larger, independently labelled test set with third-party evaluation, and measuring precision and recall on real (consented) messages.
 
 ## 9. Team
@@ -158,7 +158,7 @@ Team **TheYaqiz** (ScamShield AI, Podium+):
 ## 10. Documents
 
 - `docs/TECHNICAL.md`: technical documentation (architecture, model choices, privacy design, security, testing).
-- `docs/TheYaqiz-Presentation-EN-AR.pptx` and `docs/TheYaqiz-Presentation-EN-AR.pdf`: pitch deck (v19), English then Arabic (34 slides). Online version: https://drive.google.com/file/d/1a1OtGuXGMf_qDWVGNBReukAieVfrtjLe/view?usp=drivesdk
+- `docs/TheYaqiz-Presentation-EN-AR.pptx` and `docs/TheYaqiz-Presentation-EN-AR.pdf`: pitch deck (v20), Arabic and English together on every slide (20 slides), including Safe Pay, the quick number check with Siri, the Ask Yaqiz persona and Scam Network Intelligence. Online version: https://drive.google.com/file/d/1a1OtGuXGMf_qDWVGNBReukAieVfrtjLe/view?usp=drivesdk
 
 ---
 
