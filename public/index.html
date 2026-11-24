@@ -34,6 +34,12 @@ svg.i{width:20px;height:20px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-
 /* top bar */
 .top{position:sticky;top:0;z-index:20;background:rgba(10,33,71,.97);backdrop-filter:blur(10px);color:#fff;padding:calc(10px + var(--safe-t)) 16px 10px}
 .top .in{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:12px}
+/* first header line: Ask Yaqiz at the start of the line (right in Arabic, left in other languages); the rest of the header sits under it */
+.top .askrow{max-width:1000px;margin:0 auto 8px;display:flex;justify-content:flex-start}
+.askbtn{display:inline-flex;align-items:center;gap:8px;background:#ffffff1a;border:1px solid #ffffff40;color:#fff;border-radius:999px;padding:3px 14px 3px 3px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+html[dir=rtl] .askbtn{padding:3px 3px 3px 14px}
+.askbtn img{width:30px;height:30px;border-radius:50%;object-fit:cover;display:block}
+.askbtn.hidden{display:none}
 .mark{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 6px #0006)}
 .top h1{margin:0;font-size:20px;line-height:1.1}
 .top small{display:block;font-size:11.5px;opacity:.75;font-weight:500}
@@ -268,6 +274,7 @@ footer .dev b{color:var(--brand)}
 </svg>
 
 <div class="top">
+  <div class="askrow"><button type="button" class="askbtn hidden" id="askTop" data-go="chat"><img src="/persona.jpg" alt="" width="30" height="30"><span data-i18n="chatH"></span></button></div>
   <div class="in">
     <img class="mark" src="logo-mark.png" alt="" width="72" height="72">
     <div><h1 class="display" data-i18n="appName"></h1><small data-i18n="tagline"></small></div>
@@ -715,7 +722,7 @@ let last=null,lastRun=null,aiOn=false,curView='home';
 /* ===== navigation ===== */
 const VIEWS=['home','scan','call','train','chat','report','pitch'];let chatOn=false;
 const VLBL={home:'nHome',scan:'scan',call:'nCall',train:'train',chat:'chatH',report:'mRep',pitch:'mPitch'};
-function drawNav(){$('#dnav').innerHTML=VIEWS.filter(v=>v!=='chat'||chatOn).map(v=>`<button data-go="${v}" class="${v===curView?'on':''}">${t(VLBL[v])}</button>`).join('')}
+function drawNav(){$('#dnav').innerHTML=VIEWS.filter(v=>v!=='chat')   /* Ask Yaqiz has its own button on the first header line */.map(v=>`<button data-go="${v}" class="${v===curView?'on':''}">${t(VLBL[v])}</button>`).join('')}
 function go(v,mode){
   curView=v;
   $$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
@@ -1036,7 +1043,7 @@ function enableAi(){
 }
 (async()=>{
  const inArtifact=/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)||location.protocol==='blob:'||location.origin==='null';
- if(!inArtifact){try{const r=await fetch('/api/health',{cache:'no-store'});const j=await r.json();srv=true;if(j.ai){ai={kind:'server',images:true};enableAi()}if(j.tts){ttsSrv=true;$('#chatSpk').classList.remove('hidden')}if(j.chat){chatOn=true;$('#moreChat').classList.remove('hidden');drawNav()}}catch(e){}}
+ if(!inArtifact){try{const r=await fetch('/api/health',{cache:'no-store'});const j=await r.json();srv=true;if(j.ai){ai={kind:'server',images:true};enableAi()}if(j.tts){ttsSrv=true;$('#chatSpk').classList.remove('hidden')}if(j.chat){chatOn=true;$('#askTop').classList.remove('hidden');$('#moreChat').classList.remove('hidden');drawNav()}}catch(e){}}
  if(!ai){try{if(window.claude&&claude.use){sample=await claude.use('sample');if(sample){let im=false;try{im=!!(await sample.limits()).images}catch(e){}ai={kind:'sample',images:im};enableAi()}}}catch(e){}}
  imgNote();
 })();
