@@ -11,4 +11,5 @@ const I=fs.readFileSync(__dirname+'/../public/index.html','utf8');
 ck('main page opens the login first',/yaqiz_entry/.test(I)&&/replace\('\/gov\/login\.html'\)/.test(I)&&/location\.search/.test(I));
 ck('login sets the entry flag',/setItem\('yaqiz_entry'/.test(L));
 ck('top-bar button removed',!/class="uaep"/.test(I));
+ck('75%+ report panel with Aman channels',/POL_MIN=75/.test(I)&&/mailto:aman@adpolice\.gov\.ae/.test(I)&&/sms:2828/.test(I)&&/tel:8002626/.test(I)&&/res\.score>=POL_MIN\?polReport/.test(I));
 console.log(bad?'GOV FAIL':'GOV PASS');process.exit(bad?1:0);

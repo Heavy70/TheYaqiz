@@ -1,6 +1,8 @@
 /* Community-language strings (Urdu, Hindi, Tagalog, Persian, Amharic, Luganda). Keyed by the English source string. */
 const YAQIZ_X={
 "ur": {
+"High risk (75%+): report it to Abu Dhabi Police now": "زیادہ خطرہ (75% یا اس سے زیادہ): ابھی ابوظہبی پولیس کو رپورٹ کریں",
+"Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.": "کوئی چینل دبائیں: آپ کی اپنی میل یا SMS ایپ رپورٹ بھری ہوئی کھلے گی۔ جب تک آپ بھیجیں نہ دبائیں کچھ نہیں بھیجا جاتا۔",
 "International or overseas transfer requested": "بیرون ملک یا بین الاقوامی ٹرانسفر کا مطالبہ",
 "Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "فراڈ کرنے والے رقم بیرون ملک یا کرپٹو میں بھیجنے پر مجبور کرتے ہیں، جہاں واپس ملنا مشکل ہوتا ہے۔ پہلے اپنے بینک سے پوچھیں۔",
 "Recipient account is outside the UAE": "وصول کنندہ کا اکاؤنٹ امارات سے باہر ہے",
@@ -318,6 +320,8 @@ const YAQIZ_X={
 "English": "انگریزی"
 },
 "hi": {
+"High risk (75%+): report it to Abu Dhabi Police now": "उच्च जोखिम (75% या अधिक): अभी अबू धाबी पुलिस को रिपोर्ट करें",
+"Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.": "कोई चैनल दबाएँ: आपका अपना मेल या SMS ऐप रिपोर्ट भरी हुई खुलेगा। जब तक आप भेजें नहीं दबाते, कुछ नहीं भेजा जाता।",
 "International or overseas transfer requested": "विदेश या अंतरराष्ट्रीय ट्रांसफ़र की माँग",
 "Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "ठग पैसे विदेश या क्रिप्टो में भिजवाते हैं, जहाँ वापस पाना मुश्किल होता है। पहले अपने बैंक से पूछें।",
 "Recipient account is outside the UAE": "पाने वाले का खाता UAE के बाहर है",
@@ -635,6 +639,8 @@ const YAQIZ_X={
 "English": "अंग्रेज़ी"
 },
 "tl": {
+"High risk (75%+): report it to Abu Dhabi Police now": "Mataas na panganib (75%+): iulat na ito sa Abu Dhabi Police ngayon",
+"Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.": "Pumili ng channel: magbubukas ang sarili mong mail o SMS app na may nakasulat nang ulat. Walang ipapadala hangga't hindi mo pinipindot ang send.",
 "International or overseas transfer requested": "Hinihiling ang paglilipat ng pera sa ibang bansa",
 "Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "Pinapapadala ng mga scammer ang pera sa ibang bansa o sa crypto, kung saan mahirap itong mabawi. Magtanong muna sa iyong bangko.",
 "Recipient account is outside the UAE": "Ang account ng tatanggap ay nasa labas ng UAE",
@@ -952,6 +958,8 @@ const YAQIZ_X={
 "English": "English"
 },
 "fa": {
+"High risk (75%+): report it to Abu Dhabi Police now": "خطر بالا (۷۵٪ یا بیشتر): همین حالا به پلیس ابوظبی گزارش دهید",
+"Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.": "یک کانال را بزنید: برنامه ایمیل یا پیامک خودتان با گزارش آماده باز می‌شود. تا دکمه ارسال را نزنید چیزی فرستاده نمی‌شود.",
 "International or overseas transfer requested": "درخواست انتقال بین‌المللی یا به خارج از کشور",
 "Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "کلاهبرداران قربانی را وادار می‌کنند پول را به خارج از کشور یا با ارز دیجیتال بفرستد که بازگرداندنش دشوار است. ابتدا از بانک خود بپرسید.",
 "Recipient account is outside the UAE": "حساب گیرنده خارج از امارات است",
@@ -1269,6 +1277,8 @@ const YAQIZ_X={
 "English": "انگلیسی"
 },
 "am": {
+"High risk (75%+): report it to Abu Dhabi Police now": "ከፍተኛ አደጋ (75%+): አሁኑኑ ለአቡዳቢ ፖሊስ ያሳውቁ",
+"Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.": "አንድ መንገድ ይጫኑ፤ የራስዎ የኢሜይል ወይም የSMS መተግበሪያ ሪፖርቱ ተሞልቶ ይከፈታል። «ላክ» እስካልጫኑ ድረስ ምንም አይላክም።",
 "International or overseas transfer requested": "ወደ ውጭ አገር ገንዘብ እንዲልኩ ይጠይቃል",
 "Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "አጭበርባሪዎች ገንዘብ ወደ ውጭ አገር ወይም በክሪፕቶ እንዲልኩ ያስገድዳሉ፤ መመለስ ከባድ ነው። መጀመሪያ ባንክዎን ይጠይቁ።",
 "Recipient account is outside the UAE": "የተቀባዩ አካውንት ከUAE ውጭ ነው",
@@ -1586,6 +1596,8 @@ const YAQIZ_X={
 "English": "እንግሊዝኛ"
 },
 "lg": {
+"High risk (75%+): report it to Abu Dhabi Police now": "Obulabe obuyitiridde (75%+): kirage mu Abu Dhabi Police kati",
+"Tap a channel: your own mail or SMS app opens with the report filled in. Nothing is sent until you press send.": "Nyiga ku kkubo: app yo ey’obubaka oba SMS egguka ng’alipoota eri mu. Tewali kisindikibwa okutuusa lw’onyiga okusindika.",
 "International or overseas transfer requested": "Asaba okusindika ssente ebweru w’eggwanga",
 "Scammers push victims to send money abroad or in crypto, where it is hard to recover. Check with your bank first.": "Abafere basindika ssente ebweru w’eggwanga oba mu crypto, nga kizibu okuzizzaawo. Sooka obuuze bbanka yo.",
 "Recipient account is outside the UAE": "Akawunti y’afuna eri bweru wa UAE",
