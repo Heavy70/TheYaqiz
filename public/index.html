@@ -1015,13 +1015,15 @@ $('#evPdf').onclick=async()=>{
  box.setAttribute('dir',lang==='ar'||lang==='ur'||lang==='fa'?'rtl':'ltr');box.innerHTML=h;document.body.classList.add('printing');
  const done=()=>{document.body.classList.remove('printing');box.innerHTML='';window.removeEventListener('afterprint',done)};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),60)};
 /* ===== early warning: new look-alike domains from public certificate logs (server, refreshed every 6 h) ===== */
-let ewAt=0;
+let ewAt=0,ewTries=0;
 async function loadWatch(){
  const box=$('#ewList');if(!box||!srv||Date.now()-ewAt<6e5)return;ewAt=Date.now();box.textContent=t('ewLoad');
  try{const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),50000);const r=await fetch('/api/watch',{signal:ac.signal,cache:'no-store'});clearTimeout(tm);if(!r.ok)throw 0;const j=await r.json();
-  if(!j.updated){box.textContent=t('ewFail');ewAt=0;return}
+  if(!j.updated&&j.refreshing&&ewTries<8){ewTries++;ewAt=0;setTimeout(()=>{if(curView==='report')loadWatch()},15000)}   /* still collecting: show what is ready and ask again */
+  if(!j.updated&&!j.items.length){box.textContent=t(j.refreshing?'ewLoad':'ewFail');if(!j.refreshing)ewAt=0;return}
+  if(j.updated)ewTries=0;
   if(!j.items.length){box.textContent=t('ewEmpty');return}
-  box.innerHTML=`<div class="ewl">${j.items.slice(0,12).map(i=>`<div class="ewi"><b dir="ltr">${esc(i.domain)}</b><span>${esc(i.brand)} · ${esc(t('ewSeen'))} ${esc(i.seen)} · ${esc(t('ewAge'))}: ${i.age==null?esc(t('ewUnknown')):esc(i.age+' '+t('ewDays'))} · ${esc(i.score)}/100</span><button class="btn alt" data-ew="${esc(i.domain)}">${esc(t('ewCheck'))}</button></div>`).join('')}</div><p class="hint">${esc(t('ewUpd'))} ${esc(new Date(j.updated).toLocaleString())}</p>`;
+  box.innerHTML=`<div class="ewl">${j.items.slice(0,12).map(i=>`<div class="ewi"><b dir="ltr">${esc(i.domain)}</b><span>${esc(i.brand)} · ${esc(t('ewSeen'))} ${esc(i.seen)} · ${esc(t('ewAge'))}: ${i.age==null?esc(t('ewUnknown')):esc(i.age+' '+t('ewDays'))} · ${esc(i.score)}/100</span><button class="btn alt" data-ew="${esc(i.domain)}">${esc(t('ewCheck'))}</button></div>`).join('')}</div><p class="hint">${j.updated?esc(t('ewUpd'))+' '+esc(new Date(j.updated).toLocaleString()):esc(t('ewLoad'))}</p>`;
   box.querySelectorAll('[data-ew]').forEach(b=>b.onclick=()=>{go('scan','url');$('#urlIn').value='https://'+b.dataset.ew;runUrl()});
  }catch(e){box.textContent=t('ewFail');ewAt=0}}
 $('#repCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#repTxt').value);toast(t('copied'))}catch(e){$('#repTxt').select();toast(t('copyMan'))}};

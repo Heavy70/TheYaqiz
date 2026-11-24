@@ -436,7 +436,7 @@ const WATCH = ['emiratesnbd', 'uaepass', 'emiratespost', 'adpolice', 'dubaipolic
 const WATCH_DAYS = 90;
 let watch = { t: 0, items: [], ok: 0, failed: 0 }, watchBusy = null, watchTry = 0;
 async function crtNames(q){
-  const j = await getJson('https://crt.sh/?q=' + encodeURIComponent(q) + '&output=json&exclude=expired', 25000);
+  const j = await getJson('https://crt.sh/?q=' + encodeURIComponent(q) + '&output=json&exclude=expired', 20000);
   const since = Date.now() - WATCH_DAYS * 864e5, out = new Map();
   for (const row of Array.isArray(j) ? j : []){
     const nb = Date.parse(String(row.not_before || '') + 'Z'); if (!(nb >= since)) continue;
@@ -453,8 +453,10 @@ const OFF_CORES = new Set(OFFICIAL.map(o => o.split('.')[0]).filter(c => c.lengt
 function brandCountrySite(reg){ const p = reg.split('.'); return OFF_CORES.has(p[0]) && p.length <= 3 && p[p.length - 1].length === 2 && (p.length === 2 || SLD.includes(p[1])); }
 async function refreshWatch(){
   const found = new Map(); let ok = 0, failed = 0;
-  /* crt.sh is often slow or answers 502: 4 queries at a time, then one retry of the failed ones */
-  const run = async (list, onFail) => { for (let i = 0; i < list.length; i += 4) await Promise.all(list.slice(i, i + 4).map(async ([brand, q]) => {
+  /* crt.sh is often slow or answers 502: 6 queries at a time, then one retry of the failed ones.
+     Findings are published as they arrive (watch.partial), because Cloud Run gives the instance CPU mainly while a request is open. */
+  const publish = () => { watch.partial = [...found.values()].sort((a, b) => b.score - a.score || b.seen.localeCompare(a.seen)).slice(0, 25); };
+  const run = async (list, onFail) => { for (let i = 0; i < list.length; i += 6) { await Promise.all(list.slice(i, i + 6).map(async ([brand, q]) => {
       try {
         const names = await crtNames(q); ok++;
         names.forEach((m, n) => {
@@ -464,14 +466,14 @@ async function refreshWatch(){
           if (!prev || r.score > prev.score) found.set(reg, { domain: n, reg, brand, score: r.score, seen: m.seen, issuer: m.issuer, why: r.flags.filter(f => f.w > 0).slice(0, 2).map(f => f.l) });
         });
       } catch(e){ onFail([brand, q]); console.error('watch', q, e.name === 'AbortError' ? 'timeout' : String(e.message || e).slice(0, 60)); }
-    })); };
+    })); publish(); } };
   const again = []; await run(WATCH, x => again.push(x));
   if (again.length) await run(again, () => failed++);
   const items = [...found.values()].sort((a, b) => b.score - a.score || b.seen.localeCompare(a.seen)).slice(0, 40);
   await Promise.all(items.slice(0, 25).map(async it => { const c = await domainAge(it.reg).catch(() => null); it.created = c || ''; it.age = c ? Math.max(0, Math.floor((Date.now() - Date.parse(c)) / 864e5)) : null; }));
   /* keep what is plausibly new: registered in the last 180 days, or age not published */
   const keep = items.filter(it => it.age === undefined || it.age === null || it.age <= 180).slice(0, 25);
-  if (ok) watch = { t: Date.now(), items: keep, ok, failed };
+  if (ok) watch = { t: Date.now(), items: keep, ok, failed, partial: [] };
   else watch.failed = failed;
   return watch;
 }
@@ -484,8 +486,10 @@ async function watchApi(req, res){
   const ip = clientIp(req);
   if (!allowDom(ip)) return json(res, 429, { error: 'limit' });
   const p = ensureWatch();
-  if (!watch.t && p) await Promise.race([p, new Promise(z => setTimeout(z, 45000))]);
-  return json(res, 200, { updated: watch.t ? new Date(watch.t).toISOString() : null, days: WATCH_DAYS, brands: [...new Set(WATCH.map(w => w[0]))], items: watch.items, sources: { ok: watch.ok, failed: watch.failed }, refreshing: !!watchBusy });
+  /* no finished list yet: keep this request open up to 40 s so the refresh has CPU, then answer with what is ready */
+  if (!watch.t && p) await Promise.race([p, new Promise(z => setTimeout(z, 40000))]);
+  const done = !!watch.t;
+  return json(res, 200, { updated: done ? new Date(watch.t).toISOString() : null, days: WATCH_DAYS, brands: [...new Set(WATCH.map(w => w[0]))], items: done ? watch.items : (watch.partial || []), partial: !done, sources: { ok: watch.ok, failed: watch.failed }, refreshing: !!watchBusy });
 }
 
 /* ===== open the link safely (follow redirects, read the landing page) ===== */
