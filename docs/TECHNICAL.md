@@ -2,7 +2,7 @@
 
 **Project:** TheYaqiz, an AI scam shield for UAE residents  
 **Event:** ScamShield AI Hackathon — Abu Dhabi Police × 42 Abu Dhabi, November 2026  
-**Version:** v74 (24 November 2026)  
+**Version:** v77 (25 November 2026)  
 **Live MVP:** https://www.theyaqiz.com  
 **Repository:** https://github.com/Heavy70/TheYaqiz  
 **Developer:** Khaldun Abdalhadi  
@@ -53,6 +53,8 @@ TheYaqiz helps people decide, in the few seconds that matter, whether a message,
 - Gamified training ("scam or safe?" local scenarios with explanations)
 - Early warning: new look-alike domains of 12 UAE brands from public Certificate Transparency logs (crt.sh), refreshed every 6 hours, scored by the engine and filtered by RDAP domain age (`GET /api/watch`)
 - Evidence pack for the police: PDF (print) or JSON export of the last check with final link, redirect chain, registrar, name servers, IP and hosting network, threat lists, timestamps and a SHA-256 fingerprint
+- Page screenshot (opt-in): in a link result, one tap shows a thumbnail of the page, loaded on a public screenshot service's servers so the user's device never touches a suspicious page (`GET /api/shot`)
+- Scam network view (first version): in the Report tab, the early-warning domains are grouped by hosting country and by shared hosting network or name servers, so look-alike domains run by the same operation show up together (`/api/watch`)
 - Official contact numbers of 13 banks and authorities (`R.tels` in `registry.js`): a different number to call is flagged, a call-back to the official number is recognised
 - Reporting bridge (ready report summary for Abu Dhabi Police's Aman service)
 
@@ -130,7 +132,10 @@ The server opens the link the way a phone would, safely:
 - allows only http/https on ports 80/443, refuses IP-address hosts and URLs with credentials;
 - resolves DNS itself and refuses any private, loopback or link-local address, checked on the address actually connected to (blocks SSRF and DNS rebinding);
 - reads at most 200 KB of the final page, with a 3.5 s timeout per hop;
-- reports the redirect chain, final host, page title, and whether the page contains a password field or asks for card number, CVV, OTP or Emirates ID.
+- reports the redirect chain, final host, page title, and whether the page contains a password field or asks for card number, CVV, OTP or Emirates ID;
+- when the page asks for a password or sensitive data, it also reads the page's own name (the `og:site_name`/`og:title` meta tags and the first heading, returned as `sig`) so a login page that claims to be a bank but sits on another domain is caught even if its `<title>` is generic.
+
+A link wrapped in a redirect (`?q=`, `?url=`, `adurl=`) is judged by its real destination; when the wrapper is an advertising or social-network tracking link (Google ads, DoubleClick, Facebook link shim) the evidence says "Sponsored-ad link", because paid search and social ads are a known route for fake bank and parcel pages.
 
 If the link really ends on a verified official domain and nothing else is wrong, the verdict is lowered to safe. If the page asks for sensitive data, or its title claims to be an organisation on a domain that is not theirs, the verdict is raised.
 
@@ -245,6 +250,7 @@ The verdict lists up to four reasons. A direct link `/?pay=<url>` opens Safe Pay
 | Hostname sent to Google | Only the hostname/URL, for Web Risk / Safe Browsing | By Google under its API terms |
 | Voice questions to "Ask Yaqiz" (optional, microphone button) | Converted to text by the browser's own speech-recognition service (the browser vendor's cloud, e.g. Google for Chrome); Yaqiz receives only the resulting text and never the audio | Nothing recorded or stored by Yaqiz |
 | Spoken replies of "Ask Yaqiz" (can be switched off) | Only the assistant's reply text (card-like numbers masked) is sent to ElevenLabs (Arabic) or Azure Speech (other languages) to make the audio; limits 60 replies/IP/day and daily character caps | Not stored |
+| Page screenshot (only when the user taps the button) | The link, never the message, goes to our server and then to the WordPress mShots screenshot service, which loads the page on its own servers | Not stored by us; kept in a short in-memory cache (30 minutes); the third-party service has its own terms |
 | Phone number in the quick number check | Checked on the device | No |
 | Questions typed to the "Ask Yaqiz" assistant (optional feature) | Sent to our server and to the Claude API to generate the reply; card-like numbers masked first | Not stored; the conversation exists only in the open page |
 | Message, link or screenshot for AI analysis | Sent to our server and to the Claude API as part of every check (the privacy line under Check says so) | Not stored by our server; not logged |
@@ -267,6 +273,7 @@ Additional measures:
 | Threat | Mitigation |
 |---|---|
 | Server-side request forgery through `/api/open` | Only http/https on ports 80/443; no IP-address hosts or credentials in URLs; custom DNS lookup rejects private, loopback, link-local, CGNAT and multicast ranges (IPv4 and IPv6) on the address actually connected to, blocking DNS rebinding. |
+| Misuse of `/api/shot` as a proxy | Only links with a real hostname are accepted; the server fetches only from `*.wp.com` screenshot hosts over HTTPS, never from the link itself; image type and size are checked (900 KB). |
 | Slow or huge pages | 3.5 s per hop, 7 hops, 7 s total, 200 KB body limit. |
 | Abuse and cost overruns | AI: 10 checks per IP per day (hard maximum) and 500 per day in total. Cloudflare sits in front of Cloud Run (proxy, DDoS and bot protection); the server trusts the visitor-IP header only when the request comes from a Cloudflare address, and an optional origin secret (`YAQIZ_ORIGIN_SECRET`) rejects requests that bypass Cloudflare. Domain/link checks: 200 per IP per day. Ask Yaqiz: 30 messages per IP per day; spoken replies: 60 per IP per day with daily character caps for each voice service. Web Risk: hard monthly cap (90,000) below the free tier. |
 | Oversized uploads | Request body limit (6 MB) and text truncated to 6,000 characters. |
@@ -284,6 +291,8 @@ All responses are JSON with `Cache-Control: no-store`.
 ### `GET /api/watch`
 
 Early-warning list. Returns `{ updated, days, brands, items:[{ domain, reg, brand, score, seen, issuer, created, age, why }], sources:{ ok, failed }, refreshing }`. Built on the server from crt.sh queries for 12 brand names (only brand names are sent, nothing about users), refreshed every 6 hours; items are domains whose certificate was first seen in the last 90 days, scored 40+ by `engine.js`, not official, and registered in the last 180 days (or age not published). Same per-IP limit as `/api/domain`.
+
+`items` also carry `net` (hosting network), `cc` (country of that network) and `ns` (name servers) for the first 15 domains, enriched after the domain age. The app uses them for the scam network view: counts per country, and groups of two or more domains that share a network or name servers. The first version does not yet exclude shared CDN networks, so a group on a big shared network is a lead to check, not proof of one operator. This view is built from public certificate logs and public network records; it shows where look-alike domains are hosted and which ones are related, it is not a list of confirmed scammers.
 
 `/api/domain` facts now also carry `created`, `registrar`, `ns`, `hosting:{ ips, net, org, country }` and `checked` (ISO time). The hosting lookup sends only the hostname to DNS and the IP address to rdap.org, and is capped at 3.5 s so it never slows the verdict.
 
@@ -307,6 +316,10 @@ Facts for up to 3 domains. Rate limit 200/IP/day.
 
 `age` is in days (`null` if the extension does not publish it). `sb`/`wr` are `"threat"`, `"clean"` or `null`. `fd` lists the phishing lists that contain the host. Official domains return `{ "official": true }`.
 
+### `GET /api/shot?u=<url>`
+
+Optional page thumbnail, requested only when the user taps "Show page screenshot". Returns the image (JPEG/PNG, at most 900 KB). The link (never the message) is passed to the public WordPress mShots service, which loads the page on its own servers. The server accepts only http/https links with a real hostname (no IP addresses), contacts only `*.wp.com` screenshot hosts over HTTPS (at most 3 redirects), caches results for 30 minutes, and applies the same per-IP limit and same-origin check as `/api/domain`. `502 unavailable` when the service cannot produce an image.
+
 ### `GET /api/open?u=<url>`
 
 Opens the link safely. Rate limit 200/IP/day. Results cached for 30 minutes.
@@ -314,7 +327,7 @@ Opens the link safely. Rate limit 200/IP/day. Results cached for 30 minutes.
 ```json
 { "ok": true, "hops": [ { "host": "bit.ly", "status": 301 }, { "host": "fake-site.top", "status": 200 } ],
   "host": "fake-site.top", "url": "https://fake-site.top/pay", "status": 200,
-  "title": "Emirates Post - Pay customs fee", "pw": false, "sens": true }
+  "title": "Emirates Post - Pay customs fee", "sig": "Emirates Post", "pw": false, "sens": true }
 ```
 
 ### `POST /api/analyze`
@@ -342,9 +355,9 @@ Spoken reply for Ask Yaqiz. Body: `{ "text": "...", "lang": "ar" }` (text up to 
 
 **Accuracy gate (`npm test`)**
 
-- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **388 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
+- `tests/run.js` runs the real `engine.js` (the same file the phone uses) on **407 labelled cases** in Arabic and English (including billing and cloud-storage phishing): scam messages, scam links, genuine messages from real organisations, genuine links, and sender-ID variants.
 - The test **fails** if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%.
-- Current result: **388/388 correct (100%), 0 missed scams, 0 false alarms.** `tests/blind5.js` (24 Nov) adds look-alike letters, redirect wrappers, fake helplines, ID requests and genuine bank call-backs; `tests/watch.js` covers the early-warning filter, the evidence facts and translations.
+- Current result: **407/407 correct (100%), 0 missed scams, 0 false alarms.** `tests/blind5.js` (24 Nov) adds look-alike letters, redirect wrappers, fake helplines, ID requests and genuine bank call-backs; `tests/blind7.js` (25 Nov, 19 cases) holds the fixes from the blind test below; `tests/watch.js` covers the early-warning filter, the evidence facts and translations.
 - `tests/chat.js` checks the assistant: input cleaning, card-number masking, limits, knowledge-base grounding, Aman handover, translations of every assistant, Safe Pay and number-check string in all six community languages, the server voices and the deep links.
 - `tests/facts.js` checks how verified facts (domain age, Google and list hits, link opening) change a verdict.
 - `tests/billing.js` and `tests/blind4.js` cover billing/subscription lures; `tests/holdout.js`, `tests/blind3.js`, `tests/registry2.js` and `tests/sender.js` are focused sets for blind batches, the registry and sender checks.
@@ -352,6 +365,8 @@ Spoken reply for Ask Yaqiz. Body: `{ "text": "...", "lang": "ar" }` (text up to 
 **How we measure honestly**
 
 We do not tune the engine on the cases we report. Each new batch is written with fresh wording and measured *before* any change. The first blind batches scored **88.6%** and **80%**. We then fixed the whole *class* of each error (not the single case) and added the batch to the permanent test set, so the same mistake cannot return.
+
+**Blind test, 25 November 2026.** `tests/blind6.js` holds 30 new cases the engine had never seen (15 scams, 5 borderline, 10 genuine; Arabic, Gulf dialect and English). It is not part of the pass/fail gate, so it can show real misses. On-device layer alone: **26 of 30 correct (86.7%), 2 missed scams, 0 false alarms**; two borderline messages (an unfamiliar parcel-address link and a voicemail link) were judged safe where we expected at least "suspicious". The two missed scams are text-only (an investment-bot lure and a "Hi Mum, new number, send money" message), the hardest case for on-device rules; the AI layer reads such wording in a full check, but we have not measured it on this set and do not report one inflated number. On the live site `engine.js` gives the same 26/30 as the repository. Separately, a further 17 cases written for the judging-criteria review exposed two real gaps (an Arabic prize message asking for an ID copy, and a telecom-threat message with an unformatted 971 number); both classes were fixed and added to the gate (`tests/blind7.js`), and all 17 now pass on the live engine.
 
 **Limits of these numbers:** they describe the current test set, written and labelled by the developer. Real-world precision and recall will be measured on consented, independently labelled messages (section 11).
 
@@ -398,6 +413,8 @@ gcloud run deploy yaqiz --source . --region europe-west1 \
 - Some extensions (including several country-code TLDs) do not publish registration dates over RDAP, so domain age is sometimes unavailable.
 - The test set is developer-written; independent evaluation is still needed.
 - Voice-call scams are handled by the call companion's guided questions, not by audio analysis.
+- The page screenshot depends on a public third-party service and can be unavailable or slow; it is optional and never part of the verdict.
+- The scam network view groups only the early-warning list (the first 15 domains are enriched), only by hosting network and name servers (shared CDN networks are not yet excluded), and does not compare page designs.
 - A web app cannot see who is calling: the quick number check works when the user opens it (button, Siri Shortcut or share), not automatically as the phone rings.
 - Luganda has no server neural voice; the browser voice is used.
 
@@ -406,7 +423,7 @@ gcloud run deploy yaqiz --source . --region europe-west1 \
 | Phase | Deliverables |
 |---|---|
 | Hackathon (24–30 Nov 2026) | Working prototype at www.theyaqiz.com in eight languages: unified Check, Safe Pay, quick number check with Siri, Ask Yaqiz with Emirati and British voices, and a live demo to the panel. |
-| +3 months | Store release, a labelled local dataset (consented), a trial with 500 users, and **Scam Network Intelligence**: a visual map linking suspicious sites that share hosting, IP addresses, name patterns, designs or redirects (shared CDN addresses such as Cloudflare excluded to avoid false links), so organised operations are uncovered instead of single sites. |
+| +3 months | A pilot with Abu Dhabi Police (Aman) using the evidence packs and the early-warning feed, a trial with 500 users, a labelled local dataset, UAE hosting, and the full **Scam Network Intelligence**: a first version (grouping by hosting country, shared network and name servers) is already in the Report tab; the roadmap adds the visual map and links by page design and redirects, with shared CDN addresses such as Cloudflare excluded to avoid false links. |
 | +12 months | "TheYaqiz ambassadors" in schools, bank and government-portal integration for pre-transfer alerts, and a native app that checks the caller's number as the phone rings. |
 
 **Impact measures:** number of checks and share rated scam or suspicious; payments stopped by a Safe Pay "Don't pay" verdict; precision and recall on an expanding test set; training scores before and after use; number of structured reports referred to the Aman service.

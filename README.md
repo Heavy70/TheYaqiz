@@ -32,6 +32,9 @@ TheYaqiz is a bilingual Progressive Web App (works on Android, iPhone and deskto
 - **Early warning (look-alike sites before they are used):** the server reads public Certificate Transparency logs (crt.sh) every 6 hours for 12 UAE brands (Emirates NBD, UAE PASS, Emirates Post, Abu Dhabi and Dubai Police, Etisalat, Mashreq, FAB, ADCB, ADIB, Salik, TAMM). Every HTTPS site gets a certificate that is logged publicly the moment it is issued, usually before the first scam SMS goes out. Each name certified in the last 90 days is scored by the same engine, official domains are dropped, and the domain's registration age is read over RDAP; domains registered more than 180 days ago are dropped. The brand's own country sites (for example `emiratesnbd.com.eg`) and corporate security-proxy names (`*.mcas.ms`) are skipped, and failed crt.sh queries are retried once. Findings are shown as they arrive while the list is being built, then replaced by the finished list. The list (`/api/watch`) is shown in the Report tab with a one-tap Check. A listed domain needs review: it is not proof of a scam.
 - **Evidence pack for the police:** from the last check, the Report tab exports a PDF (print) or a JSON file with the content, verdict and signals, the final link and redirect chain, page title and whether it asks for a password, card or code, the domain's registration date, registrar and name servers, its IP addresses and hosting network (RDAP for IP), threat-list hits, timestamps, and a SHA-256 fingerprint (computed over the JSON without its `sha256` field). It is built on the user's device and not stored by TheYaqiz. The copyable report text includes the same technical lines.
 - **Fake helpline numbers:** `registry.js` holds the official contact numbers of 13 banks and authorities, each checked on the organisation's own website (24 Nov 2026). A message that names one of them but asks you to call a different mobile or landline number is flagged; a call-back to the official number is recognised as genuine. The number check shows "official number of …" for a listed number.
+- **Page screenshot (opt-in):** in a link result, one tap shows a thumbnail of the page. The link (never the message) goes to the public WordPress mShots service, which loads the page on its own servers, so the user's device never touches a suspicious page. The server only fetches from `*.wp.com` screenshot hosts and caches for 30 minutes. It is never part of the verdict.
+- **Scam network view (first version):** the early-warning list is also shown by hosting country and grouped by shared hosting network or name servers (a first version: shared CDN networks are not yet excluded, so a group is a lead to check, not proof), so look-alike domains run by the same operation appear together. It is built from public certificate logs and public network records and is not a list of confirmed scammers. The full Scam Network Intelligence map stays on the roadmap.
+- **Page name and ads:** when a page asks for a password or sensitive data, its own name (`og:site_name`/`og:title`, first heading) is read as well, so a login page posing as a bank on another domain is caught even with a generic title. A link wrapped in an advertising or social tracking redirect is labelled "Sponsored-ad link" and judged by its real destination.
 - **Hidden tricks:** internationalised domains are decoded (punycode) and look-alike letters are folded to Latin, so `аdcb.com` written with a Cyrillic "а" is caught as an imitation of ADCB; a link wrapped in a redirect (`google.com/url?q=…`, `?redirect=…`) is judged by its real destination; a request to send your Emirates ID or passport is a signal of its own.
 - **Reporting bridge:** a ready report summary pointing to Abu Dhabi Police's Aman service. For high-risk results (75%+) the app opens a report panel with the channels pre-filled; nothing is sent until the user presses send in their own mail or SMS app.
 - **Ask Yaqiz (virtual assistant):** a chat assistant that answers questions about scams, by typing or by voice (microphone input and optional spoken replies), in the user's language. It is clearly labelled as an AI assistant, not a police officer or an official body; it refers to Aman (800 2626, SMS 2828, aman@adpolice.gov.ae, 999 in danger), never asks for passwords, codes or card numbers, and stays on the topic of scams and online safety. It works like the virtual employees on UAE government sites: one fixed persona (the name Yaqiz and the picture of a young Emirati man wearing the Yaqiz shield, which animates while speaking), all 8 app languages, answers only from the TheYaqiz knowledge base (app guide, safety facts, official channels), quick-question buttons, and an in-chat handover card with the official Aman buttons (800 2626, SMS 2828, email, 999) when the user needs to report or has already lost money or data. Replies are plain text. Chat history is not stored.
@@ -88,7 +91,7 @@ The official-domain registry (`public/registry.js`) lists government suffixes pl
 
 `npm test` also runs the multilingual, AI-layer, international-transfer, entry-page and Ask Yaqiz checks (`tests/chat.js`: input cleaning, card-number masking, limits).
 
-Current result: **388 cases, 100% correct, 0 missed scams, 0 false alarms.** The newest batch (`tests/blind5.js`, 49 cases: look-alike letters, redirect wrappers, fake helplines, ID requests and genuine bank call-backs) was written before the fix: on it the on-device engine first scored 27/34 on the evasion part (79%). `tests/watch.js` checks the early-warning filter (look-alikes kept; official, old and out-of-window domains dropped), the evidence facts and the translation of every new string in all six community languages. The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
+Current result: **407 cases, 100% correct, 0 missed scams, 0 false alarms.** The newest batch (`tests/blind5.js`, 49 cases: look-alike letters, redirect wrappers, fake helplines, ID requests and genuine bank call-backs) was written before the fix: on it the on-device engine first scored 27/34 on the evasion part (79%). `tests/watch.js` checks the early-warning filter (look-alikes kept; official, old and out-of-window domains dropped), the evidence facts and the translation of every new string in all six community languages. The test fails if any scam is judged safe, if any genuine message is judged a scam, or if accuracy drops below 95%. `tests/facts.js` checks the verified-facts logic.
 
 ## 6. How to run
 
@@ -128,14 +131,14 @@ gcloud run deploy yaqiz --source . --region europe-west1 \
 ## 7. Project structure
 
 ```
-server.js              Node server: static PWA + /api/analyze, /api/domain, /api/open, /api/watch, /api/chat, /api/tts, /api/health
+server.js              Node server: static PWA + /api/analyze, /api/domain, /api/open, /api/watch, /api/shot, /api/chat, /api/tts, /api/health
 public/gov/login.html  Demo entry page (simulated sign-in, no real UAE PASS integration)
 public/index.html      Bilingual app UI (Arabic/English)
 public/engine.js       On-device detection engine (shared with tests)
 public/registry.js     Official-domain registry
 public/sw.js           Service worker (offline / installable PWA)
 public/jsQR.js         QR-code reader (third-party, see jsQR.LICENSE.txt)
-tests/                 Accuracy gate, fact, multilingual, AI, international, gov-entry, chat and early-warning tests
+tests/                 Accuracy gate (407 cases), fact, multilingual, AI, international, gov-entry, chat and early-warning tests; blind6.js (blind test, outside the gate)
 ```
 
 ## 8. Trade-offs, what was left out, and next steps
@@ -144,7 +147,7 @@ tests/                 Accuracy gate, fact, multilingual, AI, international, gov
 - **Left out:** user accounts and any server-side storage of messages, to keep the MVP private by design.
 - **Roadmap** (see the deck in `docs/`):
   - +3 months: a pilot with Abu Dhabi Police (Aman) using the evidence packs and the early-warning feed, a trial with 500 users, a labelled local dataset, and hosting inside the UAE.
-  - Later: store release and **Scam Network Intelligence**: a visual map linking suspicious sites that share hosting, IP addresses, name patterns, designs or redirects (shared CDN addresses excluded to avoid false links).
+  - Later: store release and the full **Scam Network Intelligence** (a first grouping by hosting country, network and name servers is already in the Report tab): a visual map linking suspicious sites that share hosting, IP addresses, name patterns, designs or redirects (shared CDN addresses excluded to avoid false links).
   - +12 months: a native app that checks the caller's number as the phone rings; "TheYaqiz ambassadors" in schools, and bank and government-portal integration: a quick-verify shortcut before any transfer (concept only; it needs an agreement with each bank, and no partnership exists today).
 - **What we would do differently with more time:** a larger, independently labelled test set with third-party evaluation, and measuring precision and recall on real (consented) messages.
 
@@ -172,7 +175,7 @@ Third-party: jsQR (Apache-2.0), see `public/jsQR.LICENSE.txt`.
 
 ### Blind test, 25 November 2026
 
-Besides the 388-case gate above, we wrote **30 new cases the engine had never seen** (`tests/blind6.js`): 15 scams, 5 borderline messages and 10 genuine messages, in Arabic, Gulf dialect and English (fake bank security calls, relative impersonation, fake Salik/DEWA/Emirates Post/police payment links, work-from-home and investment lures, genuine OTP and bank-warning messages). They were written before any change to the engine, and are **not** part of the pass/fail gate, so they can show real misses.
+Besides the 407-case gate above, we wrote **30 new cases the engine had never seen** (`tests/blind6.js`): 15 scams, 5 borderline messages and 10 genuine messages, in Arabic, Gulf dialect and English (fake bank security calls, relative impersonation, fake Salik/DEWA/Emirates Post/police payment links, work-from-home and investment lures, genuine OTP and bank-warning messages). They were written before any change to the engine, and are **not** part of the pass/fail gate, so they can show real misses.
 
 Run it alone:
 
@@ -180,6 +183,8 @@ Run it alone:
 node tests/blind6.js
 ```
 
-Result of the on-device layer alone (v75): **26 of 30 correct (86.7%), 2 missed scams, 0 false alarms**. Two further borderline messages (an unfamiliar parcel-address link and a voicemail link) were judged safe by this layer alone, where we expected at least "suspicious".
+Result of the on-device layer alone (v75; the live v77 engine gives the same 26/30): **26 of 30 correct (86.7%), 2 missed scams, 0 false alarms**. Two further borderline messages (an unfamiliar parcel-address link and a voicemail link) were judged safe by this layer alone, where we expected at least "suspicious".
 
 Honest reading of the misses: the two missed scams are an investment-bot lure and a "Hi Mum, I have a new number, send money" message. Both are text-only, with no link and no brand, which is the hardest case for on-device rules. The on-device layer is deliberately conservative so that genuine messages are never called scams (0 false alarms here). Each full check also sends the content to the AI analysis, which reads the wording; we report the on-device layer separately instead of one inflated number, and we have not yet measured the AI layer on this set.
+
+After this test we also ran 17 more cases written for the judging-criteria review. They exposed two real gaps: an Arabic prize message asking for a copy of the Emirates ID, and a telecom-threat message with an unformatted 971 number. Both classes were fixed at the rule level, added to the gate as `tests/blind7.js` (19 cases), and all 17 pass on the live engine. `npm test` runs 8 suites and passes.
