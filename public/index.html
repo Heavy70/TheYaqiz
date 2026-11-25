@@ -1258,8 +1258,23 @@ function langMenu(){
 }
 $('#langBtn').onclick=e=>{e.stopPropagation();langMenu()};$('#moreLang').onclick=e=>{e.stopPropagation();langMenu()};
 
+/* ===== presentation demo link (?demo=ask): runs the REAL check on the sample scam SMS, then Ask Yaqiz comments on the result in Emirati Arabic. Browsers only play sound after a tap, so one big tap starts the voice. Nothing is stored. ===== */
+const DEMO_SMS='شرطة أبوظبي: لديك مخالفة مرورية غير مسددة بقيمة 150 درهم. سدد خلال 24 ساعة لتجنب الغرامة ومصادرة المركبة: https://adpolice-fines.top/pay';
+const DEMO_Q='يقِظ، فحصت هالرسالة وطلعت احتيال مرجّح. اشرح لي بلهجتك الإماراتية ليش هي احتيال وشو أسوّي الحين؟ جاوبني باختصار في ثلاث جمل.';
+async function demoAsk(){
+ setLang('ar');go('scan','msg');$('#msgIn').value=DEMO_SMS;runMsg();
+ const t0=Date.now();   /* wait until the unified check has finished (link opened, AI merged), at most 14 s */
+ while(Date.now()-t0<14000){await new Promise(z=>setTimeout(z,400));const r=$('#res');if(Date.now()-t0>1500&&r.classList.contains('show')&&!r.querySelector('.ev .r.load'))break}
+ if(!chatOn||!last)return;
+ const bar=document.createElement('div');bar.id='demoBar';
+ bar.style.cssText='position:fixed;inset-inline:0;bottom:0;z-index:90;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:rgba(11,21,48,.94);display:flex;justify-content:center';
+ bar.innerHTML='<button type="button" style="font:inherit;font-size:20px;font-weight:700;padding:16px 26px;border:0;border-radius:14px;background:#0f8a5f;color:#fff;cursor:pointer;max-width:560px;width:100%;line-height:1.5" dir="auto">🔊 اضغط ليعلّق يقِظ على النتيجة<br><span style="font-size:14px;font-weight:400;opacity:.85">Tap: Yaqiz comments on the result in Emirati Arabic</span></button>';
+ bar.firstChild.onclick=()=>{bar.remove();spkOn=true;store.set('speak',true);ttsUnlocked=false;ttsUnlock();go('chat');chatAsk(DEMO_Q)};
+ document.body.appendChild(bar);
+}
 /* ===== share target (Android) ===== */
 function shareIn(){try{const q=new URLSearchParams(location.search);
+  if(q.get('demo')==='ask'){history.replaceState(null,'',location.pathname);demoAsk();return}
   const qr=q.get('n')||'',qn=(/^\s/.test(qr)?'+':'')+qr.trim(),qp=(q.get('pay')||'').trim();   /* '+' in a link arrives as a space */
   if(qn&&/^\+?[\d\s()\-.]{4,20}$/.test(qn)){history.replaceState(null,'',location.pathname);go('call');$('#callNum').value=qn;numCheck();return}
   if(qp){history.replaceState(null,'',location.pathname);go('scan','pay');$('#payIn').value=qp.slice(0,500);runPay();return}const x=[q.get('title'),q.get('text'),q.get('url')].filter(Boolean).join('\n');if(x){const y=x.trim();history.replaceState(null,'',location.pathname);
