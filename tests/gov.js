@@ -4,7 +4,7 @@ ck('login has UAE PASS button',/Login with UAE PASS/.test(L));
 ck('login has no credential fields',!/<input|<form|type=["']?password/i.test(L));
 ck('button is green',/background:#00843d/.test(L));
 ck('login redirects to main page',/location\.href='\/'/.test(L));
-ck('login has only the requested content',!/DEMO|Sign in to continue|Visual demo|Signing in|©/.test(L)&&!/[\u0600-\u06FF]/.test(L));
+ck('login has only the requested content',!/DEMO|Sign in to continue|Visual demo|Signing in|©/.test(L)&&/Yaqiz Antiscam AI assisted Portal/.test(L)&&/يقظ لمكافحة الإحتيال مدعوم بالذكاء الاصطناعي/.test(L)&&!/Government|حكومي|حكومية/.test(L));
 ck('portal placeholder removed',!fs.existsSync(__dirname+'/../public/gov/portal.html'));
 ck('sw does not cache /gov/',/startsWith\('\/gov\/'\)/.test(fs.readFileSync(__dirname+'/../public/sw.js','utf8')));
 const I=fs.readFileSync(__dirname+'/../public/index.html','utf8');
