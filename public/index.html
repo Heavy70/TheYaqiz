@@ -1149,16 +1149,21 @@ async function ttsFetch(x){
  }catch(e){}
  return null;
 }
-function ttsPlay(b){const a=ttsAudio,av=$('#chatAv');if(a._u)URL.revokeObjectURL(a._u);a._u=URL.createObjectURL(b);a.src=a._u;a.onplay=()=>av&&av.classList.add('talk');a.onended=a.onerror=a.onpause=()=>av&&av.classList.remove('talk');return a.play()}
+function ttsSplit(x){const s=(String(x).match(/[^.!?؟۔।።\n]+[.!?؟۔।።]*/g)||[x]).map(p=>p.trim()).filter(Boolean),o=[];let f=true;
+ s.forEach(p=>{if(!o.length){o.push(p);return}const k=o.length-1;if(f&&o[0].length<40){o[0]+=' '+p;return}f=false;if(k>=1&&(o[k]+' '+p).length<=450)o[k]+=' '+p;else o.push(p)});
+ return o.slice(0,4)}   /* a short first piece so the voice starts at once; the rest is prepared while it plays */
+function ttsPlayEnd(b,id){return new Promise((res,rej)=>{const a=ttsAudio,av=$('#chatAv');if(a._u)URL.revokeObjectURL(a._u);a._u=URL.createObjectURL(b);a.src=a._u;a.onplay=()=>av&&av.classList.add('talk');a.onended=()=>res();a.onerror=()=>rej(new Error('audio'));a.onpause=()=>{if(id!==ttsId)res()};a.play().catch(rej)})}
+async function ttsChain(ps,id,x){
+ for(let i=0;i<ps.length;i++){
+  const R=await ps[i];if(id!==ttsId)return;
+  if(R&&R.b){try{await ttsPlayEnd(R.b,id)}catch(e){if(i===0&&id===ttsId)speakBrowser(x);break}}
+  else{if(i===0){if(R&&R.na)toast(T('الصوت غير متاح الآن، حاول بعد قليل.','The voice is not available right now. Try again shortly.'));else speakBrowser(x)}break}
+ }
+ if(id===ttsId){const av=$('#chatAv');if(av)av.classList.remove('talk')}
+}
 async function speakTxt(x,force){
  if(!(spkOn||force)||!x)return;
- if(ttsSrv){
-  stopSpeak();const id=ttsId;
-  const R=await ttsFetch(x);if(id!==ttsId)return;
-  if(R&&R.b){try{await ttsPlay(R.b);return}catch(e){}}
-  else if(R&&R.na){toast(T('الصوت غير متاح الآن، حاول بعد قليل.','The voice is not available right now. Try again shortly.'));return}
-  if(id!==ttsId)return;   /* server voice unavailable (no Luganda voice, limit, error): fall back to the browser voice */
- }
+ if(ttsSrv){stopSpeak();const id=ttsId;ttsChain(ttsSplit(x).map(ttsFetch),id,x);return}   /* server voice; Luganda and errors fall back to the browser voice inside ttsChain */
  speakBrowser(x);
 }
 async function speakBrowser(x){
@@ -1205,15 +1210,14 @@ async function chatAsk(x){
   const j=await r.json().catch(()=>({}));
   out=r.ok&&j.reply?j.reply:t(r.status===429?'chatLimit':'chatErr');ho=!!(r.ok&&j.handover);
   if(r.ok&&j.reply){
-   if(spkOn&&ttsSrv){stopSpeak();pid=ttsId;pre=await Promise.race([ttsFetch(j.reply),new Promise(z=>setTimeout(()=>z('slow'),12000))])}   /* text and voice start together: the reply is shown when its audio is ready */
+   if(spkOn&&ttsSrv){stopSpeak();pid=ttsId;const ps=ttsSplit(j.reply).map(ttsFetch);const R0=await Promise.race([ps[0],new Promise(z=>setTimeout(()=>z('slow'),6000))]);pre={ps,R0}}   /* text and voice start together: the reply is shown when its audio is ready */
    else setTimeout(()=>speakTxt(j.reply),0);
   }
  }catch(e){out=t('chatErr')}
  chatMsgs.push({r:'assistant',c:out,h:ho,ok:out!==t('chatErr')&&out!==t('chatLimit')});chatBusy=false;chatDraw();
  if(pre&&pid===ttsId){
-  if(pre.b){ttsPlay(pre.b).catch(()=>speakBrowser(out))}
-  else if(pre.na)toast(T('الصوت غير متاح الآن، حاول بعد قليل.','The voice is not available right now. Try again shortly.'));
-  else speakTxt(out);   /* audio was slow or failed: the old path, text already shown */
+  if(pre.R0==='slow')speakTxt(out);   /* the first piece of audio was slow: the old path, text already shown */
+  else ttsChain(pre.ps,pid,out);
  }
 }
 $('#chatSend').onclick=()=>{stopSpeak();ttsUnlock();chatAsk($('#chatIn').value)};

@@ -725,10 +725,10 @@ const CHAT_FALLBACK = {
 
 // ---- /api/tts: one natural voice on every device (Azure Speech neural voices; Arabic = Emirati ar-AE Hamdan). Nothing stored. ----
 const TTS_KEY = (process.env.AZURE_SPEECH_KEY || '').trim(), TTS_REGION = (process.env.AZURE_SPEECH_REGION || 'uaenorth').trim();
-const TTS_PER_IP_DAY = +(process.env.YAQIZ_TTS_PER_IP_DAY || 60), TTS_CHARS_DAY = +(process.env.YAQIZ_TTS_CHARS_DAY || 15000);   /* about 450k characters a month: inside the free tier (500k) */
+const TTS_PER_IP_DAY = +(process.env.YAQIZ_TTS_PER_IP_DAY || 200), TTS_CHARS_DAY = +(process.env.YAQIZ_TTS_CHARS_DAY || 15000);   /* about 450k characters a month: inside the free tier (500k) */
 const TTS_VOICES = { ar:['ar-AE','ar-AE-HamdanNeural'], en:['en-GB','en-GB-RyanNeural'], ur:['ur-PK','ur-PK-AsadNeural'], hi:['hi-IN','hi-IN-MadhurNeural'], tl:['fil-PH','fil-PH-AngeloNeural'], fa:['fa-IR','fa-IR-FaridNeural'], am:['am-ET','am-ET-AmehaNeural'] };
 /* Arabic in a real Emirati voice through ElevenLabs when its key and voice id are set; Azure stays the automatic fallback */
-const EL_KEY = (process.env.ELEVENLABS_API_KEY || '').trim(), EL_VOICE_AR = (process.env.ELEVEN_VOICE_AR || '').trim(), EL_MODEL = (process.env.ELEVEN_MODEL || 'eleven_v4').trim();
+const EL_KEY = (process.env.ELEVENLABS_API_KEY || '').trim(), EL_VOICE_AR = (process.env.ELEVEN_VOICE_AR || '').trim(), EL_MODEL = (process.env.ELEVEN_MODEL_LIVE || 'eleven_flash_v2_5').trim();   /* fast model: a short sentence is ready in well under a second (eleven_v4 took about 11 s for a reply) */
 const EL_CHARS_DAY = +(process.env.YAQIZ_EL_CHARS_DAY || 12000);   /* safety ceiling only; the real limit is the plan's remaining credits (elCredits) */
 const EL_RESERVE = +(process.env.YAQIZ_EL_RESERVE || 1500);          /* credits always kept back */
 let elSub = { t: 0, left: null };
