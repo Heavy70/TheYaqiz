@@ -479,6 +479,8 @@ async function refreshWatch(){
   await Promise.all(items.slice(0, 25).map(async it => { const c = await domainAge(it.reg).catch(() => null); it.created = c || ''; it.age = c ? Math.max(0, Math.floor((Date.now() - Date.parse(c)) / 864e5)) : null; }));
   /* keep what is plausibly new: registered in the last 180 days, or age not published */
   const keep = items.filter(it => it.age === undefined || it.age === null || it.age <= 180).slice(0, 25);
+  /* network view: where each new look-alike is hosted and which name servers it uses, so domains run from the same place can be grouped */
+  await Promise.all(keep.slice(0, 15).map(async it => { try { const h = await Promise.race([hosting(it.domain), new Promise(z => setTimeout(() => z(null), 3500))]); if (h){ it.net = h.org || h.net || ''; it.cc = h.country || ''; } it.ns = ((rdapInfo.get(it.reg) || {}).ns || []).slice(0, 2); } catch(e){} }));
   if (ok) watch = { t: Date.now(), items: keep, ok, failed, partial: [] };
   else watch.failed = failed;
   return watch;
@@ -557,7 +559,10 @@ async function openLink(raw){
   else {
     const b = last.body || '', tm = b.match(/<title[^>]*>([\s\S]{0,300}?)<\/title>/i);
     const txt = b.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
-    v = { ok: true, hops, host: cur.hostname.toLowerCase(), url: cur.href.slice(0, 300), status: last.status,
+    const og = n => { const m = b.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + n + '["\'][^>]*content=["\']([^"\']{1,160})', 'i')) || b.match(new RegExp('<meta[^>]+content=["\']([^"\']{1,160})["\'][^>]*(?:property|name)=["\']' + n + '["\']', 'i')); return m ? m[1] : ''; };
+    const h1 = ((b.match(/<h1[^>]*>([\s\S]{0,200}?)<\/h1>/i) || [])[1] || '').replace(/<[^>]+>/g, ' ');
+    const sig = (og('og:site_name') + ' ' + og('og:title') + ' ' + h1).replace(/\s+/g, ' ').trim().slice(0, 300);
+    v = { ok: true, hops, host: cur.hostname.toLowerCase(), url: cur.href.slice(0, 300), status: last.status, sig,
       title: tm ? tm[1].replace(/\s+/g, ' ').trim().slice(0, 160) : '',
       pw: /<input[^>]+type=["']?password/i.test(b),
       sens: /(card\s*number|cvv|cvc|security code|\botp\b|one[- ]time (password|code)|emirates id|رقم البطاقة|رمز التحقق|كلمة المرور|الهوية الإماراتية)/i.test(txt) };
@@ -571,6 +576,43 @@ async function openApi(req, res){
   const u = (new URL(req.url, 'http://x').searchParams.get('u') || '').trim();
   if (!/^https?:\/\/[^\s]{4,600}$/i.test(u)) return json(res, 400, { error: 'bad_request' });
   return json(res, 200, await openLink(u));
+}
+
+/* ===== /api/shot: optional page thumbnail. Only runs when the user taps "Show page screenshot". The link (never the message) goes to the
+   public WordPress mShots service, which loads the page on its own servers, so the user's device never touches a scam page. ===== */
+const shotCache = new Map();
+function fetchShot(u){
+  return new Promise(resolve => {
+    let done = false; const fin = v => { if (!done){ done = true; resolve(v); } };
+    const go = (url, hops) => {
+      try {
+        const x = new URL(url); if (x.protocol !== 'https:' || !/^(?:s\d?|i\d)\.wp\.com$/.test(x.hostname) || hops > 3) return fin(null);
+        const rq = httpsMod.request({ protocol: 'https:', hostname: x.hostname, path: x.pathname + x.search, method: 'GET', timeout: 9000, headers: { 'User-Agent': 'TheYaqiz/1.0', 'Accept': 'image/*' } }, r => {
+          if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location){ r.resume(); return go(new URL(r.headers.location, x).href, hops + 1); }
+          const ct = String(r.headers['content-type'] || '');
+          if (r.statusCode !== 200 || !/^image\/(jpeg|png|gif|webp)/.test(ct)){ r.resume(); return fin(null); }
+          const chunks = []; let n = 0;
+          r.on('data', c => { n += c.length; if (n > 900000){ rq.destroy(); fin(null); } else chunks.push(c); });
+          r.on('end', () => fin({ ct: ct.split(';')[0], buf: Buffer.concat(chunks) }));
+          r.on('error', () => fin(null));
+        });
+        rq.on('timeout', () => { rq.destroy(); fin(null); }); rq.on('error', () => fin(null)); rq.end();
+      } catch(e){ fin(null); }
+    };
+    go('https://s0.wp.com/mshots/v1/' + encodeURIComponent(u) + '?w=640&h=400', 0);
+  });
+}
+async function shotApi(req, res){
+  const ip = clientIp(req);
+  if (!allowDom(ip)) return json(res, 429, { error: 'limit' });
+  const u = (new URL(req.url, 'http://x').searchParams.get('u') || '').trim();
+  if (!/^https?:\/\/[^\s]{4,600}$/i.test(u)) return json(res, 400, { error: 'bad_request' });
+  let h; try { h = new URL(u).hostname.toLowerCase(); } catch(e){ return json(res, 400, { error: 'bad_request' }); }
+  if (netMod.isIP(h) || !h.includes('.')) return json(res, 400, { error: 'bad_request' });
+  const c = shotCache.get(u); let r = c && Date.now() - c.t < 30 * 6e4 ? c.v : null;
+  if (!r){ r = await fetchShot(u); if (r){ shotCache.set(u, { t: Date.now(), v: r }); if (shotCache.size > 60) shotCache.clear(); } }
+  if (!r) return json(res, 502, { error: 'unavailable' });
+  return send(res, 200, r.buf, { 'Content-Type': r.ct, 'Cache-Control': 'no-store' });
 }
 
 
@@ -794,6 +836,7 @@ function route(req, res){
   if (url === '/api/domain' && req.method === 'GET') return domainApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/watch' && req.method === 'GET') return watchApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/open' && req.method === 'GET') return openApi(req, res).catch(() => json(res, 500, { error:'server' }));
+  if (url === '/api/shot' && req.method === 'GET') return shotApi(req, res).catch(() => json(res, 500, { error:'server' }));
   if (url === '/api/chat'){
     if (req.method !== 'POST') return json(res, 405, { error:'method' });
     return chatApi(req, res).catch(e => { console.error('chat', e && e.message); json(res, 500, { error:'server' }); });

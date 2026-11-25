@@ -193,7 +193,7 @@
           const r = analyzeUrl(inner, 1);
           if (r && !r.official && r.score >= 20) {
             const w = 15, sc = Math.min(100, Math.max(r.score + w, r.decisive ? 75 : r.score >= 40 ? 62 : 0));
-            return Object.assign({}, r, { score: sc, decisive: true, wrapper: host, flags: [{ l: T('يخفي الوجهة الحقيقية خلف تحويل عبر', 'Hides the real destination behind a redirect through') + ': ' + host, w, rule: 'redir' }].concat(r.flags), evidence: [{ id: 'dom', st: 'bad', t: T('النطاق', 'Domain'), v: host + ' → ' + r.host }] });
+            return Object.assign({}, r, { score: sc, decisive: true, wrapper: host, flags: [{ l: (/(googleadservices\.com|doubleclick\.net|googlesyndication\.com|\/aclick|\/pagead\/|adclick|l\.facebook\.com|lm\.facebook\.com)/.test(host + u.pathname) ? T('رابط إعلاني (ممول) يخفي الوجهة الحقيقية عبر', 'Sponsored-ad link that hides the real destination through') : T('يخفي الوجهة الحقيقية خلف تحويل عبر', 'Hides the real destination behind a redirect through')) + ': ' + host, w, rule: 'redir' }].concat(r.flags), evidence: [{ id: 'dom', st: 'bad', t: T('النطاق', 'Domain'), v: host + ' → ' + r.host }] });
           }
         }
       }
@@ -496,7 +496,8 @@
       }
       let add = 0, floor = 0;
       if (o.pw || o.sens) { add += 35; floor = Math.max(floor, 62); r.flags.unshift({ l: T('الصفحة المفتوحة تطلب كلمة مرور أو بيانات بطاقة أو رمز تحقق وهي على نطاق غير رسمي: ', 'The opened page asks for a password, card details or an OTP on a non-official domain: ') + fh, w: 35, rule: 'link' }); }
-      const tt = normMap(o.title || '').s;
+      /* the page's own text (title, and, when it has a login form, site name / headline) is compared with the brands it may imitate */
+      const tt = normMap((o.title || '') + ((o.pw || o.sens) && o.sig ? ' ' + o.sig : '')).s;
       const imp = tt && ENT.find(e => e.rx.test(tt) && !e.d.some(d => fh === d || fh.endsWith('.' + d)));
       if (imp) { add += 40; floor = Math.max(floor, 70); r.flags.unshift({ l: T('عنوان الصفحة يدّعي أنها «', 'The page title claims to be “') + TX(imp.n[LI()]) + T('» لكن النطاق الحقيقي غير رسمي: ', '” but the real domain is not official: ') + fh, w: 40, rule: 'mism' }); }
       row(add ? 'bad' : 'unk', (o.title ? '«' + o.title + '» · ' : '') + fh + ' · ' + (o.pw || o.sens ? T('تطلب بيانات حساسة', 'asks for sensitive data') : T('لا نموذج دخول ظاهر — الفتح وحده لا يثبت الأمان', 'no login form seen — opening alone does not prove safety')));

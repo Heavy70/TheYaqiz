@@ -18,5 +18,7 @@ const cases = [
 ['مبروك! ربحت 10000 درهم في سحب مهرجان دبي للتسوق. أرسل صورة هويتك الإماراتية واسمك الكامل لاستلام الجائزة.','x'],
 ['You have been selected to receive a free iPhone 16. Send your passport copy and bank card number to confirm delivery.','x'],
 ['Your appointment at the ICP centre is confirmed for tomorrow. Please bring your original Emirates ID.','s'],
+['https://www.googleadservices.com/pagead/aclk?sa=L&adurl=https://adcb-secure-login.top/verify','x'],
+['https://www.googleadservices.com/pagead/aclk?sa=L&adurl=https://www.adcb.com/','s'],
 ];
 module.exports = cases;
