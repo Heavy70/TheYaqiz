@@ -169,3 +169,17 @@ Team **TheYaqiz** (ScamShield AI, Podium+):
 ---
 
 Third-party: jsQR (Apache-2.0), see `public/jsQR.LICENSE.txt`.
+
+### Blind test, 25 November 2026
+
+Besides the 388-case gate above, we wrote **30 new cases the engine had never seen** (`tests/blind6.js`): 15 scams, 5 borderline messages and 10 genuine messages, in Arabic, Gulf dialect and English (fake bank security calls, relative impersonation, fake Salik/DEWA/Emirates Post/police payment links, work-from-home and investment lures, genuine OTP and bank-warning messages). They were written before any change to the engine, and are **not** part of the pass/fail gate, so they can show real misses.
+
+Run it alone:
+
+```
+node tests/blind6.js
+```
+
+Result of the on-device layer alone (v75): **26 of 30 correct (86.7%), 2 missed scams, 0 false alarms**. Two further borderline messages (an unfamiliar parcel-address link and a voicemail link) were judged safe by this layer alone, where we expected at least "suspicious".
+
+Honest reading of the misses: the two missed scams are an investment-bot lure and a "Hi Mum, I have a new number, send money" message. Both are text-only, with no link and no brand, which is the hardest case for on-device rules. The on-device layer is deliberately conservative so that genuine messages are never called scams (0 false alarms here). Each full check also sends the content to the AI analysis, which reads the wording; we report the on-device layer separately instead of one inflated number, and we have not yet measured the AI layer on this set.
