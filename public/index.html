@@ -1266,10 +1266,13 @@ async function demoAsk(){
  const t0=Date.now();   /* wait until the unified check has finished (link opened, AI merged), at most 14 s */
  while(Date.now()-t0<14000){await new Promise(z=>setTimeout(z,400));const r=$('#res');if(Date.now()-t0>1500&&r.classList.contains('show')&&!r.querySelector('.ev .r.load'))break}
  if(!chatOn||!last)return;
+ /* get ready before the tap: Yaqiz's reply and its voice are fetched now, so the tap starts the speech almost at once */
+ let pre=null;
+ if(ttsSrv){pre=(async()=>{try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lang,messages:[{role:'user',content:DEMO_Q}],ctx:{score:last.score,verdict:last.lvl,type:last.kind,flags:(last.flags||[]).slice(0,5)}})});const j=await r.json();if(!r.ok||!j.reply)return null;const ps=ttsSplit(j.reply).map(ttsFetch);await Promise.race([ps[0],new Promise(z=>setTimeout(z,8000))]);return{j,ps}}catch(e){return null}})()}
  const bar=document.createElement('div');bar.id='demoBar';
  bar.style.cssText='position:fixed;inset-inline:0;bottom:0;z-index:90;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:rgba(11,21,48,.94);display:flex;justify-content:center';
  bar.innerHTML='<button type="button" style="font:inherit;font-size:20px;font-weight:700;padding:16px 26px;border:0;border-radius:14px;background:#0f8a5f;color:#fff;cursor:pointer;max-width:560px;width:100%;line-height:1.5" dir="auto">🔊 اضغط ليعلّق يقِظ على النتيجة<br><span style="font-size:14px;font-weight:400;opacity:.85">Tap: Yaqiz comments on the result in Emirati Arabic</span></button>';
- bar.firstChild.onclick=()=>{bar.remove();spkOn=true;store.set('speak',true);ttsUnlocked=false;ttsUnlock();go('chat');chatAsk(DEMO_Q)};
+ bar.firstChild.onclick=async()=>{bar.remove();spkOn=true;store.set('speak',true);ttsUnlocked=false;ttsUnlock();go('chat');const P=pre?await pre:null;if(P&&!chatBusy){chatMsgs.push({r:'user',c:DEMO_Q});chatMsgs.push({r:'assistant',c:P.j.reply,h:!!P.j.handover,ok:true});chatDraw();stopSpeak();ttsChain(P.ps,ttsId,P.j.reply)}else chatAsk(DEMO_Q)};
  document.body.appendChild(bar);
 }
 /* ===== share target (Android) ===== */
