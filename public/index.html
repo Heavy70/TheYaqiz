@@ -1183,10 +1183,11 @@ function micToggle(){
  try{rec.start();listening=true;micPaint()}catch(e){listening=false;micPaint();toast(t('micErr'))}
 }
 function spkPaint(){const b=$('#chatSpk');b.classList.toggle('off',!spkOn);b.setAttribute('aria-pressed',spkOn);b.title=b.ariaLabel=t('spkTitle')}
+const ltr=s=>esc(s).replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|\+?\d[\d \-]*\d|\d/g,m=>`<bdi dir="ltr">${m}</bdi>`);   /* phone numbers and e-mails read left-to-right inside Arabic text */
 function chatDraw(){
  const box=$('#chatMsgs');if(!box)return;
  const ho=()=>`<div class="ho"><b>${esc(t('hoH'))}</b><div class="hr"><a href="tel:8002626" dir="ltr">800 2626</a><a href="sms:2828" dir="ltr">SMS 2828</a><a href="mailto:aman@adpolice.gov.ae" dir="ltr">aman@adpolice.gov.ae</a><a class="em" href="tel:999">${esc(t('hoEm'))}</a></div></div>`;
- const bot=(x,h,n)=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${esc(x)}${h?ho():''}</div>${(TTS||ttsSrv)&&n!=null?`<button type="button" class="say" data-say="${n}" title="${esc(t('sayTitle'))}" aria-label="${esc(t('sayTitle'))}"><svg class="i" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></button>`:''}</div>`;
+ const bot=(x,h,n)=>`<div class="mr"><span class="av">${AVATAR}</span><div class="m b" dir="auto">${ltr(x)}${h?ho():''}</div>${(TTS||ttsSrv)&&n!=null?`<button type="button" class="say" data-say="${n}" title="${esc(t('sayTitle'))}" aria-label="${esc(t('sayTitle'))}"><svg class="i" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></button>`:''}</div>`;
  box.innerHTML=bot(t('chatHello'))+chatMsgs.map((m,n)=>m.r==='user'?`<div class="m u" dir="auto">${esc(m.c)}</div>`:bot(m.c,m.h,m.ok?n:null)).join('')+(chatBusy?bot(t('chatWait')):'');
  box.scrollTop=box.scrollHeight;
  const qs=['chatQ1','chatQ4','chatQ5','chatQ2'].concat(last?['chatQ3']:[]);
