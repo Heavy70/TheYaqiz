@@ -1144,6 +1144,7 @@ async function speakTxt(x,force){
   stopSpeak();const id=ttsId;
   try{const r=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:x,lang})});
    if(r.ok){const b=await r.blob();if(id!==ttsId)return;const a=ttsAudio,av=$('#chatAv');if(a._u)URL.revokeObjectURL(a._u);a._u=URL.createObjectURL(b);a.src=a._u;a.onplay=()=>av.classList.add('talk');a.onended=a.onerror=a.onpause=()=>av.classList.remove('talk');await a.play();return}
+   if(r.status===503){try{const j=await r.clone().json();if(j.error==='voice_unavailable'){if(id===ttsId)toast(T('الصوت غير متاح الآن، حاول بعد قليل.','The voice is not available right now. Try again shortly.'));return}}catch(e){}}
   }catch(e){}
   if(id!==ttsId)return;   /* server voice unavailable (no Luganda voice, limit, error): fall back to the browser voice */
  }

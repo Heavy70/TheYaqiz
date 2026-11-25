@@ -788,7 +788,7 @@ async function ttsApi(req, res){
   const l = ttsLang(text, CHAT_LANGS[b.lang] ? b.lang : 'en');
   if (!l) return json(res, 404, { error:'no_voice' });
   if (!allowTts(clientIp(req), text.length)) return json(res, 429, { error:'limit' });
-  if (l === 'ar'){ const el = await elevenTts(text); if (el) return send(res, 200, el, { 'Content-Type':'audio/mpeg', 'Cache-Control':'no-store', 'X-Voice':'elevenlabs' }); console.error('tts: Arabic fell back to Azure'); }
+  if (l === 'ar'){ const el = await elevenTts(text) || await elevenTts(text); if (el) return send(res, 200, el, { 'Content-Type':'audio/mpeg', 'Cache-Control':'no-store', 'X-Voice':'elevenlabs' }); console.error('tts: ElevenLabs unavailable for Arabic'); if (EL_KEY && EL_VOICE_AR) return json(res, 503, { error:'voice_unavailable' }); }   /* Arabic is ElevenLabs only: never another voice */
   if (!TTS_KEY) return json(res, 503, { error:'tts_off' });
   const [xl, voice] = TTS_VOICES[l];
   const ssml = `<speak version="1.0" xml:lang="${xl}"><voice name="${voice}"><prosody rate="+0%">${xmlEsc(text)}</prosody></voice></speak>`;
