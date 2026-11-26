@@ -5,7 +5,8 @@
 **Version:** v77 (25 November 2026)  
 **Live MVP:** https://www.theyaqiz.com  
 **Repository:** https://github.com/Heavy70/TheYaqiz  
-**Developer:** Khaldun Abdalhadi  
+**Developed by:** Khaldun Abdalhadi and the TheYaqiz team  
+**Logo idea:** Sara Almaazmi  
 **Team:** TheYaqiz (Podium+): Khaldun I K Abdalhadi (leader, Ministry of Education), Amna Alaryani and Mahra Aldhanhani (United Arab Emirates University), Sara Almaazmi (Zayed University), Rafa Khalife (Manipal University) and Meznah Alawlaqi (Zayed University)  
 
 ---

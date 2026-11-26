@@ -2,7 +2,8 @@
 
 **Live app:** https://www.theyaqiz.com
 **Hackathon:** ScamShield AI — Abu Dhabi Police × 42 Abu Dhabi (24–30 Nov 2026)
-**Developer:** Khaldun Abdalhadi
+**Developed by:** Khaldun Abdalhadi and the TheYaqiz team  
+**Logo idea:** Sara Almaazmi
 
 > يقِظ تطبيق ذكي ثنائي اللغة (عربي/إنجليزي) يكشف الاحتيال الإلكتروني قبل أن يقع: الصق أي رسالة أو رابط مشبوه، فيفتح يقِظ الرابط ويتحقق منه ويعطيك حكمًا واضحًا مع الأدلة.
 
@@ -40,7 +41,8 @@ TheYaqiz is a bilingual Progressive Web App (works on Android, iPhone and deskto
 - **Ask Yaqiz (virtual assistant):** a chat assistant that answers questions about scams, by typing or by voice (microphone input and optional spoken replies), in the user's language. It is clearly labelled as an AI assistant, not a police officer or an official body; it refers to Aman (800 2626, SMS 2828, aman@adpolice.gov.ae, 999 in danger), never asks for passwords, codes or card numbers, and stays on the topic of scams and online safety. It works like the virtual employees on UAE government sites: one fixed persona (the name Yaqiz and the picture of a young Emirati man wearing the Yaqiz shield, which animates while speaking), all 8 app languages, answers only from the TheYaqiz knowledge base (app guide, safety facts, official channels), quick-question buttons, and an in-chat handover card with the official Aman buttons (800 2626, SMS 2828, email, 999) when the user needs to report or has already lost money or data. Replies are plain text. Chat history is not stored.
 - **Verify before you pay (Safe Pay):** a Pay tab and home button check a payment link (official-domain registry, opened page, domain age, threat lists) and give a clear verdict: pay / check first / don’t pay, with reasons. A claimed government, police, bank or courier sender on a non-official domain is always “don’t pay”. Deep link: `https://www.theyaqiz.com/?pay=<link>`.
 - **Quick number check and Siri:** a home button and the deep link `https://www.theyaqiz.com/?n=<number>` open the number check at once. iPhone Shortcut “Check this number with Yaqiz”: Ask for Input (Number) → Text `https://www.theyaqiz.com/?n=` + input → Open URLs; then say “Hey Siri, check this number with Yaqiz”. Checking the caller while the phone rings needs a native app (roadmap).
-- **Demo entry page:** `/gov/login.html` is a simulated "Government Intelligence Portal" sign-in screen with a UAE PASS-style button, used as an entry gate for the demo. It is not a real UAE PASS integration and collects nothing.
+- **Demo entry page:** `/gov/login.html` is a simulated "Yaqiz Antiscam AI assisted Portal" sign-in screen with a UAE PASS-style button, used as an entry gate for the demo. It is not a real UAE PASS integration and collects nothing.
+- **Presentation demo link:** `/?demo=ask` runs the real check on a sample fake traffic-fine SMS, then Ask Yaqiz comments on the result in Emirati Arabic with the ElevenLabs voice (the voice starts on a tap, as browsers require). Nothing is stored.
 - **Installable PWA:** "Add to Home Screen", works offline for the core check, and on Android appears in the share menu ("Share to TheYaqiz").
 
 ### How a check works (layered evidence)
